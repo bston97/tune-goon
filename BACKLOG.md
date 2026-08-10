@@ -1101,9 +1101,9 @@ below are copies owned, not builds already made.
 | car | copies | builds needed |
 |---|---|---|
 | 1995 Lancer Evolution III GSR | 2 | 2 |
-| 1999 Lancer Evolution VI GSR Tommi Mäkinen Edition (entered as "01 VI GSR TM edition") | 3 | 3 |
+| 2001 Lancer Evolution VI GSR Tommi Mäkinen Edition | 3 | 3 |
 | 2004 Lancer Evolution VIII MR | 2 | 2 |
-| 2004 Lancer Evolution VIII MR "Welcome Edition" | 2 | 2 |
+| 2004 Lancer Evolution VIII MR Forza Edition | 2 | 2 |
 | 2006 Lancer Evolution IX MR | 1 | 1 |
 | 2008 Lancer Evolution X GSR | 1 | 1 |
 | 1995 Eclipse GSX | 2 | 2 |
@@ -1124,32 +1124,45 @@ migration, version marker, tests. The roster below is designed to stay inside
 the existing key, which is why it is worth checking before building rather
 than after.
 
-### Two names to confirm off the garage screen before typing anything
+### Two names, both confirmed by Boston 2026-08-08
 
-Per G3 the name string *is* the family key, so transcribe, do not guess:
+Per G3 the name string *is* the family key, so both were queried before typing.
+Both came back settled and the roster above is unchanged:
 
-1. **"Welcome Edition."** Recorded verbatim as given. There is no Evo variant
-   by that name that this repo can confirm, and Forza's distinct-variant
-   convention is normally "Forza Edition" (a different car with its own perk
-   and PI). If it is a Forza Edition, it is genuinely a separate car and the
-   roster is right; if it is a second copy of the plain 04 VIII MR under a
-   nickname, then that line and the "04 VIII MR" line merge into **one car with
-   four copies needing four distinct pairs**, which changes the allocation.
-   Check this first — it is the only thing on this page that could be wrong in
-   a way that costs work.
-2. **The VI TME's year.** Given as "01" but the Tommi Mäkinen Edition is a 1999
-   car in every Forza title to date. Whichever the garage says is what goes in
-   the year field; the point is that both copies of a given car must use the
-   *same* year string or they stop being the same car to `libKey` — which would
-   accidentally sidestep the collision constraint and hide the problem rather
-   than solve it.
+1. **The "Welcome Edition" VIII MR is a Forza Edition of the car** — a distinct
+   car, not a nickname for a second copy of the plain 04 VIII MR. So it keeps
+   its own row with two copies and two builds, and the two VIII MR lines stay
+   separate. Boston's own term for it is the Welcome Edition; the roster uses
+   Forza Edition because that is what makes it a different car, but the string
+   that goes in the name field is whatever the garage prints.
+2. **The VI TME is a 2001.** Prior Forza titles list the Tommi Mäkinen Edition
+   as a 1999 car, which is why it was queried — FH6 says 2001 and the game
+   beats the prior-title convention, per CLAUDE.md's rule that a check against
+   the actual game beats any outside source. All three copies use `2001`.
+
+**One consequence of the FE being real, worth knowing before building it.**
+Forza Edition cars carry a built-in perk and normally sit at a higher stock PI
+than the base car. The app has no field for either — `FIELDS` has no perk
+concept, and PI is whatever gets typed in. Nothing breaks: the build plan reads
+the numbers off the screen like any other car, and the PI budget line will be
+correct because it is computed from the entered figure. But no note anywhere
+will mention the perk, so the plan cannot account for it. That is a limitation
+to know about rather than a gap to fill — a perk field would be one more
+unmeasured constant, which is the thing this backlog keeps refusing to add.
+It does support the S2 Road allocation below: the FE starts higher, so building
+into the class rather than down to it is the cheaper direction.
 
 ### Naming, so Find groups them
 
 Family substring `lancer` catches all eleven Evos. Suggested strings:
 `Lancer Evolution III GSR`, `Lancer Evolution VI GSR TME`,
-`Lancer Evolution VIII MR`, `Lancer Evolution VIII MR Forza Edition` (pending
-the check above), `Lancer Evolution IX MR`, `Lancer Evolution X GSR`.
+`Lancer Evolution VIII MR`, `Lancer Evolution VIII MR Forza Edition`,
+`Lancer Evolution IX MR`, `Lancer Evolution X GSR`.
+
+Note the FE string must extend the base car's name rather than replace it, so
+that `Lancer Evolution VIII MR` as a search returns **both** VIII MR cars —
+four copies, four builds, which is the set worth seeing together. Naming it
+`Evo VIII FE` would hide it from that search.
 
 **The Eclipse is not in the Lancer family and should not be forced into it.**
 Same manufacturer, different nameplate — `Eclipse GSX`. Searching `lancer`
