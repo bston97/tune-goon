@@ -1090,3 +1090,112 @@ touched: **the app lists, it does not order.**
    may well want the opposite emphasis, since the interesting comparison
    between three Evos is more likely to be the same discipline at different
    classes than the reverse.
+
+## G6 — First family: the Mitsubishis. Roster given 2026-08-08
+
+Supplied directly, and it settles something G0 got half-right. "Duplicate cars"
+does **not** only mean generations of a nameplate — it means **multiple copies
+of the identical car in the garage**, each wanting its own build. The counts
+below are copies owned, not builds already made.
+
+| car | copies | builds needed |
+|---|---|---|
+| 1995 Lancer Evolution III GSR | 2 | 2 |
+| 1999 Lancer Evolution VI GSR Tommi Mäkinen Edition (entered as "01 VI GSR TM edition") | 3 | 3 |
+| 2004 Lancer Evolution VIII MR | 2 | 2 |
+| 2004 Lancer Evolution VIII MR "Welcome Edition" | 2 | 2 |
+| 2006 Lancer Evolution IX MR | 1 | 1 |
+| 2008 Lancer Evolution X GSR | 1 | 1 |
+| 1995 Eclipse GSX | 2 | 2 |
+
+**Thirteen builds across seven distinct cars.**
+
+### The constraint this puts on the key, which is the whole reason it matters
+
+`libKey` is `name|year|class|disc`. Two copies of the same car are, to the app,
+the same car — there is no copy number in the key. **So every copy of a given
+car must land on a distinct (class, discipline) pair, or the second one
+overwrites the first with no warning.** That is not a preference, it is the
+storage model. Three copies of the VI TME means three distinct pairs.
+
+If any car ever wants two builds at the *same* class and discipline, that is
+exactly the `variant`-in-the-key schema change F2 ruled out — three-store
+migration, version marker, tests. The roster below is designed to stay inside
+the existing key, which is why it is worth checking before building rather
+than after.
+
+### Two names to confirm off the garage screen before typing anything
+
+Per G3 the name string *is* the family key, so transcribe, do not guess:
+
+1. **"Welcome Edition."** Recorded verbatim as given. There is no Evo variant
+   by that name that this repo can confirm, and Forza's distinct-variant
+   convention is normally "Forza Edition" (a different car with its own perk
+   and PI). If it is a Forza Edition, it is genuinely a separate car and the
+   roster is right; if it is a second copy of the plain 04 VIII MR under a
+   nickname, then that line and the "04 VIII MR" line merge into **one car with
+   four copies needing four distinct pairs**, which changes the allocation.
+   Check this first — it is the only thing on this page that could be wrong in
+   a way that costs work.
+2. **The VI TME's year.** Given as "01" but the Tommi Mäkinen Edition is a 1999
+   car in every Forza title to date. Whichever the garage says is what goes in
+   the year field; the point is that both copies of a given car must use the
+   *same* year string or they stop being the same car to `libKey` — which would
+   accidentally sidestep the collision constraint and hide the problem rather
+   than solve it.
+
+### Naming, so Find groups them
+
+Family substring `lancer` catches all eleven Evos. Suggested strings:
+`Lancer Evolution III GSR`, `Lancer Evolution VI GSR TME`,
+`Lancer Evolution VIII MR`, `Lancer Evolution VIII MR Forza Edition` (pending
+the check above), `Lancer Evolution IX MR`, `Lancer Evolution X GSR`.
+
+**The Eclipse is not in the Lancer family and should not be forced into it.**
+Same manufacturer, different nameplate — `Eclipse GSX`. Searching `lancer`
+correctly misses it. This is the concrete case for G5's open question: "the
+Mitsubishis" is a garage grouping, "Lancer" is a nameplate family, and the app
+only models the second. That is fine and no code should try to fix it.
+
+### Proposed allocation — a starting table, not a recommendation
+
+Every copy gets a distinct pair, so nothing collides. All seven cars are AWD
+turbo, which rules one discipline out immediately and makes two others
+obvious:
+
+- **No drift builds.** The app fires an RWD-only warning on anything else, so a
+  drift Evo means a drivetrain swap — a different exercise, not a variant.
+- **Dirt and cross-country are the natural fit** and the Evos are the cars that
+  earn those constants an honest test. Note cross-country requires off-road
+  tires and advises maximum width.
+- **Drag rewards AWD launch**, and drag is the discipline with the most
+  distinctive tune signature in the app (pressures forced to 50/15, aero
+  suppressed at both ends, decel 0), so it is a useful contrast to hold.
+
+| car | copy | class | discipline | why this one |
+|---|---|---|---|---|
+| Evo III GSR | 1 | A | Road | lightest and oldest — the baseline everything else reads against |
+| Evo III GSR | 2 | B | Dirt | low class keeps it period-honest and tests the dirt constants at low power |
+| Evo VI GSR TME | 1 | S1 | Road | the halo car at the class where AWD road tunes get interesting |
+| Evo VI GSR TME | 2 | A | Dirt | the rally car doing the rally job |
+| Evo VI GSR TME | 3 | S1 | Sprint | same class as copy 1, so it isolates road-vs-sprint on one car |
+| Evo VIII MR | 1 | A | Touge | tests the softest tarmac spring set on a heavy AWD car |
+| Evo VIII MR | 2 | S1 | Drag | AWD launch, and the most distinctive tune signature to eyeball |
+| Evo VIII MR FE | 1 | S2 | Road | the FE perk pushes PI up anyway, so build into it |
+| Evo VIII MR FE | 2 | A | Sprint | — |
+| Evo IX MR | 1 | S1 | Dirt | the dirt build at high power, contrast against the A-class TME |
+| Evo X GSR | 1 | S1 | Road | newest chassis against the TME at the same class and discipline |
+| Eclipse GSX | 1 | A | Drag | 2G AWD, the obvious drag candidate |
+| Eclipse GSX | 2 | B | Road | — |
+
+Two deliberate pairings in there worth keeping whatever else changes, because
+they are the only ones that produce a *comparison* rather than just a build:
+**TME copy 1 vs copy 3** (same car, same class, road vs sprint — isolates the
+discipline constants) and **TME copy 1 vs Evo X GSR** (same class, same
+discipline, different chassis — isolates the stat block). Everything else in
+the table is a spread rather than an experiment and can be reshuffled freely.
+
+Cross-country is unallocated: it wants off-road tires and max width on a car
+that will otherwise be built for tarmac, and thirteen builds is already the
+work. Worth adding as a fourteenth on whichever copy is least interesting after
+the first pass.
