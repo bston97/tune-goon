@@ -565,8 +565,18 @@ const VMETA={
  reR :{n:'Rebound R',    u:'',          s:0.1,  d:1, lo:1,  hi:20},
  buF :{n:'Bump F',       u:'',          s:0.1,  d:1, lo:1,  hi:20},
  buR :{n:'Bump R',       u:'',          s:0.1,  d:1, lo:1,  hi:20},
- aeF :{n:'Aero F',       u:'% of range',s:1,    d:0, lo:0,  hi:100},
- aeR :{n:'Aero R',       u:'% of range',s:1,    d:0, lo:0,  hi:100},
+ /* The game's aero sliders are calibrated in POUNDS OF DOWNFORCE, and the two
+    ends have different ranges — measured 2026-08-12, along with the fact that
+    the bodyshell itself makes a comparable amount (~175 lb front, ~215 rear on
+    the GR86) that no slider touches. So a percentage is a position on the
+    slider and NOTHING MORE: equal percentages front and rear are not equal
+    downforce, and no percentage pair can be aimed at the Aero Balance readout,
+    because the readout is a function of the pounds plus those body terms.
+    Labelled '% of travel' rather than '% of range' for exactly that reason —
+    it is where to start the slider, not how much downforce you are asking for.
+    See tests/data/balance-ab-gr86-2026-08-12.json. */
+ aeF :{n:'Aero F',       u:'% of travel',s:1,   d:0, lo:0,  hi:100},
+ aeR :{n:'Aero R',       u:'% of travel',s:1,   d:0, lo:0,  hi:100},
  bal :{n:'Brake balance',u:'% front',   s:1,    d:0, lo:30, hi:70},
  pres:{n:'Brake pressure',u:'%',        s:1,    d:0, lo:50, hi:150},
  dfa :{n:'Front accel',  u:'%',         s:1,    d:0, lo:0,  hi:100},
@@ -1438,7 +1448,7 @@ function render(){
     const bothAero=eff('aeF')!=null&&eff('aeR')!=null, frontOnly=eff('aeR')==null;
     R.push(sec('var(--aero)','Aero',[['Front',vin('aeF')],['Rear',vin('aeR')]],
       bothAero
-        ? 'Set front to its position, then adjust rear until <b>Aero Balance &mdash; shown on this same tab &mdash; reads 0.42&ndash;0.48, sweet spot 0.45</b>. That reading is the target; the absolute lbs are not. More front = rotation, more rear = stability.'
+        ? '<b>These are slider positions, not downforce.</b> The game\'s sliders are in pounds and the two ends have different ranges, so a matching percentage is not matching downforce &mdash; and the bodyshell makes a comparable amount on its own (measured ~175 lb front, ~215 rear) that no slider touches. Start the front there, then move the rear until <b>Aero Balance, on this same tab, reads 0.42&ndash;0.48</b>, sweet spot 0.45. That readout is the only target here. More front = rotation, more rear = stability.'
         : '<b>'+(frontOnly?'Front':'Rear')+' aero only.</b> With a fixed '+(frontOnly?'rear':'front')+
           ', the in-game balance figure is not a reliable target &mdash; trust mechanical balance from diff, ARB and springs instead.'));
   } else {
@@ -2201,12 +2211,12 @@ function sheet(){
   let aeroBody;
   if(aeroAny){
     const fixedEnd=eff('aeF')==null?'Front':'Rear';
-    aeroBody=(eff('aeF')!=null?row('Front Downforce',sv('aeF'),'val-teal')
-                              :row('Front Downforce','Not adjustable','dim'))+
-      (eff('aeR')!=null?row('Rear Downforce',sv('aeR'),'val-teal')
-                       :row('Rear Downforce','Not adjustable','dim'))+
+    aeroBody=(eff('aeF')!=null?row('Front Aero',sv('aeF'),'val-teal')
+                              :row('Front Aero','Not adjustable','dim'))+
+      (eff('aeR')!=null?row('Rear Aero',sv('aeR'),'val-teal')
+                       :row('Rear Aero','Not adjustable','dim'))+
       '<div class="aero-note">'+(aeroBoth
-        ? 'Set front to its position, then adjust rear until <strong>Aero Balance</strong> on the same tab reads <strong>0.42&ndash;0.48</strong>, sweet spot 0.45. That reading is the target; the lbs figures are secondary.'
+        ? '<strong>Percentages are slider positions, not downforce.</strong> The sliders are calibrated in pounds with a different range at each end, and the body makes a comparable amount by itself, so no pair of percentages can be aimed at the balance figure. Start the front there, then move the rear until <strong>Aero Balance</strong> on the same tab reads <strong>0.42&ndash;0.48</strong>, sweet spot 0.45. That readout is the target.'
         : fixedEnd+' is fixed, so the in-game balance figure is <strong>not a reliable target</strong> here &mdash; trust mechanical balance from the diff, ARBs and springs instead.')+'</div>';
   } else {
     aeroBody=row('Downforce', i.disc==='drag'?'None &mdash; drag build':'No adjustable aero')+

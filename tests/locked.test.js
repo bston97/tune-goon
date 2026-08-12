@@ -36,14 +36,40 @@ ok('rear-only: page says the FRONT is the fixed end', /With a fixed front/.test(
 
 let sh = sheetFor({ aero: 'front' });
 ok('front-only sheet: rear marked not adjustable',
-   /Rear Downforce[\s\S]{0,80}Not adjustable/.test(sh));
+   /Rear Aero[\s\S]{0,80}Not adjustable/.test(sh));
 ok('front-only sheet: rear is not left as a bare dash',
-   !/Rear Downforce<\/div><div class="row-value val-teal">&mdash;/.test(sh));
+   !/Rear Aero<\/div><div class="row-value val-teal">&mdash;/.test(sh));
 ok('front-only sheet: names the rear as fixed', /Rear is fixed, so the in-game balance/.test(sh));
 sh = sheetFor({ aero: 'rear' });
 ok('rear-only sheet: front marked not adjustable',
-   /Front Downforce[\s\S]{0,80}Not adjustable/.test(sh));
+   /Front Aero[\s\S]{0,80}Not adjustable/.test(sh));
 ok('rear-only sheet: names the front as fixed', /Front is fixed, so the in-game balance/.test(sh));
+
+console.log('--- C3: the aero percentage is a slider position, not downforce ---');
+/* Measured 2026-08-12: the game's aero sliders are in POUNDS, the two ends have
+   different ranges, and the bodyshell makes a comparable amount on its own
+   (~175 lb front, ~215 rear on the GR86) that no slider touches. So the app's
+   percentage cannot be aimed at the Aero Balance readout — it is where to start
+   the slider and nothing more. The app already said "the readout is the target"
+   while printing the percentage under a Downforce label, which is the
+   self-contradiction this closes. */
+{
+  const p = build({ aero: 'both' });
+  ok('the card calls them slider positions', /slider positions, not downforce/.test(p));
+  ok('and says why a matching percentage is not matching downforce',
+     /different ranges/.test(p));
+  ok('and names the body term that no slider touches', /~175 lb front, ~215 rear/.test(p));
+  ok('the readout is still the only target', /Aero Balance, on this same tab, reads 0\.42&ndash;0\.48/.test(p));
+  ok('nothing is labelled "% of range" any more',
+     !/% of range/.test(p.slice(p.indexOf('>Aero</h3>'), p.indexOf('>Braking</h3>'))));
+  ok('the unit says travel', /% of travel/.test(p));
+
+  const s = sheetFor({ aero: 'both' });
+  ok('the sheet stops calling the percentage Downforce', !/Downforce/.test(s));
+  ok('and carries the same correction', /slider positions, not downforce/i.test(s));
+  ok('and still hands off to the readout', /Aero Balance<\/strong> on the same tab reads/.test(s));
+  ok('sheet clean', !/undefined|NaN|\{\{/.test(s));
+}
 
 console.log('--- partial locks are labelled, not blank ---');
 page = build({ diff: 'sport' });
