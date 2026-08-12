@@ -1,0 +1,182 @@
+{
+  "_README": [
+    "The game's own default tune for a known build, every slider, read off eight",
+    "screenshots on 2026-08-12. Same car and parts as",
+    "gearing-gr86-defaulttune-2026-08-12.json; this is the rest of the tabs.",
+    "",
+    "It was collected as the C1 control row. It also solved Aero Balance and",
+    "killed the simplest Mechanical Balance model, neither of which anyone was",
+    "asking it to do — see aeroBalanceSolved and mechBalanceConstraint."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — all tabs",
+  "tune": "game default (control)",
+  "readout": "ab",
+
+  "build": {
+    "tires": "semi-slick", "susp": "race", "arb": "both", "diff": "race",
+    "trans": "race", "aero": "both", "twf": 3, "twr": 3, "gears": 7,
+    "wt": 2428, "fw": 54, "hp": 290, "tq": 303, "dt": "AWD"
+  },
+
+  "defaultTune": {
+    "_note": "Every value the game shipped for this build. Units are as the screen prints them.",
+    "pF": 31.0, "pR": 31.0, "pUnit": "psi",
+
+    "camF": -2.0, "camR": -1.5, "toeF": 0.0, "toeR": 0.0, "cast": 5.0,
+
+    "arF": 48.10, "arR": 22.80,
+
+    "spF": 607.6, "spR": 596.9, "spUnit": "lb/in",
+    "rhF": 4.4, "rhR": 4.8, "rhUnit": "in",
+
+    "reF": 12.1, "reR": 11.3, "buF": 7.6, "buR": 7.1,
+
+    "aeF": 190, "aeR": 232, "aeUnit": "lb of downforce",
+
+    "brakeBal": 50, "brakePres": 100, "brakeUnit": "%",
+
+    "dfa": 30, "dfd": 10, "dra": 55, "drd": 13, "dc": 60, "diffUnit": "%",
+
+    "fd": 3.63,
+    "ratios": [4.17, 2.89, 2.17, 1.66, 1.32, 1.07, 0.85]
+  },
+
+  "readouts": {
+    "mechBalance": 0.50,
+    "aeroBalance": 0.45,
+    "aeroEfficiency": 0.750
+  },
+
+  "aeroBalanceSolved": [
+    "AERO BALANCE IS FRONT DOWNFORCE OVER TOTAL DOWNFORCE, IN POUNDS.",
+    "",
+    "  190 / (190 + 232) = 0.45024   ->  screen prints 0.45",
+    "",
+    "Exact to every digit shown. Case A1 asked whether AB at equal sliders is",
+    "0.5 and predicted it would not be; the real answer is better, because the",
+    "slider is not a percentage at all — it is pounds of downforce, and the",
+    "balance is simply their ratio. There is no bodyshell term to discover. The",
+    "asymmetry A1 expected is just the front and rear ends having different",
+    "pound ranges.",
+    "",
+    "ONE CAR, ONE POINT — the standing rule is two before a constant is general,",
+    "so this is confirmed-pending. The confirmation is free: Boston is about to",
+    "move only the rear wing for the axis test, so re-reading AB at that setting",
+    "is a second point on the same car for no extra work. A different car is the",
+    "one still owed.",
+    "",
+    "WHAT IT CHANGES IN THE APP, if it holds. VMETA has aeF and aeR as",
+    "'% of range', 0-100 (index.html:559-560), and the discipline tables emit",
+    "values like aeF 60. But front and rear have DIFFERENT pound ranges — 190",
+    "and 232 sit at visibly different slider positions here — so setting both",
+    "ends to the same percentage does NOT give a predictable balance, and the",
+    "0.42-0.48 target cannot be hit through a percentage. With this solve the",
+    "app can instead say: read your two downforce numbers, and set them so",
+    "front/(front+rear) lands in the band. That is an exact instruction with an",
+    "exact target, which is what the aero section has never had.",
+    "",
+    "AND IT MAKES THE REACHABILITY CHECK (A3) CHEAP. The achievable range is",
+    "  [ Fmin/(Fmin+Rmax) , Fmax/(Fmax+Rmin) ]",
+    "so four readings — each wing at each end, in pounds — bracket every AB the",
+    "car can produce, and settle whether the printed target is reachable at all."
+  ],
+
+  "mechBalanceConstraint": [
+    "MECHANICAL BALANCE IS NOT THE ANTI-ROLL BAR RATIO. That is the simplest",
+    "candidate model (M1 in MEASURE.md Phase 1) and this single row kills it:",
+    "",
+    "  bars      48.10 F / 22.80 R  ->  48.10/(48.10+22.80) = 0.679",
+    "  screen prints                                            0.50",
+    "",
+    "So whatever MB is, the bars alone do not set it, and the front bar being",
+    "more than twice the rear does not push the readout off centre at all.",
+    "",
+    "WHAT DOES FIT, on this one row: the SPRINGS.",
+    "",
+    "  springs   607.6 F / 596.9 R  ->  607.6/(607.6+596.9) = 0.5044  -> 0.50",
+    "",
+    "A pure-spring ratio lands inside the rounding of the printed value. A model",
+    "with both terms also fits provided the bar term is small. A bars-only model",
+    "cannot fit at all.",
+    "",
+    "THIS IS ONE POINT AND IT CANNOT CHOOSE BETWEEN THE SURVIVORS. It is exactly",
+    "the discrimination MEASURE.md Phase 1 was designed to get, arriving free",
+    "from a screenshot taken for another purpose — but the same-ratio pair and",
+    "the spring rows are still needed, and Phase 1 now has a much better",
+    "starting hypothesis to test than it had this morning: MB is spring-led,",
+    "with the bars contributing little or nothing.",
+    "",
+    "IF THAT SURVIVES, IT IS A PROBLEM FOR THE APP. The Verify In Game section",
+    "tells the user to hit Mechanical Balance 0.55-0.65 and the fine-tune advice",
+    "treats the bars as the balance lever. If MB barely responds to the bars,",
+    "that instruction is unachievable by the means the app recommends."
+  ],
+
+  "panelFindings": [
+    "TWO THINGS ABOUT THE PERFORMANCE PANEL, both from comparing these eight",
+    "shots against the six-read repeat test taken minutes earlier on the SAME",
+    "TUNE.",
+    "",
+    "1. ACCELERATION FIGURES ARE QUANTISED TO EXACTLY 1/60 SECOND. Every 0-60",
+    "   and 0-100 figure recorded today is an exact multiple of 1/60:",
+    "",
+    "     3.317 = 199/60   3.333 = 200/60   3.350 = 201/60   3.367 = 202/60",
+    "     8.700 = 522/60   8.717 = 523/60   8.867 = 532/60   9.000 = 540/60",
+    "",
+    "   The simulation is frame-stepped at 60 Hz and these are frame counts. So",
+    "   0.0167 s is the hard resolution of the instrument, a one-frame",
+    "   difference is the smallest thing it can express, and quoting three",
+    "   decimals implies precision that only two of them carry.",
+    "",
+    "   Worth noting against the older data: the July sweep's figures (3.040,",
+    "   3.056, 8.723...) are NOT multiples of 1/60. Either they came from a",
+    "   different frame rate or they were not transcribed exactly. Flagged, not",
+    "   resolved.",
+    "",
+    "2. THE FIGURES MOVED BETWEEN THE TWO SETS, WITH THE TUNE UNCHANGED.",
+    "",
+    "     repeat test   0-60 3.350   0-100 8.717   60-0 63.1   100-0 145.8",
+    "     these shots   0-60 3.317   0-100 8.700   60-0 63.2   100-0 145.9",
+    "",
+    "   That is 2 frames on 0-60 and 1 on 0-100 — small, but far larger than the",
+    "   repeat test's own spread, which was zero on both. Top speed held at",
+    "   141.1 throughout.",
+    "",
+    "   THIS IS THE VARIANCE BOSTON SAID HE HAD SEEN, and it means the S0 result",
+    "   is narrower than it looked: the panel is deterministic WITHIN a",
+    "   continuous sitting on one screen, and not across whatever happened",
+    "   between these two sets. Until we know what that was, the working rule is",
+    "   that a comparison is only valid within one unbroken sitting, because a",
+    "   2-frame drift will otherwise masquerade as a result.",
+    "",
+    "   UNRESOLVED, AND BOSTON IS THE ONLY ONE WHO KNOWS: what happened between",
+    "   the repeat test and these screenshots — leaving the tuning menu, backing",
+    "   out to the garage, applying the tune, a restart? The answer names the",
+    "   thing that has to be held constant, and S0 should re-run across THAT",
+    "   boundary rather than only across a slider nudge."
+  ],
+
+  "corroborations": [
+    "Three of the app's numbers meet the game's default here, which is worth",
+    "recording as much as the disagreements:",
+    "",
+    "  - AWD centre balance 60%. The app's neutral base moved 55 -> 60 on",
+    "    ForzaTune's band without ever being measured (case D3). The game's own",
+    "    default for this AWD build is exactly 60.",
+    "  - Tire pressure 31.0 psi. PSI.semi in index.html:523 is 31. Exact.",
+    "  - Brake balance 50% and pressure 100%, which is the base the app's",
+    "    1.5%-per-width-step bias is applied from.",
+    "",
+    "And one disagreement: CASTER. The game's default here is 5.0 deg; the app",
+    "uses 6.5 for the road family (index.html:508), from ForzaTune's 5.5-6.5",
+    "band. Not necessarily wrong — a default is not an optimum — but it is the",
+    "app sitting at the top of a published band while the game ships the bottom."
+  ],
+
+  "notes": "Front and rear aero clearly have different pound ranges: 190 and 232 sit at different slider positions on the same screen. That alone means any per-cent-of-range aero instruction is car-specific and end-specific. The default diff is strongly rear-biased on acceleration (front 30, rear 55) with very low deceleration lock at both ends (10 and 13), which is a shape worth remembering when the diff cases are designed."
+}
