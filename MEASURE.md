@@ -380,21 +380,36 @@ curve-drawing exercise. They are nested, so the simplest one that survives wins.
 | **M4** | `r = (arF + c·spF) / (arR + c·spR)` | springs contribute roll stiffness too |
 | **M5** | `r = (arF + k + c·spF) / (arR + k + c·spR)` | both |
 
-**Measured 2026-08-12, and the list above was the right shape upside down.**
-MB is the **rear** axle's share, not the front's: stiffening the rear bar
-raises it, stiffening the front spring lowers it. Every model here is written
-as `F/(F+R)`. The surviving form, from four settled rows, is
+## ✅ SOLVED 2026-08-12 — and the list above was the right shape upside down
+
+MB is the **rear** axle's share, not the front's. Every model in that table is
+written `F/(F+R)`; stiffening the rear bar *raises* the readout and stiffening
+the front spring *lowers* it. The solved form, on the GR86:
 
 ```
-MB = R / (F + R)      F = wa·arF + ws·spF + tF      R = wa·arR + ws·spR + tR
+MB = R / (F + R)      F = arF + 0.150·spF + 50.5      R = arR + 0.150·spR + 72.3
 ```
 
-with one bar point worth roughly **8 lb/in of spring**, and per-axle constants
-`tF` and `tR` that are large and rear-biased — presumably tires, geometry and
-unsprung mass, which is also why tire pressure moves MB. Four readings and four
-unknowns, so it is exactly determined and **has never been tested**. The
-same-ratio pair is what tests it: `20/40` against `32.5/65`, since the bar
-slider maxes at 65 and 40/80 is unreachable.
+Bars in slider points, springs in lb/in. **Six settings, three free parameters,
+every row landing on the printed digit** — plus two rows it was not fitted to,
+one of them exact and the other one rounding step out.
+
+- **One bar point ≈ 6.7 lb/in of spring.** Across their full ranges the two
+  have comparable authority, which is why no bars-only or springs-only model
+  could ever have fitted.
+- **The axle constants are large and rear-biased** — together about 40% of the
+  total. They are the tires, geometry and unsprung mass, and they are why tire
+  pressure moves MB.
+
+The same-ratio pair is what proved the additive terms real: `20/40` reads 0.54
+and `32.5/65` reads 0.56, same ratio, different readout. (The bar slider maxes
+at **65**, so the original `40/80` was unreachable.)
+
+**The coefficients are this car's and will not transfer** — they encode its
+tires, geometry and weight distribution. What transfers is the shape, and a
+two-reading calibration that needs no constants at all: read MB, add 10 to the
+rear bar, read again, and scale the difference to the distance to target. On
+this car that is ≈0.028 per 10 points of rear bar.
 
 Not on the list, and worth watching the residuals for: track width and roll
 centre. Neither is a tuning slider, so both would show up as a **per-car

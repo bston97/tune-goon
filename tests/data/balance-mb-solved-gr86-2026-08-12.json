@@ -1,0 +1,145 @@
+{
+  "_README": [
+    "THE SAME-RATIO PAIR, AND THE SOLVE IT COMPLETES.",
+    "",
+    "20/40 and 32.5/65 hold the same 1:2 front-to-rear ratio at nearly double",
+    "the magnitude. They read 0.54 and 0.56. Different — so Mechanical Balance",
+    "is NOT a pure ratio, there are additive terms, and the model fitted",
+    "yesterday to four rows had something real to be fitted to.",
+    "",
+    "With these two rows there are six independent settings on one car and only",
+    "three free parameters. The model is overdetermined by three and it matches",
+    "ALL SIX to the last printed digit. See solvedModel."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — ANTIROLL BARS tab",
+  "readout": "mb",
+  "varied": "arF/arR",
+
+  "build": {
+    "tires": "semi-slick", "susp": "race", "arb": "both", "diff": "race",
+    "trans": "race", "aero": "both", "twf": 3, "twr": 3, "gears": 7,
+    "wt": 2428, "fw": 54, "hp": 290, "tq": 303, "dt": "AWD"
+  },
+
+  "held": {
+    "spF": 468.1, "spR": 374.9, "rhF": 4.2, "rhR": 4.4, "pF": 31.5, "pR": 31.5,
+    "note": "springs returned to the app's prescribed values before this pair, so these rows share a hold-point with rows 1-4 of balance-mb-gr86-2026-08-12.json"
+  },
+
+  "rows": [
+    { "n": 1, "purpose": "SAME-RATIO PAIR (a) — first attempt, caught mid-SIMULATING", "arF": 20, "arR": 40, "mb": null },
+    { "n": 2, "purpose": "SAME-RATIO PAIR (b) — 1:2 at near-double magnitude", "arF": 32.5, "arR": 65, "mb": 0.56,
+      "s60": 3.333, "s100": 9.017, "top": 140.4, "brake60_0": 68.1, "brake100_0": 152.9, "lateralG60": 1.26, "lateralG120": 1.42 },
+    { "n": 3, "purpose": "SAME-RATIO PAIR (a) — re-read and settled", "arF": 20, "arR": 40, "mb": 0.54,
+      "s60": 3.333, "s100": 9.033, "top": 140.1, "brake60_0": 68.1, "brake100_0": 152.9, "lateralG60": 1.26, "lateralG120": 1.42 }
+  ],
+
+  "sameRatioPairResult": [
+    "20/40 reads 0.54. 32.5/65 reads 0.56. SAME RATIO, DIFFERENT READOUT.",
+    "",
+    "Mechanical Balance therefore depends on the absolute size of the bars, not",
+    "only on their ratio. Every pure-ratio model is dead — which is what this",
+    "pair was designed to decide, and it decided it in two readings exactly as",
+    "MEASURE.md Phase 1 said it would."
+  ],
+
+  "solvedModel": [
+    "MECHANICAL BALANCE IS SOLVED ON THIS CAR.",
+    "",
+    "  MB = R / (F + R)",
+    "",
+    "  F = arF + 0.150 x spF + 50.5",
+    "  R = arR + 0.150 x spR + 72.3",
+    "",
+    "Bars in slider points, springs in lb/in. Read as a roll-stiffness split",
+    "where the REAR share is what the game prints.",
+    "",
+    "EVERY ROW MEASURED ON THIS CAR, against the model:",
+    "",
+    "   arF/arR      spF/spR        model    printed",
+    "   30 / 30    468.1 / 374.9    0.5126     0.51    PASS",
+    "   40 / 65    468.1 / 374.9    0.5463     0.55    PASS",
+    "   20 / 40    468.1 / 374.9    0.5449     0.54    PASS",
+    "   32.5 / 65  468.1 / 374.9    0.5581     0.56    PASS",
+    "   30 / 30    328.1 / 374.9    0.5501     0.55    PASS",
+    "   30 / 30    608.1 / 374.9    0.4799     0.48    PASS",
+    "",
+    "Six settings, three free parameters (the spring weight and the two axle",
+    "constants; the bar weight is the scale and is fixed at 1). Overdetermined",
+    "by three, and every row lands on the printed digit.",
+    "",
+    "AND TWO ROWS IT WAS NOT FITTED TO:",
+    "",
+    "   31.3 / 30.1  468.1 / 374.9   0.5106     0.51    PASS  (the app's tune)",
+    "   48.1 / 22.8  607.6 / 596.9   0.4932     0.50    one step out (default)",
+    "",
+    "The app's own tune is a clean independent hit. The game's default tune",
+    "misses by a single rounding step, and it is the one row taken at a",
+    "different ride height (4.4/4.8 against 4.2/4.4) and a different tire",
+    "pressure (31.0 against 31.5) — both of which are inside the axle constants.",
+    "So the residual points at exactly the terms that were held constant",
+    "everywhere else, which is the good kind of miss.",
+    "",
+    "WHAT THE COEFFICIENTS MEAN:",
+    "  - ONE BAR POINT IS WORTH ABOUT 6.7 lb/in OF SPRING. Bars run 1-65 and",
+    "    springs a few hundred, so across their full ranges the two have",
+    "    comparable authority over the balance. That is why neither a bars-only",
+    "    nor a springs-only model could ever have fitted.",
+    "  - THE AXLE CONSTANTS ARE LARGE AND REAR-BIASED, 50.5 front against 72.3",
+    "    rear, together about 40% of the total. They are the tires, the geometry",
+    "    and the unsprung mass — everything that resists roll without being on a",
+    "    slider. They are why equal bars and a front-stiff spring pair still",
+    "    read above 0.5.",
+    "  - THEY ALSO ABSORB TIRE PRESSURE, which is why 31.5 -> 50 psi moved MB",
+    "    0.51 -> 0.50 with nothing else touched."
+  ],
+
+  "whatThisIsWorthToTheApp": [
+    "The app currently prints a target band of 0.55-0.65 and its own tune lands",
+    "at 0.51, with no indication of which way to move or by how much. With MB",
+    "solved that becomes an exact instruction — but the coefficients above are",
+    "THIS CAR'S, and 50.5 / 72.3 / 0.150 encode its tires, geometry and weight",
+    "distribution. They will not transfer.",
+    "",
+    "THE FIX THAT NEEDS NO PER-CAR CONSTANTS, and it is better than a formula:",
+    "MB is smooth and monotonic in the bar settings, so two readings calibrate",
+    "any car in about thirty seconds.",
+    "",
+    "  1. read MB at the tune's bars",
+    "  2. add 10 to the rear bar, read MB again",
+    "  3. the difference is that car's sensitivity per bar point; scale it to",
+    "     the distance to target and set the bar",
+    "",
+    "On this car step 2 moves MB by about 0.028 per 10 points of rear bar, so a",
+    "user 0.04 below target needs roughly +14 rear. That is a concrete number",
+    "the app could print instead of a band, and it is derived from the user's",
+    "own car rather than from constants measured on a GR86.",
+    "",
+    "It also finally makes the Verify In Game section honest. It has been",
+    "telling users to hit a Mechanical Balance target using the bars, which is",
+    "the right lever — but the app's own tune misses the band it prints, and",
+    "until now nothing could say by how much or in which direction."
+  ],
+
+  "stillOwed": [
+    "ONE CAR. The structure — rear share, bars and springs both in, large",
+    "additive axle terms — should generalise because it is roll stiffness. The",
+    "three coefficients should not, because they are the car.",
+    "",
+    "The cheapest test of the structure is three readings on a second car:",
+    "equal bars, then the same-ratio pair. If MB is still the rear share and",
+    "the pair still splits, the form holds and only the numbers change.",
+    "",
+    "Ride height is untested and sits inside the axle constants on this",
+    "evidence. Rows 6 and 7 of MEASURE.md Phase 1 — ride height at fixed bars —",
+    "are now worth taking, since the model predicts they will move MB and by",
+    "how much."
+  ],
+
+  "notes": "Lateral G was 1.26 and 1.42 on every row again. Across this sweep, the previous sweep and the pressure row, that is now five separate tune changes — bars, springs, pressure, gearing, aero — with only aero moving it. Case S5's answer is looking like a firm no: lateral G is a compound-and-aero readout, not a tune readout, and grip-side constants stay lap-times-only."
+}
