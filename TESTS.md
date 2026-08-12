@@ -38,6 +38,79 @@ as a control so Session A's fixtures keep meaning what they say.
 Satellites appear in individual cases only. The three-car core is what carries
 the discipline work.
 
+## What actually decides the platform car
+
+Not the stat block. **How many configurations it reaches without becoming a
+different car** — because the whole design is one car reconfigured, and two
+different cars differ on weight, front %, drivetrain, gear count and power at
+once. Five requirements, in the order that a failure costs the most:
+
+1. **Both aero ends available.** Plenty of cars offer a rear wing only. Phase 2
+   and case A3 are unrunnable on one of those, and it is the kind of thing
+   discovered an hour in rather than at the dealership.
+2. **Drivetrain swap available.** That makes SAT-DT the same car with one part
+   changed rather than a seventh car with six differences.
+3. **Engine swap and aspiration options, buildable D→S1**, so the spring
+   frequency curve can be swept across classes on one chassis.
+4. **Near 3,000 lb and near 55% front** — the pivot, as above.
+5. **RWD.** No centre-diff slider in the way while MB is being solved, and the
+   swap then goes outward from there rather than inward.
+
+## The roster — agreed 2026-08-12, none of it confirmed in game yet
+
+Shortlisted on FH5-era figures, which is what stock data is good for. **Every
+number below is a candidate to check, not data**; weight and front % get read
+off the upgrade screen before anything is entered.
+
+| slot | first pick | alternates |
+|---|---|---|
+| CORE-1 | **2003 Nissan 350Z** ~3,190 lb, ~53% F | 1999 Silvia S15 Spec-R (2,755/55) · 2002 RX-7 Spirit R (2,870/50) |
+| CORE-2 | **2016 Mazda MX-5** ~2,340 lb | 1985 AE86 · 2004 Honda S2000 (2,800) |
+| CORE-3 | **2015 Challenger SRT Hellcat** ~4,500 lb, 8-spd RWD | 2020 Audi RS 6 Avant · Bentley Continental GT |
+| SAT-F-low | **Porsche 911 GT3** ~39% F, ~3,150 lb | 1995 Toyota MR2 (43%) |
+| SAT-F-high | **2018 Civic Type R (FK8)** ~3,100 lb, ~62% F | 2015 Golf GTI · Mini Cooper S |
+| SAT-DT | CORE-1 with the drivetrain swapped | — |
+| SAT-G | **2018 Mustang GT** (10-spd) | 2017 Camaro ZL1 (10-spd) |
+
+Three notes that come out of the roster rather than the slots:
+
+- **CORE-3 doubles as the old R5 slot** — heavy, 8-speed, RWD and high-power at
+  once, which gets the long gearbox without adding AWD as a confound.
+- **The 911 and the Civic are a matched pair**, ~39% and ~62% front at weights
+  either side of CORE-1. Front % bracketed from both ends at near-constant
+  weight is worth more than either car alone.
+- **No Evo as CORE-1.** All seven Mitsubishis in `G6` are AWD turbos near 60%
+  front, so they cluster in one corner and bring a centre diff into every row
+  while MB is being solved. They are the right cars for **D3** — the AWD centre
+  split, whose neutral base moved 55 → 60 on ForzaTune's band without ever
+  being measured — and for the dirt and cross-country work.
+
+**G4 needs its own list.** With a race box fitted the gear count is a property
+of the car, so `SPREAD[4]` and `[5]` mean old muscle and 90s cars while `[8]`,
+`[9]` and `[10]` mean modern ones. That case is transcription only — no tuning,
+nothing owned, borrowed or rented cars are fine.
+
+## Screening pass — 5 minutes per candidate, before any measurement
+
+The roster is a shortlist. This is what turns it into the rig, and it is the
+next physical action. Per candidate, in the dealership or the garage, no
+driving:
+
+```
+car ____________________  slot ____   owned? ____
+
+stock weight ______ lb    front % ______    PI ______   drivetrain ______
+front aero available?  ____     rear aero available?  ____
+race ARBs, both ends?  ____     drivetrain swap?      ____
+engine swap options?   ____     lowest / highest class buildable ____ / ____
+gear count with a race transmission fitted: ______
+```
+
+The aero line is the one that disqualifies. Anything missing a front wing
+cannot be CORE-1 whatever its stat block says, because Phase 2 and A3 both
+need the pair. Record the whole block even for a car that fails — a rejected
+candidate with its reason written down is what stops it being re-proposed.
+
 ---
 
 ## Photo protocol

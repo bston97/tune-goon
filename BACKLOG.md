@@ -98,6 +98,13 @@ no run-to-run variance.
 
 ## The rig — reference cars
 
+**The named roster lives in `TESTS.md`, not here.** That file carries the
+actual candidates agreed 2026-08-12, what decides the platform car, and the
+screening pass that promotes a candidate to the rig. This table stays as the
+*rationale* — the axes the slots exist to span. Two files carrying two rosters
+for the same job is E2 in miniature, so if the slots below ever disagree with
+the roster there, the roster wins and this table is the stale one.
+
 Chosen to span the axes the formulas actually key off (weight, front %,
 drivetrain, gear count, class). Pick real cars owned, and record the exact
 stat block once in the fixture header.
