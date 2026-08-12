@@ -309,7 +309,10 @@ Measured across two builds and three tunes:
 axis is the chart's scale and the fit is the final drive at which top gear
 reaches the end of it, so a longer scale needs a shorter final drive and the
 product is conserved. `k` is the physical constant; the axis alone is chart
-furniture.
+furniture. (Honest sample size: the last three rows are one sitting at adjacent
+final drives, so this is nearer three independent points than five. Enough to
+retire the 157-vs-159 question; a second car — `TESTS.md` `G5` — is what makes
+the invariance general.)
 
 **The one rule this leaves:** read the axis and the fit **on the same tune, in
 the same sitting**. Pair them and `k` is right whatever either reads; mix them

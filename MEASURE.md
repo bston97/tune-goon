@@ -136,14 +136,18 @@ tune was loaded. That is E2's mechanism, found.
 What each part of the sitting settled:
 
 - **The fit came back 4.57**, against 4.575 on July's completely different
-  build — AWD instead of RWD, 472 lb lighter, 60 hp down. `k = 588.3` versus
-  July's 589.0 at axis 157, **0.1% apart**. At axis 159 July's k would be
-  596.5, 1.4% away. That is what makes 157 the reading that survives *for a
-  given tune*.
+  build — AWD instead of RWD, 472 lb lighter, 60 hp down. At the time this was
+  read as evidence that 157 was "the reading that survives." **It is not — see
+  the end-of-day resolution:** re-sweeping the fit on the app's own tune (axis
+  159, fit ≈4.52) gave the *same k*, because when the axis moves the fit moves
+  to compensate. `k = axis × fit × topRatio` spans 588.1–590.7 across
+  everything ever measured on this car. Neither axis reading survives over the
+  other; the pair is the measurement.
 - **The axis does not move with the final drive** — held at 157 from 3.50 to
   4.60. `G2` answered.
 - **It does move with the tune** — 157 → 159 on the default, parts untouched.
-  Which *part* of the tune is step 2 of the plan.
+  Which part of the tune was chased and eliminated one variable at a time
+  (top ratio, aero, pressure) and **stopped mattering** once k proved invariant.
 - **The axis prints a midpoint label** (78, then 79 on default) at half the
   maximum, so it is linear and evenly divided — an assumption every gear-speed
   calculation makes and nothing had checked.
@@ -423,7 +427,10 @@ at **65**, so the original `40/80` was unreachable.)
 tires, geometry and weight distribution. What transfers is the shape, and a
 two-reading calibration that needs no constants at all: read MB, add 10 to the
 rear bar, read again, and scale the difference to the distance to target. On
-this car that is ≈0.028 per 10 points of rear bar.
+this car that is **0.0153 per 10 points of rear bar**, so closing the app's own
+0.51 → 0.55 gap takes ≈+27 rear. (An earlier revision of this line said 0.028
+and +14 — eyeballed instead of differentiated from the model directly above it.
+The fixture records the correction.)
 
 Not on the list, and worth watching the residuals for: track width and roll
 centre. Neither is a tuning slider, so both would show up as a **per-car

@@ -86,6 +86,13 @@
     "kJulyIfAxis157": 589.0,
     "kJulyIfAxis159": 596.5,
     "eraseTheDisagreement": [
+      "*** SUPERSEDED THE SAME EVENING — see",
+      "*** gearing-gr86-fit-apptune-2026-08-12.json -> kIsTheInvariant.",
+      "*** Re-sweeping the fit on the 159-axis tune gave the SAME k, so neither",
+      "*** reading survives over the other: the axis and fit compensate and k",
+      "*** is the invariant. Kept unedited below because the argument was sound",
+      "*** given what was known at noon, and watching it fail is the lesson.",
+      "",
       "THIS IS THE E2 RESULT, AND IT IS AN ARGUMENT RATHER THAN A DIRECT READ.",
       "",
       "July recorded fit 4.575 with the axis as either 157 or 159. Today, on a",
