@@ -14,7 +14,8 @@ driving work is the last 20% of the value, not the first.
 # Where we are — updated end of 2026-08-12
 
 **Ten fixtures in `tests/data/`, all on one GR86 at A 700.** `node
-tests/status.js` went from 1 case with data to 15 in a day. This section is
+tests/status.js` went from 1 case with data to 17 in a day, and all four app
+defects those measurements exposed are fixed (see step 1). This section is
 maintained so the file never shows a step as pending that is already done; if it
 disagrees with `tests/data/`, **the fixtures win**.
 
@@ -24,7 +25,7 @@ disagrees with `tests/data/`, **the fixtures win**.
 | **Mechanical Balance** | ✅ **SOLVED.** `MB = R/(F+R)`, `F = arF + 0.150·spF + 50.5`, `R = arR + 0.150·spR + 72.3`. Rear share, six settings, three parameters, every row on the printed digit |
 | **Aero Balance** | ✅ **model validated out-of-sample.** Pounds of downforce plus a large per-axle body term, ≈175 front / 215 rear |
 | **`SPREAD[7]`** | ❌ **wrong.** Game default is 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at fd 3.63. The old "confirmation" was the app's own ratios read back off a car they were applied to |
-| **The app's `k`** | ❌ **3.8% low**, because the fit is read on the game's gearbox and `k` is built with `SPREAD`'s top ratio |
+| **The app's `k`** | ✅ **fixed 2026-08-12 (`C1`).** It was 3.8% low, because the fit is read on the game's gearbox while `k` was built with `SPREAD`'s top ratio. The app now asks for the top ratio and says when it is assuming one |
 | **App tune vs game default** | ❌ the **default wins 5 of 6 panel columns**, braking by 8%. One car — needs a second before it is general |
 | **Panel behaviour** | deterministic within a sitting; acceleration quantised to exactly **1/60 s**. Small differences are therefore *real* |
 | **Slider facts** | ARB range **1–65**, step 0.1, confirmed. Spring rates cannot be hit exactly. MB moves with **tire pressure** |
@@ -39,27 +40,34 @@ within a sitting).
 
 # The plan — do these in this order
 
-### Step 1 — **Fix the app.** Measurement has outrun the code
+### Step 1 — **Fix the app** ✅ DONE 2026-08-12
 
-Four defects are sitting unfixed while more data arrives. In priority order:
+All four defects are fixed and pushed, one commit each, suite green throughout
+(**612 assertions**, from 567):
 
-1. **The gearing top ratio.** `index.html:1083` builds `k` from `SPREAD`'s top
-   ratio while the fit is read on the game's gearbox. Add a top-ratio input
-   beside the fit and graph max; fall back to `SPREAD` when blank. Wrong on
-   every build the app generates today, so this one is not optional.
-2. **The sheet's ratio label.** It calls `SPREAD`'s ratios *"the game's default
-   ratios"*. They are not. Relabel honestly and keep printing them.
-3. **Aero.** Stop emitting "% of range" as though it were a settable value —
-   the game takes pounds and the two ends have different ranges.
-4. **The Mechanical Balance instruction.** *"±0.5 ARB per 1% of shift"* is out
-   by roughly 10×: measured sensitivity is ≈0.0015 of MB per rear-bar point, so
-   the app's own 0.51 → 0.55 gap needs **≈+27 rear bar**. Replace with the
-   two-reading calibration below, which needs no per-car constants.
+1. **The gearing top ratio** (`C1`). `#topratio` is now the third gearing
+   reading, off the same screen as the other two; it feeds `k` and the top slot
+   of the ratio list, and falls back to `SPREAD` when blank. Hand-checked
+   against the fixture: 159 × 4.34 × 0.85 = 586.6 against ~588.3 measured,
+   0.29%. **An assumed ratio is now disclosed** on the card and flagged in the
+   preflight — the defect was silence, not arithmetic.
+2. **The sheet's ratio label** (`C2`). Nothing calls `SPREAD` the game's ratios
+   any more, on any path, and the sheet prints both tables so the size of the
+   gap is visible where it cannot be checked.
+3. **Aero** (`C3`). "% of range" → "% of travel", labelled a slider position,
+   with the measured body terms given as the reason no percentage pair can
+   target the readout.
+4. **Mechanical Balance** (`C4`). The ±0.5-per-1% rule is gone from all three
+   paths, replaced by the two-reading calibration. All three now also say the
+   readout is the **rear** axle's share, which is the finding that inverted
+   every candidate model.
 
-**Promotion rule applies:** the fixture exists, the test asserting it
-independently of `compute()` comes next, and only then does `compute()` change.
+**The promotion rule was followed for `C4`** and is worth copying: fixture →
+`mb.test.js` asserting the model *without loading `index.html`* → only then
+`compute()`. The render assertions live in `modes.test.js`/`locked.test.js` so
+`mb.test.js` never checks the app against itself.
 
-### Step 2 — Three readings on a second car *(~5 min)*
+### Step 2 — Three readings on a second car *(~5 min)* ← **start here**
 
 Equal bars, then `20/40`, then `32.5/65`, with springs and pressure held and
 recorded. This is what turns "MB solved on a GR86" into "MB solved" — the

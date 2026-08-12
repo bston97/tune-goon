@@ -28,7 +28,7 @@ not a deliberate exception.
 node tests/run.js
 ```
 
-**567 assertions across seventeen files**, plus a 684-build structural sweep, a
+**612 assertions across seventeen files**, plus a 684-build structural sweep, a
 2,304-combination render/export sweep over every gated-part combination, and a
 monotonicity sweep. Exits non-zero on any failure or crash — safe to use as a
 gate. See `tests/shim.js` for how a plain-Node DOM shim runs the app's real
@@ -206,6 +206,15 @@ is. Rough tiers, most to least trustworthy:
    structure should, because it is roll stiffness. See
    `tests/data/balance-mb-solved-gr86-2026-08-12.json`.
 
+   **What shipped from it (C4, 2026-08-12):** the app no longer quotes a
+   sensitivity at all. Because the coefficients are per-car, the guidance is the
+   *two-reading calibration* — read the figure, add 10 to the rear bar, read it
+   again, scale your gap by the difference — which needs no constants and is
+   right on any car. The GR86 numbers (10 points ≈ 0.015, so 0.51 → 0.55 wants
+   +27 bar) are quoted as the worked example only. The rule this replaced,
+   "±0.5 ARB per 1% of shift", was out by an order of magnitude in the direction
+   that makes the target band look unreachable.
+
 1. **Confirmed on Boston's own screen** — Mechanical Balance and Aero Balance
    are real in-game readouts (confirmed 2026-07-30); the exact target bands
    (0.55–0.65 / 0.42–0.48) are still house numbers, not published, and **the
@@ -214,6 +223,9 @@ is. Rough tiers, most to least trustworthy:
    2026-08-12 when 80 proved unsettable. **Aero Balance is a function of the two
    downforce figures in pounds plus a large per-axle body term** (≈175 front /
    215 rear on the GR86) — validated on an out-of-sample point, one car only.
+   **The sliders are in pounds and the two ends have different ranges**, so the
+   app's percentages are slider *positions* and can never target the readout;
+   C3 relabelled them "% of travel" and says so on both the card and the sheet.
    **The `SPREAD` gear tables were listed here too and are demoted to tier 4 as
    of 2026-08-12** — the screen that "confirmed" them was showing the app's own
    ratio set read back off a car it had been applied to, and the game's real
@@ -290,6 +302,21 @@ ratios went on, a ratio of 1.041 against a top-ratio ratio of 1.037 — so the
 model was never wrong, only the constant fed into it. **The fix is to ask for
 the top ratio of the gearbox the fit was read on**, one number off a screen
 already open, which also stops `SPREAD` being load-bearing at all.
+
+**Fixed 2026-08-12 (C1).** `#topratio` is the third gearing reading, taken off
+the same screen as the other two, and it feeds both `k` and the top slot of the
+printed ratio list. It falls back to `SPREAD` when blank so every saved build
+keeps working — but the card and the preflight now say when the ratio is
+assumed, because the defect was never bad arithmetic, it was silence.
+
+One trap found while fixing it, worth knowing if this is ever refactored:
+putting the read ratio into `k` alone is not enough. `gearsAt()` was still
+taking every gear off `SPREAD`, so a `k` built on a 0.85 box with speeds read
+off a 0.82 one put top gear at 165 mph on a 159 chart — and "top gear reaches
+the right-hand edge" is the entire reading the fit is. Only the top ratio is
+known, so only the top slot is replaced; the gears below stay `SPREAD`'s, and
+**both the card and the sheet now have to say so** (C2). If you ever learn the
+full ratio set, that is the assumption to retire.
 
 ### `k` is the invariant — the axis on its own means nothing
 
