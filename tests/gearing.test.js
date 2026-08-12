@@ -173,11 +173,20 @@ console.log('--- per-gear limiter speeds, from the fit plus the axis maximum ---
 /* Confirmed end to end on the reference car: k = 159 x 4.575 x 0.82 = 596.5,
    which puts 5th at final drive 3.73 at 145.4 mph — exactly the Top Speed the
    game reported for that setup. The car was rev-limited in 5th with 6th (168)
-   and 7th (195) both past the 159 mph axis and therefore unreachable. */
-const K = 159 * 4.575 * 0.82;
-ok('k from the reference screen', near(K, 596.5, 0.1), K.toFixed(1));
+   and 7th (195) both past the 159 mph axis and therefore unreachable.
+
+   The 159 here and the 157 in sweep.test.js are the same reading taken twice
+   (BACKLOG.md E2). Both now come from tests/data via FX.axis(), so settling
+   the fixture settles both files at once. Note this file's value is the one
+   the independent 145.4 readout agrees with, exactly — that is evidence, but
+   only if 145.4 was read off the screen rather than back-computed from 159. */
+const FXG = require('./data');
+const AXIS_G = FXG.axis(159, 'gearing.test.js');
+const K = FXG.k(AXIS_G);
+ok('k from the reference screen', near(K, AXIS_G * 4.575 * 0.82, 0.1), K.toFixed(1));
 ok('5th at fd 3.73 reproduces the 145.4 mph readout',
-   near(K / (3.73 * 1.10), 145.4, 0.1), (K / (3.73 * 1.10)).toFixed(2));
+   near(K / (3.73 * 1.10), FXG.GR86.readings.fifthAtFd373, 0.1),
+   (K / (3.73 * 1.10)).toFixed(2) + ' vs ' + FXG.GR86.readings.fifthAtFd373 + ' measured');
 ok('6th at fd 3.73 sits past the 159 axis', K / (3.73 * 0.95) > 159, (K / (3.73 * 0.95)).toFixed(1));
 ok('7th at fd 3.73 sits far past it', K / (3.73 * 0.82) > 190, (K / (3.73 * 0.82)).toFixed(1));
 

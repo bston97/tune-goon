@@ -844,6 +844,34 @@ car, but it is not established whether power upgrades move it. If the two
 readings were taken at different build states, both could be right and the real
 defect is that neither records the build. A4 should check that too.
 
+**Status 2026-08-08: the structural half is done.** Both files now read the
+axis through `tests/data/index.js` (`FX.axis(fallback, who)`), which returns
+the fixture's confirmed value if there is one and the caller's historical
+literal if not, printing an `[UNRESOLVED]` line either way. Filling in
+`readings.axisMax` in `tests/data/gearing-gr86-2026-07-31.json` switches both
+files at once. All that is left is the reading. Session sheet: `MEASURE.md`.
+
+**And the dry run turned up something the plan did not expect: the two
+candidates are not symmetric, and neither is simply the typo.** Both were run
+through the suite:
+
+- **157** → `gearing.test.js` fails: 5th at fd 3.73 predicts 143.55 against the
+  measured **145.4**, out by 1.85 mph.
+- **159** → `sweep.test.js` fails: 2nd at fd 4.82 predicts 60.4 against **59**
+  read off the chart, out by 1.4 mph (2.4%, past the 2% tolerance).
+
+Each candidate is contradicted by a different independent measurement, so the
+"one misreading, not two valid numbers" framing above is too tidy. The
+contradictions are not equally strong, though: 145.4 is a digit readout off the
+Performance panel and 59 is a gear endpoint eyeballed off a chart, where ±1 mph
+is nothing. That favours **159**, with the gear-2 miss inside chart-reading
+error. It is an argument and not a measurement — which is exactly why
+`MEASURE.md` asks for the axis to be read cold, before that reasoning is seen.
+
+If the cold reading comes back 157, the next question is whether the 145.4 was
+genuinely read off the screen or back-computed from 159 at the time. If it was
+back-computed it is not evidence and this whole paragraph collapses.
+
 **Third wrinkle, found in the code check 2026-08-08:** the two files also
 disagree about where the *top gear ratio* comes from. `sweep.test.js` reads it
 from the app — `const K = AXIS * FIT * X.SPREAD[7][6]` (`:78`, `:91`) — while
