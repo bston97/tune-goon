@@ -1,0 +1,97 @@
+{
+  "_README": [
+    "Template for a Mechanical or Aero Balance sweep. Copy to",
+    "balance-<car>-<yyyy-mm-dd>.json, fill in `car`/`build`, then fill the `mb`",
+    "(or `ab`) field on each row as you read it. Rows may be filled in any",
+    "order and partially — the solver ignores rows with a null readout, so you",
+    "can run it after five readings to see whether the sweep is discriminating",
+    "yet.",
+    "",
+    "  node tests/fit-balance.js tests/data/balance-<car>-<date>.json",
+    "",
+    "The rows below are ordered by how much they tell you, not by convenience.",
+    "Rows 1-5 are the whole experiment in miniature: if you only have ten",
+    "minutes, do those and stop. Everything after them refines a model those",
+    "five have already chosen.",
+    "",
+    "ONE VARIABLE PER ROW. Every row states what it holds. If something else",
+    "moved, the row is discarded, not interpreted.",
+    "",
+    "Record MB/AB to every digit the game prints. The solver's noise floor",
+    "assumes 2-3 decimal places; rounding to 2 throws away the discrimination",
+    "the same-ratio pair depends on."
+  ],
+
+  "car": "",
+  "class": "",
+  "pi": null,
+  "date": "",
+  "screen": "tuning menu — Mechanical Balance readout",
+  "readout": "mb",
+
+  "build": {
+    "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+    "aero": "both", "tires": "", "twf": 0, "twr": 0,
+    "wt": null, "fw": null, "dt": "", "gears": null
+  },
+
+  "baseline": {
+    "spF": null, "spR": null, "rhF": null, "rhR": null,
+    "note": "the app's own values for this car, used as the hold-point for the bar sweeps"
+  },
+
+  "varied": "arF/arR",
+
+  "rows": [
+    { "n": 1, "purpose": "SYMMETRY — is MB exactly 0.5 with equal bars? If not, something other than the bars is in the formula",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+
+    { "n": 2, "purpose": "SAME-RATIO PAIR (a) — with row 3, separates a pure ratio from anything with an additive term",
+      "arF": 20, "arR": 40, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 3, "purpose": "SAME-RATIO PAIR (b) — identical F:R as row 2 at double the magnitude. Equal readouts = pure ratio; different = offset or springs",
+      "arF": 40, "arR": 80, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+
+    { "n": 4, "purpose": "SPRINGS (a) — bars held at 30/30, front spring -30%. If MB moves, springs are in the formula and are solvable",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 5, "purpose": "SPRINGS (b) — bars held at 30/30, front spring +30%",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+
+    { "n": 6, "purpose": "RIDE HEIGHT (a) — bars 30/30, springs back at baseline, front ride height at minimum",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 7, "purpose": "RIDE HEIGHT (b) — front ride height at maximum",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+
+    { "n": 8,  "purpose": "arF sweep at arR=30 — shape of the front term", "arF": 1,  "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 9,  "purpose": "arF sweep", "arF": 15, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 10, "purpose": "arF sweep", "arF": 45, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 11, "purpose": "arF sweep — top of the slider", "arF": 65, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+
+    { "n": 12, "purpose": "arR sweep at arF=30 — confirms the rear term is the mirror of the front, or is not", "arF": 30, "arR": 1,  "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 13, "purpose": "arR sweep", "arF": 30, "arR": 15, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 14, "purpose": "arR sweep", "arF": 30, "arR": 45, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 15, "purpose": "arR sweep", "arF": 30, "arR": 65, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null }
+  ],
+
+  "_AERO_ROWS": [
+    "For an Aero Balance sweep set readout to 'ab', use aeF/aeR instead of",
+    "arF/arR, and swap the row plan for:",
+    "  1  50/50   SYMMETRY — is AB 0.5 with equal sliders? Almost certainly not,",
+    "             because the body makes downforce the wings do not, and that",
+    "             asymmetry is the interesting part.",
+    "  2  25/50   SAME-RATIO PAIR (a)",
+    "  3  50/100  SAME-RATIO PAIR (b)",
+    "  4  0/0     FLOOR — both wings at minimum. AB here is the bodyshell's own",
+    "             balance, and it is the number that decides whether the app's",
+    "             0.42-0.48 target is reachable on this car at all.",
+    "  5  100/100 CEILING — both at maximum. With row 4 this brackets every AB",
+    "             the car can produce; if the target band sits outside that",
+    "             bracket, the app is printing an unreachable goal.",
+    "  6-9        aeF sweep at aeR=50: 0, 25, 75, 100",
+    "  10-11      rake: ride height F min then max, wings held at 50/50 — tests",
+    "             whether AB is a pure wing function or moves with attitude",
+    "  12         one row on a second car at 0/0, to see whether the floor is a",
+    "             property of the car rather than a constant"
+  ],
+
+  "notes": ""
+}

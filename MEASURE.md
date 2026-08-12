@@ -256,85 +256,135 @@ variety.
 
 ---
 
-## Phase 1 — Solve Mechanical Balance (no driving, ~60 min)
+## Phase 1 — Solve Mechanical Balance (no driving, ~45 min)
 
-The highest-value hour available. MB is a live readout, so this is an exact
-solve, and it converts the ARB multipliers — currently tier-4 house heuristics
-inherited from an FH4-era method — into a computed inverse.
+The highest-value session available, and it is not a calibration — it is a
+**solve**. MB is a number the game prints that responds to the sliders, so the
+function can be recovered exactly. Once it is, the app computes the ARB pair
+that lands on a target instead of approximating it with FH4-era multipliers.
 
-### Step 0 — The branch point, do this first (5 min, 6 readings)
+### The trick that makes the whole thing easy
 
-Three questions decide the size of everything after. On the platform car, race
-suspension and race ARBs fitted:
-
-| # | change only this | read MB | tells you |
-|---|---|---|---|
-| 1 | `arF` 20 → 40 | ______ → ______ | bars enter MB (expected yes) |
-| 2 | `spF` −30% → +30% | ______ → ______ | **do springs enter MB?** |
-| 3 | `rhF` low → high | ______ → ______ | does ride height enter MB? |
-
-**If springs move MB, springs are class A and solvable.** If they do not,
-springs have no readout anywhere and drop to class D, which is worth knowing
-before designing a sweep around them. Same for ride height. Answer these
-before spending an hour on the grid below.
-
-### Step 1 — The grid
-
-Platform car, race suspension and ARBs, everything else held. Record MB to
-every digit shown.
-
-| sweep | vary | hold | points |
-|---|---|---|---|
-| 1 | `arF` = 1, 15, 30, 45, 65 | `arR` = 30 | 5 |
-| 2 | `arR` = 1, 15, 30, 45, 65 | `arF` = 30 | 5 |
-| 3 | `spF` −30%, 0, +30% | bars 30/30 | 3 |
-| 4 | `spR` −30%, 0, +30% | bars 30/30 | 3 |
-| 5 | `rhF`, `rhR` one step each way | bars 30/30 | 4 |
-
-Skip 3–5 if step 0 says those inputs do not move MB.
-
-### Step 2 — The same two sweeps on three more cars
-
-Sweeps 1 and 2 only, three points each (`arF`/`arR` = 1, 30, 65), on **W-low,
-W-high and F-low**. Twelve readings. This is what turns a curve fitted to one
-car into a function of the car.
-
-### The fit
-
-Candidate model, from the shape the app already assumes:
+Every plausible model has the form `MB = F / (F + R)`. Invert it:
 
 ```
-MB = kF / (kF + kR)     where k is roll stiffness per axle
+r  =  MB / (1 - MB)  =  F / R
 ```
 
-Test whether MB is: a pure function of the bar pair; linear in slider value or
-in some derived rate; affected by the car's weight distribution independently
-of the sliders. The residuals tell you which.
+and the balance becomes a plain front-to-rear ratio. Ratios linearise: if the
+slider is linear in roll rate then `r` is linear in the slider pair, and the
+model shows up as a straight line instead of an S-curve. **Never fit MB
+directly — fit `r`.** `tests/fit-balance.js` does this for you.
 
-### Deliverables
+### The candidate models, stated before any data is taken
 
-`tests/data/mb-<car>-<date>.json` per car, one `varied` key each. Then
-`MODEL.md` with the solved form. Then — and only then — `compute()` inverts it:
-given the target band, emit the bars that hit it, and print the predicted MB
-beside the ARB values so the in-game readout becomes a **check** rather than a
-discovery.
+Writing these down first is what makes the sweep a test rather than a
+curve-drawing exercise. They are nested, so the simplest one that survives wins.
+
+| id | model | says |
+|---|---|---|
+| **M1** | `r = arF / arR` | bars only, slider linear in rate, axles symmetric |
+| **M2** | `r = (arF+k) / (arR+k)` | as M1 but the bar has a base rate at slider 0 |
+| **M3** | `r = (arF/arR)^p` | slider is non-linear in rate |
+| **M4** | `r = (arF + c·spF) / (arR + c·spR)` | springs contribute roll stiffness too |
+| **M5** | `r = (arF + k + c·spF) / (arR + k + c·spR)` | both |
+
+Not on the list, and worth watching the residuals for: track width and roll
+centre. Neither is a tuning slider, so both would show up as a **per-car
+constant** — a car whose residuals are all offset one way is the signature.
+
+### The five readings that do most of the work
+
+Ordered by discriminating power, not convenience. If there are only ten
+minutes, do these five and stop — they choose the model, and everything after
+refines it.
+
+| # | set | hold | what it decides |
+|---|---|---|---|
+| 1 | `arF` 30, `arR` 30 | springs, ride height at the app's values | **Symmetry.** Is MB exactly 0.500? If yes, nothing but the bars is moving it. If not, springs, track or an axle asymmetry is in there — and every model without a car term is already in trouble. |
+| 2 | `arF` 20, `arR` 40 | as above | **Same-ratio pair (a).** |
+| 3 | `arF` 40, `arR` 80 | as above | **Same-ratio pair (b).** Identical F:R at double the magnitude. Equal readouts ⇒ pure ratio, M1 survives and M2/M4/M5 die. Different ⇒ there is an additive term and M1 is dead. Two readings that split the model space in half. |
+| 4 | `spF` −30% | bars at 30/30 | **Do springs enter?** |
+| 5 | `spF` +30% | bars at 30/30 | If MB moves across 4–5, springs are class A and solvable. If it does not, springs have **no readout anywhere in the game** and drop to lap-times-only — which is worth knowing before designing an hour of spring sweeps. |
+
+Rows 6–7 (ride height at fixed bars) test the roll-centre question and cost two
+more readings.
+
+### Then the shape, and then the car
+
+Rows 8–15: sweep `arF` = 1, 15, 45, 65 at `arR` = 30, then `arR` = 1, 15, 45,
+65 at `arF` = 30. Fifteen rows total on the platform car. The two sweeps
+together also answer whether the rear term is the mirror of the front or has
+its own gain.
+
+Then **rows 1–3 only, on three more cars** — W-low, W-high, F-low. Nine
+readings. This is the step that turns a curve fitted to one car into a function
+of the car, and it is where a track-width or weight-distribution term would
+finally show itself.
+
+### Doing it
+
+Copy `tests/data/balance-TEMPLATE.json` to
+`tests/data/balance-<car>-<date>.json`. The row plan above is already in it
+with the purpose of each row written on the row. Fill in `mb` as you read, then:
+
+```
+node tests/fit-balance.js tests/data/balance-<car>-<date>.json
+```
+
+It reports every candidate's fit, applies Occam properly (among models
+statistically indistinguishable from the best, it prefers the fewest
+parameters), names which models the data has **ruled out**, and prints the
+discriminating checks by name. Run it after five rows — if it says *"nothing
+ruled out yet, the sweep is not discriminating"*, that is the sweep telling you
+which reading is missing.
+
+**Record every digit the game prints.** The same-ratio pair is decided by
+differences of a few thousandths; rounding to two decimals throws away exactly
+the discrimination it exists to provide.
 
 ### What this does NOT settle
 
-Whether **0.55–0.65 is the right target**. That band is a house number and
-solving MB does not test it — it only lets you hit it precisely. The target is
-a class-D question. Solving the function first is still right, because it makes
-the eventual driving test one variable instead of two.
+Whether **0.55–0.65 is the right target**. Solving MB tells you how to hit any
+band precisely; it says nothing about which band is fast. That is a class-D
+driving question — but solving the function first makes it a one-variable test
+instead of a two-variable one, which is the whole reason to do it in this
+order.
 
 ---
 
-## Phase 2 — Aero Balance (no driving, ~20 min)
+## Phase 2 — Solve Aero Balance (no driving, ~25 min)
 
-Same method, smaller. Sweep `aeF` at fixed `aeR` and vice versa, 5 points each,
-on the platform car and on one high-downforce car. Confirms whether AB is
-simply front downforce share, and whether the app's 0.42–0.48 band is even
-reachable with a slider pair on a given car — which is the failure mode worth
-catching, because the app currently prints that target regardless.
+Same method, same solver (`readout: "ab"`, sliders `aeF`/`aeR`), but the
+interesting readings are different because aero has a floor the bars do not.
+
+**Expect AB at 50/50 not to be 0.5.** The bodyshell makes downforce the wings
+do not, so the symmetric-slider reading is a measurement of the car's own
+balance rather than a check on symmetry. That is the useful part, not a
+problem.
+
+The two readings that matter most here are the **floor and ceiling**:
+
+| # | set | what it decides |
+|---|---|---|
+| 4 | `aeF` 0, `aeR` 0 | the bodyshell's own aero balance, with the wings contributing nothing |
+| 5 | `aeF` 100, `aeR` 100 | the other end |
+
+Together they **bracket every AB the car can produce**. This is the reachability
+check, and it is the failure mode worth catching: the app prints the 0.42–0.48
+target on every build with aero fitted, and on a car whose bracket does not
+contain that range the target is unreachable — the user would chase it to the
+end of a slider and never arrive. If that happens on even one car, the app
+needs to say so rather than print the band.
+
+Then the same-ratio pair (25/50 vs 50/100), an `aeF` sweep at `aeR` = 50, and
+two rake rows (ride height min/max at wings 50/50) to test whether AB moves
+with attitude or only with the wings.
+
+Also worth one row: AB with **only one end fitted**. The app gates aero values
+when a wing is missing, but if AB is still printed and still off-target with no
+front wing, that is a case where the readout is real and the tune cannot reach
+it — which is a note the card should carry.
 
 ---
 
@@ -434,8 +484,8 @@ Only what genuinely cannot be read standing still.
 | phase | driving | rough time | converts |
 |---|---|---|---|
 | A (gearing) | no | 40 min | the axis, `SPREAD`, the speed constant |
-| 1 (MB) | no | 60 min | ARBs: tier 4 → solved function |
-| 2 (AB) | no | 20 min | aero balance: house band → reachability check |
+| 1 (MB) | no | 45 min | ARBs: tier 4 → solved function |
+| 2 (AB) | no | 25 min | aero balance: house band → reachability check |
 | 3 (panel) | no | 90 min | brakes, discipline signatures, diff bracket |
 | 4 (cross-car) | no | 30 min | one car's fit → general |
 | 5 (driving) | yes | hours | pressures, camber, diff, MB target, loose `vFrac` |
