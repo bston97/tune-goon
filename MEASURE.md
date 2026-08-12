@@ -1,10 +1,13 @@
 # Session sheets
 
-Two sessions, different jobs. **Session A** (gearing) settles specific
-constants by isolating one variable at a time. **Session B** (whole-tune
-validation) tests whether the tune the app hands you is actually good, across
-several cars and disciplines. Do A first — it is shorter and B inherits its
-gearing numbers — but B is the one that answers "is our system right."
+Two sessions, different jobs. **Session A** (gearing) settles the specific
+constants that thread is stuck on. **Session B** is the real reverse-engineering
+plan: it classifies every constant by what in the game responds to it, then
+attacks them in that order. Do A first — it is short and B inherits its numbers
+— but B is the one that answers "is our system right."
+
+Roughly **four hours standing still** covers Phases 1–4 of Session B. The
+driving work is the last 20% of the value, not the first.
 
 ---
 
@@ -152,99 +155,217 @@ that car's fit — the lesson `vFrac` taught twice.
 
 ---
 
-# Session B — whole-tune validation
+# Session B — reverse-engineering the tuning system
 
-## What this is, and why it is not just "tune 4 cars and see how it goes"
+## The idea that shapes everything below
 
-The instinct is right: nothing currently tests whether a *whole tune* is any
-good. The 532 assertions check structure — in range, finite, bump ≤ rebound,
-nulls handled — and `sweep.test.js` checks one constant against measured data.
-Nothing checks the package.
+Every constant in `compute()` falls into one of four classes, defined by
+**what in the game responds when you move it**. That classification, not car
+choice, is what decides how a constant gets tested and how expensive it is.
 
-But "tune 4 cars for each discipline and see how it goes" has two problems
-worth fixing before spending the evening on it:
+| class | what responds | constants in it | cost |
+|---|---|---|---|
+| **A — solvable** | a live readout that changes with the tune | ARBs, springs¹, ride height¹, aero (via Mechanical / Aero Balance) | minutes, no driving |
+| **B — objective** | Performance panel figures | gearing, brakes, aero drag, diff accel², pressures² | minutes, no driving |
+| **C — telemetry** | per-corner tire data | pressures, camber, diff lock | ~30 min each, driving |
+| **D — lap times only** | nothing measurable | damping, touge/sprint split, loose-surface `vFrac` | hours, best-of-5 |
 
-1. **4 cars × 7 disciplines = 28 builds**, and most of that time is *shopping*
-   — buying parts and managing PI — not tuning. 
-2. **The verdict would be feel**, which cannot tell you *which* part of the
-   tune was wrong. Everything moved at once. That is precisely how `vFrac`
-   got set to 0.95 and then 1.14: a conclusion drawn from a comparison where
-   more than one thing differed.
+¹ conditional — see Phase 1 step 0, which decides it.  ² weakly.
 
-Two changes make it cheap and diagnostic instead:
+**Class A is not calibration, it is algebra.** Mechanical Balance is a number
+the game prints that responds to the sliders. So we do not need statistics or
+lap times for those — we move an input, read the output, and solve the
+function. Once solved, the app can *compute* the ARB pair that lands on any
+target instead of approximating it with FH4-era multipliers.
 
-**Parts stay fixed; only the tune changes.** Switching discipline in the app
-changes slider values, not the build. So one physical build per car can be
-re-tuned four ways and measured four times without buying anything. That turns
-28 builds into **4 builds and 20 readings**.
+That reframes the whole exercise. The job is not "tune some cars and see." It
+is: **push every constant as far up that table as it will go, then spend the
+expensive driving time only on what is genuinely stuck in class D.**
 
-**The Performance panel is the verdict, not feel.** It scores a whole tune in
-about a second, with no run-to-run variance: 0-60, 0-100, top speed, 60-0,
-100-0, lateral G. Six objective numbers per configuration.
+## Why the car list is short, and mostly one car
 
-## What the panel can and cannot judge — read before choosing disciplines
+The dependency list, read straight out of `compute()`:
 
-It sees straight-line performance plus one lateral-G figure. So it validates
-**gearing, brakes, aero, and pressures**; it partly sees the **diff**; and it
-barely sees springs, ARBs or damping except as they move lateral G. It cannot
-see balance, kerb compliance or trail-braking at all.
-
-**And it cannot judge the loose-surface disciplines.** Dirt and cross-country
-tunes measured on the panel will simply look worse than tarmac tunes, because
-the panel is not testing them on dirt. That is not a finding, it is the wrong
-instrument. Those need A9's best-of-5 lap protocol — expensive, do it later.
-
-**So Session B covers the four tarmac disciplines only: Road, Sprint, Touge,
-Drag.**
-
-## The cars — pick for spread, or you test one car four times
-
-The formulas key off weight, front %, drivetrain and gear count. Four Evos
-would be four readings of the same point in that space. Suggested four, all
-from the garage:
-
-| slot | car | why |
+| output | depends on | does NOT depend on |
 |---|---|---|
-| 1 | **GR86** | RWD, ~2,900 lb, 53% front, 7-speed. Continuity — every existing fixture is this car. |
-| 2 | **A Civic** | FWD, ~2,600 lb, 62%+ front. The only way to touch the FWD diff band and the front-heavy ARB split. |
-| 3 | **Lancer Evo VI TME** | AWD, ~3,200 lb, mid. Already on the G6 roster, so the build counts twice. |
-| 4 | **Challenger / Charger Hellcat** | RWD, ~4,400 lb, 8-speed. Weight scaling and a long gearbox, from the heavy end. |
+| springs | PI, weight, front %, aero fitted, discipline | power, torque, drivetrain, tires |
+| damping | front %, discipline, weight (mild) | PI, power, tires |
+| **ARBs** | **weight, front %, discipline** | **PI, power, torque, tires, aero** |
+| pressures | tire compound, weight, drivetrain | PI, front %, power |
+| alignment | discipline, front % | everything else |
+| brakes | **tire width delta only** | everything else |
+| diff | torque, weight, drivetrain, discipline | PI, front %, tires |
+| gearing | gear count, fit, graph max, discipline | weight, power, front % |
 
-That spans 2,600–4,400 lb, ~53–62% front, all three drivetrains, and gear
-counts 6/7/8. Substitute freely as long as the spread survives.
+Two things fall out that make this far cheaper than four cars × seven
+disciplines:
 
-## What you type INTO the app, per car
+**1. ARBs ignore PI and power entirely.** So while testing ARBs you may change
+parts freely — PI drift is irrelevant to that formula. The only things that
+matter are weight and front %, and within one car those barely move.
 
-Only **four numbers are required**: weight, front %, HP, torque
-(`index.html:2469`). Everything else defaults. But the ones below all change
-the tune, so enter them or the test is measuring defaults:
+**2. Between-car comparisons are the *worst* instrument, not the best.** Two
+different cars differ on weight, front %, drivetrain, gear count and power at
+once. One car reconfigured differs on one or two. So the default is **one car,
+many configurations**, and other cars enter only where a factor cannot be moved
+within a car — which is essentially just weight and front %.
 
-| field | where it comes from | notes |
+Nothing in Forza is perfectly clean, because PI moves with every part. But PI
+only enters the **spring** formula, so for six of the eight outputs above, PI
+drift costs nothing.
+
+## Choosing the platform car
+
+One car carries most of the work. It wants:
+
+- **The widest upgrade tree** — engine swap, drivetrain swap, aspiration
+  options, several transmissions. Each swap is a factor you can move without
+  changing cars.
+- **A wide usable PI range** — ideally buildable from D to S1/S2, so the spring
+  frequency curve can be swept across classes on one chassis.
+- **A middling stat block**, near 3,000 lb and near 55% front, so it sits at the
+  centre of the formulas rather than at an edge where a clamp might hide a
+  defect. Note `ab = 33 + (W−3000)×0.004` pivots exactly on 3,000 lb, and the
+  damping `wNudge` pivots there too — a platform car near 3,000 lb makes the
+  weight term ≈ 1 and takes it out of the algebra while the other terms are
+  being solved.
+- **Not the GR86** for this role. It is the gearing reference and should stay
+  untouched as a control, so Session A's fixtures keep meaning what they say.
+
+Shortlist candidates by stock weight, front % and upgrade options. **Kudosprime
+is fine for this** — CLAUDE.md rejects it as a source of *tune inputs* because
+it is stock-only and a tune needs post-upgrade numbers, but shortlisting cars
+by their stock stats is exactly what stock data is good for. Confirm the real
+figures on the upgrade screen before entering anything.
+
+Then a **satellite set** of 4–6 cars, chosen not to be interesting but to be
+**extreme and matched**:
+
+| slot | wants | isolates |
 |---|---|---|
-| Weight | Upgrade screen, post-build | **post-upgrade**, not stock |
-| Front % | Upgrade screen | rejected outside 20–80 |
-| HP | Upgrade screen, post-build | post-upgrade |
-| Torque | Upgrade screen, post-build | drives the diff accel lock |
-| Class + PI | Upgrade screen | PI drives the spring frequency curve |
-| Drivetrain | the car | |
-| Gears | the transmission fitted | |
-| Tire compound | what you fitted | drives pressures |
-| Tire widths F/R | steps above stock, 0–3 | only the **difference** matters — 0/0 and 3/3 give an identical tune |
-| Aero fitted | front / rear / both / none | gates the aero values entirely |
-| Susp / ARB / trans / diff tier | what you fitted | gates which sliders exist at all |
-| Fit (`fdfit`) | gearing graph — FD where top gear's line just touches the right edge | Session A step 1 |
-| Graph max (`vgraph`) | gearing graph bottom axis | Session A step 1 |
-| Final drive you run (`fdset`) | whatever you actually set | wins over the app's recommendation |
+| W-low | ~2,200 lb, front % near the platform car | the weight term in `ab`, and `wNudge` |
+| W-high | ~4,600 lb, front % near the platform car | same, other end — this is where damping pinned at 19.2 before |
+| F-low | front % ≤ 45, weight near the platform car | every axle-share formula from the rear-biased side |
+| F-high | front % ≥ 62, weight near the platform car | the FWD-ish end of the same |
+| G-long | 9 or 10 gears | `SPREAD` at the long end |
+| DT | same chassis as the platform car, drivetrain swapped | drivetrain, at near-constant everything |
 
-## What you read OUT of the game, per configuration
+The point of "weight near the platform car" is that a pair differing on one
+factor is worth more than six cars differing on all of them. Pairs, not
+variety.
 
-Five configurations per car: the game's own default tune as a control, then the
-app's tune for each of the four tarmac disciplines. **Buy nothing between
-rows** — only the tuning sliders move.
+---
 
-### Car 1: ______________________  class ____  gears ____  drivetrain ____
+## Phase 1 — Solve Mechanical Balance (no driving, ~60 min)
 
-Stat block entered: wt ______ · fw ______ · hp ______ · tq ______ · PI ______
+The highest-value hour available. MB is a live readout, so this is an exact
+solve, and it converts the ARB multipliers — currently tier-4 house heuristics
+inherited from an FH4-era method — into a computed inverse.
+
+### Step 0 — The branch point, do this first (5 min, 6 readings)
+
+Three questions decide the size of everything after. On the platform car, race
+suspension and race ARBs fitted:
+
+| # | change only this | read MB | tells you |
+|---|---|---|---|
+| 1 | `arF` 20 → 40 | ______ → ______ | bars enter MB (expected yes) |
+| 2 | `spF` −30% → +30% | ______ → ______ | **do springs enter MB?** |
+| 3 | `rhF` low → high | ______ → ______ | does ride height enter MB? |
+
+**If springs move MB, springs are class A and solvable.** If they do not,
+springs have no readout anywhere and drop to class D, which is worth knowing
+before designing a sweep around them. Same for ride height. Answer these
+before spending an hour on the grid below.
+
+### Step 1 — The grid
+
+Platform car, race suspension and ARBs, everything else held. Record MB to
+every digit shown.
+
+| sweep | vary | hold | points |
+|---|---|---|---|
+| 1 | `arF` = 1, 15, 30, 45, 65 | `arR` = 30 | 5 |
+| 2 | `arR` = 1, 15, 30, 45, 65 | `arF` = 30 | 5 |
+| 3 | `spF` −30%, 0, +30% | bars 30/30 | 3 |
+| 4 | `spR` −30%, 0, +30% | bars 30/30 | 3 |
+| 5 | `rhF`, `rhR` one step each way | bars 30/30 | 4 |
+
+Skip 3–5 if step 0 says those inputs do not move MB.
+
+### Step 2 — The same two sweeps on three more cars
+
+Sweeps 1 and 2 only, three points each (`arF`/`arR` = 1, 30, 65), on **W-low,
+W-high and F-low**. Twelve readings. This is what turns a curve fitted to one
+car into a function of the car.
+
+### The fit
+
+Candidate model, from the shape the app already assumes:
+
+```
+MB = kF / (kF + kR)     where k is roll stiffness per axle
+```
+
+Test whether MB is: a pure function of the bar pair; linear in slider value or
+in some derived rate; affected by the car's weight distribution independently
+of the sliders. The residuals tell you which.
+
+### Deliverables
+
+`tests/data/mb-<car>-<date>.json` per car, one `varied` key each. Then
+`MODEL.md` with the solved form. Then — and only then — `compute()` inverts it:
+given the target band, emit the bars that hit it, and print the predicted MB
+beside the ARB values so the in-game readout becomes a **check** rather than a
+discovery.
+
+### What this does NOT settle
+
+Whether **0.55–0.65 is the right target**. That band is a house number and
+solving MB does not test it — it only lets you hit it precisely. The target is
+a class-D question. Solving the function first is still right, because it makes
+the eventual driving test one variable instead of two.
+
+---
+
+## Phase 2 — Aero Balance (no driving, ~20 min)
+
+Same method, smaller. Sweep `aeF` at fixed `aeR` and vice versa, 5 points each,
+on the platform car and on one high-downforce car. Confirms whether AB is
+simply front downforce share, and whether the app's 0.42–0.48 band is even
+reachable with a slider pair on a given car — which is the failure mode worth
+catching, because the app currently prints that target regardless.
+
+---
+
+## Phase 3 — What the Performance panel can settle (no driving, ~90 min)
+
+Six figures per configuration, deterministic, about a second each: 0-60, 0-100,
+top speed, 60-0, 100-0, lateral G.
+
+### 3a — Brakes, fully objectively (~15 min)
+
+The cleanest experiment in the whole plan, because brake balance depends on
+**nothing but the tire-width delta** and the panel measures braking directly.
+
+Platform car, 5 balance points × 3 pressure points = 15 readings. The optimum
+is read straight off 60-0 and 100-0. This confirms or kills
+brake-bias-per-width-step (currently 1.5% per step, no source at all).
+
+Caveat to record with the result: the panel's braking figures are straight-line
+only. They cannot see trail-braking stability, which is what balance actually
+trades against — so this sets the floor and the `entry_us`/`entry_os` fix path
+still owns the rest.
+
+### 3b — Discipline signatures (~45 min)
+
+Parts fixed, only the tune changes, so this costs no shopping. Per car: the
+game's default tune as a control, then the app's tune for each tarmac
+discipline.
+
+**Tarmac only.** Dirt and cross-country tunes measured on the panel just look
+worse, because the panel is not testing them on dirt. That is the wrong
+instrument, not a finding.
 
 | tune | 0-60 | 0-100 | top speed | 60-0 | 100-0 | lateral G |
 |---|---|---|---|---|---|---|
@@ -254,47 +375,95 @@ Stat block entered: wt ______ · fw ______ · hp ______ · tq ______ · PI _____
 | app — Touge | | | | | | |
 | app — Drag | | | | | | |
 
-*(repeat this block per car — four in total)*
+Run on the platform car plus W-high and F-low — three cars, 15 configurations.
 
-## Write your predictions down BEFORE you read the panel
+**Write the expected ordering down before reading.** Drag should win 0-60 and
+top speed and lose lateral G and braking; touge the reverse; road best braking;
+sprint between road and drag. Drag is the most distinctive tune the app
+produces, so if it does not separate cleanly the discipline constants are not
+doing their job.
 
-This is the step that makes it a test rather than a story told afterwards. The
-app claims each discipline does something specific; the panel can check four of
-those claims. Expected ordering, from the constants currently in `DISC`:
+**The finding that matters most:** if the game's default tune beats the app
+outright in any column, across more than one car, that column's formulas are
+wrong. That is worth more than every ordering above.
 
-- **Drag** should win 0-60 and top speed, and lose lateral G and both braking
-  distances. It is the most distinctive tune the app produces — pressures
-  forced to 50/15, aero suppressed at both ends, decel lock 0 — so if drag does
-  *not* separate clearly from the others, the discipline constants are not
-  doing their job and that is the headline finding.
-- **Touge** should win lateral G and lose top speed (softest tarmac springs,
-  shortest gearing).
-- **Road** should take the best braking and sit mid-pack elsewhere.
-- **Sprint** should sit between Road and Drag on top speed.
-- **Every app tune should beat the game default on something.** If the default
-  wins a column outright across several cars, that column's formulas are wrong
-  — and that is worth knowing far more than any of the orderings above.
+### 3c — Diff accel lock (~30 min)
 
-Write the four orderings you expect in the margin, then read. Where the panel
-disagrees with the prediction, that is the row to chase.
+Panel 0-60 responds to launch, so accel lock can be swept objectively on an
+RWD and an AWD configuration: 5 lock settings each. Weaker than the telemetry
+version (Phase 5) but free, and it brackets the useful range before spending
+driving time.
 
-## What this can and cannot conclude
+---
 
-It can conclude: the discipline constants produce measurably different cars in
-the direction claimed; the gearing lands where it should; the app's tune beats
-doing nothing. Those are the claims currently resting on nothing.
+## Phase 4 — Cross-car generalisation (no driving, ~30 min)
 
-It cannot conclude anything about ARBs, damping or balance. Those need A2 —
-Mechanical Balance is a live readout that responds to the tune, which makes it
-solvable outright rather than measurable by proxy. That is the highest-value
-session in the backlog and it is 40 minutes standing still. **Do it after
-this**, because Session B will probably generate the motivation for it.
+Not a sweep — a check. Enter 10–12 varied cars, one build each, and confirm the
+Phase 1–3 conclusions still hold. Two cars minimum before a constant is treated
+as general is the standing rule; this is what makes the constants general rather
+than the platform car's.
 
-## Filing the results
+This is also where the **satellite pairs** pay off: W-low against W-high with
+front % matched isolates the weight term in `ab = 33 + (W−3000)×0.004`
+directly, which is otherwise buried.
 
-One JSON per car under `tests/data/`, named `tune-<car>-<yyyy-mm-dd>.json`,
-same shape as the GR86 gearing fixture: `car / class / pi / date / screen /
-build / rows`, with `varied: "disc"` and one row per configuration. Then a
-`disc.test.js` that asserts the measured orderings hold — the Layer 2
-signature matrix from `BACKLOG.md` B, with real numbers behind it instead of
-internal comparisons.
+---
+
+## Phase 5 — The driving sessions, in value order (hours)
+
+Only what genuinely cannot be read standing still.
+
+1. **Tire pressure against tire temperature** (~30 min per compound). Telemetry
+   reports per-corner temperature, so the target is directly observable: fixed
+   route, 3 laps at each of 5 pressures per axle, steady-state temp at lap end.
+   Sport and race slick first; dirt compounds last, the surface dominates.
+2. **Camber against inner/outer contact-patch temperature** (~30 min). Sweep 5
+   points per axle, find where inner and outer converge. This also gives the
+   `out_f`/`in_f` fix deltas a real slope instead of a flat 0.3°.
+3. **Diff lock via per-wheel speed** (~40 min). Fixed corner exit, 5 lock
+   settings, watch where the inner/outer driven-wheel difference collapses.
+4. **The MB target band.** Now a one-variable test: the function is solved, so
+   sweep MB itself across 0.50–0.70 and drive it.
+5. **Loose-surface `vFrac`.** Fixed route, best-of-5, all five recorded,
+   anything inside the spread of those five is no result.
+
+---
+
+## Sequencing and budget
+
+| phase | driving | rough time | converts |
+|---|---|---|---|
+| A (gearing) | no | 40 min | the axis, `SPREAD`, the speed constant |
+| 1 (MB) | no | 60 min | ARBs: tier 4 → solved function |
+| 2 (AB) | no | 20 min | aero balance: house band → reachability check |
+| 3 (panel) | no | 90 min | brakes, discipline signatures, diff bracket |
+| 4 (cross-car) | no | 30 min | one car's fit → general |
+| 5 (driving) | yes | hours | pressures, camber, diff, MB target, loose `vFrac` |
+
+**Roughly four hours standing still buys most of it.** That is the headline:
+the expensive driving work is the last 20% of the value, not the first.
+
+## Rules that keep the data worth having
+
+- **One variable per observation.** If two things moved, the row is discarded,
+  not interpreted.
+- **Type the number, never photograph it.** The 3.73 disaster came from
+  measuring gear-line spacing off a phone photo at an angle.
+- **Record raw readings, never conclusions.** The interpretation lives in the
+  analysis, where it can be revised without re-driving anything.
+- **Predictions before readings** wherever an ordering is expected.
+- **Every session ends with a committed fixture**, even one that changes
+  nothing. Confirming a constant is worth as much as overturning it, and worth
+  nothing if it is not written down.
+- **Promotion order, no exceptions:** fixture file with provenance → a test
+  asserting it independently of `compute()` → only then `compute()` changes,
+  with the date and the car in the comment above the constant.
+- **Two cars minimum** before a constant is treated as general.
+
+## Filing
+
+`tests/data/<topic>-<car>-<yyyy-mm-dd>.json`, schema as the GR86 gearing
+fixture. One `varied` key per file. Then one test file per topic asserting the
+fixture — `mb.test.js`, `brakes.test.js`, `disc.test.js` — each able to fail if
+the formula moves. A green suite after new measurements means the measurements
+were not wired to anything.
