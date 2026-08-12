@@ -1,0 +1,127 @@
+{
+  "_README": [
+    "Groups S, C, D — everything the Performance panel can settle. Copy to",
+    "panel-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "Six figures per configuration, deterministic, about a second each. ONE",
+    "VARIABLE PER ROW - every row names what it changed from the baseline. If",
+    "two things moved, the row is discarded, not interpreted.",
+    "",
+    "S1 IS THE IMPORTANT ONE. What the Top Speed readout responds to is what",
+    "the readout IS, and the app's oldest unresolved question rides on it:",
+    "Boston's reading is that it is the projected maximum with the whole build",
+    "aimed at top speed, but it moved 140.0 -> 144.4 across the GR86",
+    "final-drive sweep, so it is not independent of the tune either. Both",
+    "cannot be true as stated. The SET of inputs it moves with settles it.",
+    "",
+    "Do S3 before S2. If 0-60 barely moves between the worst and best tire,",
+    "the car is power-limited and S2's thirty minutes are not worth spending",
+    "on it."
+  ],
+
+  "car": "",
+  "class": "",
+  "pi": null,
+  "date": "",
+  "screen": "Performance panel",
+  "build": { "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+             "aero": "both", "tires": "", "twf": 0, "twr": 0,
+             "wt": null, "fw": null, "hp": null, "tq": null, "dt": "", "gears": null },
+
+  "baseline": {
+    "_note": "the app's road tune for this car — every S row returns here before changing one thing",
+    "fd": null, "aeF": null, "aeR": null, "pF": null, "pR": null,
+    "camF": null, "camR": null, "rhF": null, "rhR": null, "dfa": null, "dra": null
+  },
+
+  "S1_topSpeedRespondsTo": {
+    "_note": "S1 — vary ONE input, return to baseline, vary the next. Record Top Speed each time. The set that moves it defines what the number is.",
+    "rows": [
+      { "changed": "nothing (baseline)",        "topSpeed": null },
+      { "changed": "final drive -0.5",          "topSpeed": null },
+      { "changed": "final drive +0.5",          "topSpeed": null },
+      { "changed": "aero front to minimum",     "topSpeed": null },
+      { "changed": "aero front to maximum",     "topSpeed": null },
+      { "changed": "aero rear to minimum",      "topSpeed": null },
+      { "changed": "aero rear to maximum",      "topSpeed": null },
+      { "changed": "tire compound one step down", "topSpeed": null },
+      { "changed": "tire pressure +6 psi both",  "topSpeed": null },
+      { "changed": "ride height to maximum",     "topSpeed": null },
+      { "changed": "camber to zero both",        "topSpeed": null }
+    ]
+  },
+
+  "S3_tractionOrPowerLimited": {
+    "_note": "S3 — do this before S2. Big 0-60 change = traction-limited, the launch group matters. Small = power-limited, skip S2 on this car.",
+    "worstTire": { "compound": "", "s0_60": null, "s0_100": null },
+    "bestTire":  { "compound": "", "s0_60": null, "s0_100": null }
+  },
+
+  "S2_accelerationFactors": {
+    "_note": "S2 — one variable per row, all returning to baseline.",
+    "rows": [
+      { "changed": "nothing (baseline)",   "s0_60": null, "s0_100": null },
+      { "changed": "final drive -0.5",     "s0_60": null, "s0_100": null },
+      { "changed": "final drive +0.5",     "s0_60": null, "s0_100": null },
+      { "changed": "diff accel lock 0",    "s0_60": null, "s0_100": null },
+      { "changed": "diff accel lock 50",   "s0_60": null, "s0_100": null },
+      { "changed": "diff accel lock 100",  "s0_60": null, "s0_100": null },
+      { "changed": "tire pressure -6 psi", "s0_60": null, "s0_100": null },
+      { "changed": "tire pressure +6 psi", "s0_60": null, "s0_100": null },
+      { "changed": "weight reduction fitted", "s0_60": null, "s0_100": null }
+    ]
+  },
+
+  "S4_braking": {
+    "_note": "S4 — 5 balance points x 3 pressure points. The cleanest experiment in the catalogue: brake balance depends on nothing but wStep, and the panel measures braking directly. Tests brake-bias-per-width-step (currently 1.5% per step, no source at all).",
+    "rows": [
+      { "bal": 45, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 50, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 55, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 60, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 65, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 55, "pres": 75,  "s60_0": null, "s100_0": null },
+      { "bal": 55, "pres": 125, "s60_0": null, "s100_0": null }
+    ]
+  },
+
+  "S5_lateralGRespondsTo": {
+    "_note": "S5 — THE SLEEPER. If lateral G moves with camber and pressure and not just compound, a whole group of lap-times-only constants becomes measurable standing still. Ten minutes to find out.",
+    "rows": [
+      { "changed": "nothing (baseline)",     "lateralG": null },
+      { "changed": "ARB front to minimum",   "lateralG": null },
+      { "changed": "ARB front to maximum",   "lateralG": null },
+      { "changed": "spring front -30%",      "lateralG": null },
+      { "changed": "spring front +30%",      "lateralG": null },
+      { "changed": "camber front to 0",      "lateralG": null },
+      { "changed": "camber front to -5",     "lateralG": null },
+      { "changed": "tire pressure -6 psi",   "lateralG": null },
+      { "changed": "tire pressure +6 psi",   "lateralG": null }
+    ]
+  },
+
+  "C1_disciplineSignatures": {
+    "_note": "C1 — parts FIXED, only the tune changes, so this costs no shopping. Tarmac only: dirt and cross-country tunes on the panel just look worse because the panel is not testing them on dirt. Write the predicted ordering in `prediction` BEFORE reading.",
+    "prediction": "",
+    "rows": [
+      { "tune": "game default (control)", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — road",   "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — sprint", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — touge",  "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — drag",   "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null }
+    ]
+  },
+
+  "D3_awdCentreSplit": {
+    "_note": "D3 — AWD only. The app's neutral base moved 55 -> 60 on ForzaTune's band without ever being measured.",
+    "rows": [
+      { "dc": 40, "s0_60": null, "lateralG": null },
+      { "dc": 50, "s0_60": null, "lateralG": null },
+      { "dc": 60, "s0_60": null, "lateralG": null },
+      { "dc": 70, "s0_60": null, "lateralG": null },
+      { "dc": 85, "s0_60": null, "lateralG": null }
+    ]
+  },
+
+  "notes": ""
+}

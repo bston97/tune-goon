@@ -1,0 +1,61 @@
+{
+  "_README": [
+    "Group R — slider ranges. Copy to ranges-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "WHY THIS IS FIRST. The app emits spring rates as absolute lb/in and tells",
+    "the user the game clamps to the car's range if it is narrower",
+    "(index.html:1379, :2183). It never checks whether the clamp fired. An",
+    "asymmetric clamp - front pinned, rear not - destroys the F/R ratio the",
+    "whole spring model rests on, silently, on a screen the app cannot see.",
+    "",
+    "Fill `min` and `max` off the tuning menu by dragging each slider to each",
+    "end and reading the value. `appValue` is what the app printed for this car",
+    "on a road tune. Run: node tests/status.js"
+  ],
+
+  "car": "",
+  "class": "",
+  "date": "",
+  "screen": "tuning menu — slider extremes",
+  "build": { "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+             "aero": "both", "wt": null, "fw": null, "dt": "", "gears": null },
+
+  "case": "R1+R3",
+
+  "sliders": [
+    { "id": "spF",  "name": "Spring rate F",  "vmetaLo": 20,  "vmetaHi": 3000, "min": null, "max": null, "appValue": null },
+    { "id": "spR",  "name": "Spring rate R",  "vmetaLo": 20,  "vmetaHi": 3000, "min": null, "max": null, "appValue": null },
+    { "id": "arF",  "name": "ARB F",          "vmetaLo": 1,   "vmetaHi": 65,   "min": null, "max": null, "appValue": null },
+    { "id": "arR",  "name": "ARB R",          "vmetaLo": 1,   "vmetaHi": 65,   "min": null, "max": null, "appValue": null },
+    { "id": "reF",  "name": "Rebound F",      "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "reR",  "name": "Rebound R",      "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "buF",  "name": "Bump F",         "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "buR",  "name": "Bump R",         "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "camF", "name": "Camber F",       "vmetaLo": -10, "vmetaHi": 2,    "min": null, "max": null, "appValue": null },
+    { "id": "camR", "name": "Camber R",       "vmetaLo": -10, "vmetaHi": 2,    "min": null, "max": null, "appValue": null },
+    { "id": "toeF", "name": "Toe F",          "vmetaLo": -5,  "vmetaHi": 5,    "min": null, "max": null, "appValue": null },
+    { "id": "toeR", "name": "Toe R",          "vmetaLo": -5,  "vmetaHi": 5,    "min": null, "max": null, "appValue": null },
+    { "id": "cast", "name": "Caster",         "vmetaLo": 1,   "vmetaHi": 8,    "min": null, "max": null, "appValue": null },
+    { "id": "bal",  "name": "Brake balance",  "vmetaLo": 30,  "vmetaHi": 70,   "min": null, "max": null, "appValue": null },
+    { "id": "pres", "name": "Brake pressure", "vmetaLo": 50,  "vmetaHi": 150,  "min": null, "max": null, "appValue": null },
+    { "id": "dfa",  "name": "Diff front accel", "vmetaLo": 0, "vmetaHi": 100,  "min": null, "max": null, "appValue": null },
+    { "id": "dra",  "name": "Diff rear accel",  "vmetaLo": 0, "vmetaHi": 100,  "min": null, "max": null, "appValue": null },
+    { "id": "pF",   "name": "Tire psi F",     "vmetaLo": 10,  "vmetaHi": 55,   "min": null, "max": null, "appValue": null },
+    { "id": "pR",   "name": "Tire psi R",     "vmetaLo": 10,  "vmetaHi": 55,   "min": null, "max": null, "appValue": null }
+  ],
+
+  "R2_rangeByPartTier": {
+    "_note": "R2 — does the suspension tier move the spring range, or only unlock sliders? Same car, refit each tier.",
+    "street": { "spFmin": null, "spFmax": null, "spRmin": null, "spRmax": null },
+    "sport":  { "spFmin": null, "spFmax": null, "spRmin": null, "spRmax": null },
+    "race":   { "spFmin": null, "spFmax": null, "spRmin": null, "spRmax": null }
+  },
+
+  "R5_boundary": {
+    "_note": "R5 — type a spring rate below min and above max. What does the game do?",
+    "belowMin": "", "aboveMax": "",
+    "options": "clamps silently / refuses the entry / rounds to nearest legal"
+  },
+
+  "notes": ""
+}

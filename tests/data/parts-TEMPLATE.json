@@ -1,0 +1,101 @@
+{
+  "_README": [
+    "Group P — what parts actually change. Copy to parts-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "P1 is the gating matrix: fit each tier, open the tuning menu, tick which",
+    "sliders EXIST. This is the case where photos earn their keep, because it is",
+    "a list of what is present rather than a value to read.",
+    "",
+    "P1 also settles BACKLOG E4: the gate comment in index.html:1207 cites",
+    "Destructoid's slider guide as a traceable FH6 source while CLAUDE.md's",
+    "audit says no such source exists. Measuring the matrix makes the argument",
+    "moot either way.",
+    "",
+    "Use true / false. Leave null for a tier not tested."
+  ],
+
+  "car": "",
+  "date": "",
+  "screen": "tuning menu — which sliders exist",
+  "case": "P1",
+
+  "_expected": {
+    "_note": "What the app currently assumes (index.html:1215-1224). Two claims flagged as most likely wrong.",
+    "suspension": "race/rally/offroad -> springs + ride height + damping + alignment(incl caster); street/sport -> springs + ride height ONLY (SUSPECT); stock -> nothing",
+    "diff": "race+ -> accel + decel + AWD centre; street/sport -> accel ONLY (SUSPECT); stock -> nothing",
+    "arb": "race -> that end's bar, front and rear gated apart; stock -> nothing. NOTE the form offers no street/sport ARB tier at all",
+    "trans": "the form collapses Stock and Street into one option — if Street differs from Stock, a fourth option is needed"
+  },
+
+  "suspension": {
+    "stock":   { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "street":  { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "sport":   { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "race":    { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "rally":   { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "offroad": { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null }
+  },
+
+  "differential": {
+    "stock":   { "accel": null, "decel": null, "centre": null },
+    "street":  { "accel": null, "decel": null, "centre": null },
+    "sport":   { "accel": null, "decel": null, "centre": null },
+    "race":    { "accel": null, "decel": null, "centre": null },
+    "drift":   { "accel": null, "decel": null, "centre": null },
+    "rally":   { "accel": null, "decel": null, "centre": null },
+    "offroad": { "accel": null, "decel": null, "centre": null }
+  },
+
+  "antirollBars": {
+    "stock":  { "frontBar": null, "rearBar": null },
+    "street": { "frontBar": null, "rearBar": null, "_exists": "does a street ARB tier exist to buy at all?" },
+    "sport":  { "frontBar": null, "rearBar": null, "_exists": "same question" },
+    "race":   { "frontBar": null, "rearBar": null },
+    "_frontRearSeparate": null
+  },
+
+  "transmission": {
+    "stock":  { "finalDrive": null, "individualGears": null },
+    "street": { "finalDrive": null, "individualGears": null },
+    "sport":  { "finalDrive": null, "individualGears": null },
+    "race":   { "finalDrive": null, "individualGears": null }
+  },
+
+  "aero": {
+    "none":  { "frontSlider": null, "rearSlider": null },
+    "front": { "frontSlider": null, "rearSlider": null },
+    "rear":  { "frontSlider": null, "rearSlider": null },
+    "both":  { "frontSlider": null, "rearSlider": null }
+  },
+
+  "P2_statBlockEffect": {
+    "_note": "P2 — fit ONE part, record the stat block after. This is what makes 'hold everything else' achievable in every later case.",
+    "rows": [
+      { "part": "baseline, nothing fitted", "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "front aero",      "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "rear aero",       "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "race suspension", "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "weight reduction stage 1", "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "tire compound -> sport",   "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "tire width +1 front",      "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "tire width +1 rear",       "wt": null, "fw": null, "pi": null, "hp": null, "tq": null }
+    ]
+  },
+
+  "P3_P4_gripEffect": {
+    "_note": "P3/P4 — what compound and width actually buy. The app moves ONLY brake balance on width (wStep = twr - twf), so 0/0 and 3/3 give an identical tune. If width changes grip or braking measurably, that is a formula the app does not have.",
+    "rows": [
+      { "change": "compound stock",  "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound street", "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound sport",  "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound semi",   "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound slick",  "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 0/0",       "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 3/3",       "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 0/3",       "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 3/0",       "lateralG": null, "s60_0": null, "s100_0": null }
+    ]
+  },
+
+  "notes": ""
+}
