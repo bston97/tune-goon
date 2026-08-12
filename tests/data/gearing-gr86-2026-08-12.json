@@ -1,0 +1,94 @@
+{
+  "_README": [
+    "Second GR86 build, read 2026-08-12. NOT the July car — same chassis, a",
+    "completely different build: AWD swap, semi-slick tires at maximum width,",
+    "2,428 lb against 2,900, 290 hp / 303 lb-ft against 350 / 260. It is a",
+    "separate fixture rather than an edit of gearing-gr86-2026-07-31.json for",
+    "exactly that reason. Two builds, both recorded, is what the old data",
+    "failed to do.",
+    "",
+    "Everything here is off one screen photograph of the GEARING tab, which is",
+    "digits only and so within the photo protocol. NOTHING POSITIONAL WAS TAKEN",
+    "FROM THE IMAGE. The axis maximum is a printed label, not a measurement off",
+    "the chart; the fit and the gear endpoints are positions and are therefore",
+    "still null, to be read live off the screen and typed."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — GEARING tab, with the Performance panel alongside",
+
+  "build": {
+    "tires": "semi-slick",
+    "susp": "race",
+    "arb": "both",
+    "diff": "race",
+    "trans": "race",
+    "aero": "both",
+    "twf": 3,
+    "twr": 3,
+    "twNote": "reported as the maximum width the car allows, front and rear. Recorded as +3 because CLAUDE.md has FH6 widths running stock to +3; confirm the actual step count on the upgrade screen.",
+    "gears": 7,
+    "wt": 2428,
+    "fw": 54,
+    "hp": 290,
+    "tq": 303,
+    "dt": "AWD",
+    "dtNote": "DRIVETRAIN SWAP. The GR86 is RWD stock, so this build carries an AWD conversion — which also confirms drivetrain swaps exist in FH6, the assumption the SAT-DT satellite slot rests on."
+  },
+
+  "held": {
+    "ratios": [2.92, 2.05, 1.60, 1.30, 1.10, 0.95, 0.82],
+    "ratiosNote": "Read off this screen and IDENTICAL to both SPREAD[7] and the July build's ratios. Boston's read was that they looked edited; they are not — this is the game's own 7-speed race-box default set, now confirmed on two separate builds of the car. SPREAD[7] stands."
+  },
+
+  "varied": "none — single configuration, one reading of each",
+
+  "rows": [
+    {
+      "fd": 4.56,
+      "s60": 3.333,
+      "s100": 9.000,
+      "top": 139.9,
+      "brake60_0": 67.1,
+      "brake100_0": 151.8,
+      "lateralG60": 1.26,
+      "lateralG120": 1.42,
+      "mechBalance": 0.51,
+      "aeroBalance": 0.45,
+      "aeroEfficiency": 0.741
+    }
+  ],
+
+  "readings": {
+    "axisMax": 157,
+    "axisMaxNote": "Read cold off the bottom axis of the gearing graph before the two candidates were looked at, which is what case G1 asks for. It agrees with sweep.test.js's literal and disagrees with gearing.test.js's 159 — but ON A DIFFERENT BUILD from the one those literals came from, so it does not settle E2 by itself. What settles E2 is G3: whether the axis moves with the build at all.",
+    "axisMidLabel": 78,
+    "axisMidLabelNote": "The axis also prints a midpoint label at 78. 157/2 = 78.5, so the axis is linear and evenly divided — a free cross-check on the assumption every gear-speed calculation makes.",
+    "fit": null,
+    "fitNote": "UNREAD. The final drive at which the top gear's line just touches the right-hand edge. This is a POSITION on a chart, so it cannot be taken from the photograph — it gets swept live and typed. Without it there is no k for this build.",
+    "gearEndpoints": null,
+    "gearEndpointsAtFd": null,
+    "gearEndpointsNote": "UNREAD, and positional for the same reason. With the fit, these are what test k/(FD*G) on this build."
+  },
+
+  "panelNotes": [
+    "THE PERFORMANCE PANEL PRINTS MORE THAN THE REPO ASSUMED. TESTS.md group S",
+    "is written around six figures; this screen shows eight, and two of them",
+    "are split by speed:",
+    "  - lateral G at BOTH 60 and 120 mph, not one figure",
+    "  - braking from BOTH 60 and 100 mph (already assumed)",
+    "  - Aero Efficiency, 0.741 — a readout that appears NOWHERE in this repo",
+    "",
+    "Aero Efficiency matters more than the others. It is a live number that",
+    "responds to the tune, which by the Session B classification makes it class",
+    "A — solvable by algebra rather than lap times — and it sits next to Aero",
+    "Balance, which case A3 is already about. If it is downforce-over-drag then",
+    "it is the missing objective for every aero decision the app currently makes",
+    "by house heuristic."
+  ],
+
+  "notes": "Mechanical Balance 0.51 and Aero Balance 0.45 are real readouts on this build. AB sits inside the app's 0.42-0.48 target band; MB sits BELOW the app's 0.55-0.65 target. Neither is usable in the balance solve as recorded, because the ARB and wing slider values in effect at the time were not read — a balance readout without the sliders that produced it is an observation with no x-axis. Read arF/arR and aeF/aeR next time the car is on this screen."
+}
