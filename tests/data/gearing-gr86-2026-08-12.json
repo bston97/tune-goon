@@ -7,11 +7,14 @@
     "exactly that reason. Two builds, both recorded, is what the old data",
     "failed to do.",
     "",
-    "Everything here is off one screen photograph of the GEARING tab, which is",
-    "digits only and so within the photo protocol. NOTHING POSITIONAL WAS TAKEN",
-    "FROM THE IMAGE. The axis maximum is a printed label, not a measurement off",
-    "the chart; the fit and the gear endpoints are positions and are therefore",
-    "still null, to be read live off the screen and typed."
+    "Six configurations, final drive the only variable, no driving — every",
+    "figure is Performance panel output off a screen photograph, which is",
+    "digits and so within the photo protocol.",
+    "",
+    "NOTHING POSITIONAL WAS TAKEN FROM AN IMAGE. The axis maximum is a printed",
+    "label. The fit is Boston's own on-screen reading, swept live. The graph in",
+    "the photographs is ~250 px wide for 157 mph — one pixel is 0.6 mph — so",
+    "judging where a line lands from it would be the 3.73 error exactly."
   ],
 
   "car": "2022 Toyota GR86",
@@ -44,51 +47,126 @@
     "ratiosNote": "Read off this screen and IDENTICAL to both SPREAD[7] and the July build's ratios. Boston's read was that they looked edited; they are not — this is the game's own 7-speed race-box default set, now confirmed on two separate builds of the car. SPREAD[7] stands."
   },
 
-  "varied": "none — single configuration, one reading of each",
+  "varied": "fd",
 
   "rows": [
-    {
-      "fd": 4.56,
-      "s60": 3.333,
-      "s100": 9.000,
-      "top": 139.9,
-      "brake60_0": 67.1,
-      "brake100_0": 151.8,
-      "lateralG60": 1.26,
-      "lateralG120": 1.42,
-      "mechBalance": 0.51,
-      "aeroBalance": 0.45,
-      "aeroEfficiency": 0.741
-    }
+    { "fd": 4.60, "s60": 3.333, "s100": 9.000, "top": 139.7, "brake60_0": 67.3, "brake100_0": 152.0, "lateralG60": 1.26, "lateralG120": 1.42, "mechBalance": 0.51, "aeroBalance": 0.45, "aeroEfficiency": 0.741 },
+    { "fd": 4.58, "s60": 3.333, "s100": 8.983, "top": 139.5, "brake60_0": 67.1, "brake100_0": 151.8, "lateralG60": 1.26, "lateralG120": 1.42, "mechBalance": 0.51, "aeroBalance": 0.45, "aeroEfficiency": 0.741 },
+    { "fd": 4.57, "s60": 3.333, "s100": 9.000, "top": 139.9, "brake60_0": 67.1, "brake100_0": 151.8, "lateralG60": 1.26, "lateralG120": 1.42, "mechBalance": 0.51, "aeroBalance": 0.45, "aeroEfficiency": 0.741 },
+    { "fd": 4.56, "s60": 3.333, "s100": 9.000, "top": 139.9, "brake60_0": 67.1, "brake100_0": 151.8, "lateralG60": 1.26, "lateralG120": 1.42, "mechBalance": 0.51, "aeroBalance": 0.45, "aeroEfficiency": 0.741 },
+    { "fd": 4.00, "s60": 3.367, "s100": 8.867, "top": 139.6, "brake60_0": 67.2, "brake100_0": 151.9, "lateralG60": 1.26, "lateralG120": 1.42, "mechBalance": 0.51, "aeroBalance": 0.45, "aeroEfficiency": 0.741 },
+    { "fd": 3.50, "s60": 3.500, "s100": 8.883, "top": 139.2, "brake60_0": 68.0, "brake100_0": 152.8, "lateralG60": 1.26, "lateralG120": 1.42, "mechBalance": null, "aeroBalance": null, "aeroEfficiency": null,
+      "rowNote": "The three Miscellaneous readouts said SIMULATING... when this shot was taken, so they are null rather than carried over from the previous row. See protocolNotes." }
   ],
 
   "readings": {
     "axisMax": 157,
-    "axisMaxNote": "Read cold off the bottom axis of the gearing graph before the two candidates were looked at, which is what case G1 asks for. It agrees with sweep.test.js's literal and disagrees with gearing.test.js's 159 — but ON A DIFFERENT BUILD from the one those literals came from, so it does not settle E2 by itself. What settles E2 is G3: whether the axis moves with the build at all.",
+    "axisMaxNote": "Read cold off the bottom axis before the two candidates were looked at, which is what case G1 asks for.",
     "axisMidLabel": 78,
-    "axisMidLabelNote": "The axis also prints a midpoint label at 78. 157/2 = 78.5, so the axis is linear and evenly divided — a free cross-check on the assumption every gear-speed calculation makes.",
-    "fit": null,
-    "fitNote": "UNREAD. The final drive at which the top gear's line just touches the right-hand edge. This is a POSITION on a chart, so it cannot be taken from the photograph — it gets swept live and typed. Without it there is no k for this build.",
+    "axisMidLabelNote": "The axis also prints a midpoint label at 78, and 157/2 = 78.5, so the axis is linear and evenly divided — the assumption every gear-speed calculation makes, never previously checked.",
+
+    "fit": 4.57,
+    "fitNote": "Boston's own reading, swept live on the screen: the final drive at which the top gear's line just reaches the right-hand edge. Deliberately NOT re-judged from the photographs.",
+
+    "axisVsGearing": "unchanged",
+    "axisVsGearingNote": "CASE G2, ANSWERED. The axis label stayed 157 across every final drive from 3.50 to 4.60. The axis is not a function of the gearing.",
+
+    "axisVsParts": "moves",
+    "axisVsPartsNote": "CASE G3, ANSWERED by Boston's own standing observation: the only thing he has ever seen move that number is changing parts and coming back. So the axis IS a property of the build, not of the car alone — which is the mechanism E2 needed, and it means every axis reading must be filed with the build that produced it. This fixture and the July one are two different builds and are correctly two files.",
+
     "gearEndpoints": null,
-    "gearEndpointsAtFd": null,
-    "gearEndpointsNote": "UNREAD, and positional for the same reason. With the fit, these are what test k/(FD*G) on this build."
+    "gearEndpointsNote": "Not read. Positional, so it needs the live screen; the derived table below is what they would be checked against."
   },
 
-  "panelNotes": [
-    "THE PERFORMANCE PANEL PRINTS MORE THAN THE REPO ASSUMED. TESTS.md group S",
-    "is written around six figures; this screen shows eight, and two of them",
-    "are split by speed:",
-    "  - lateral G at BOTH 60 and 120 mph, not one figure",
-    "  - braking from BOTH 60 and 100 mph (already assumed)",
-    "  - Aero Efficiency, 0.741 — a readout that appears NOWHERE in this repo",
+  "derived": {
+    "_note": "COMPUTED, NOT MEASURED. Kept separate from `readings` so the two can never be confused. k = axisMax * fit * topRatio, then per-gear limiter speed = k/(FD*G).",
+    "k": 588.3,
+    "kNote": "157 * 4.57 * 0.82 = 588.34.",
+
+    "kJulyIfAxis157": 589.0,
+    "kJulyIfAxis159": 596.5,
+    "eraseTheDisagreement": [
+      "THIS IS THE E2 RESULT, AND IT IS AN ARGUMENT RATHER THAN A DIRECT READ.",
+      "",
+      "July recorded fit 4.575 with the axis as either 157 or 159. Today, on a",
+      "build that shares almost nothing with it — AWD instead of RWD, 472 lb",
+      "lighter, 60 hp down, different tire compound and width — the fit came",
+      "back 4.57 and the axis read 157.",
+      "",
+      "  k today            = 157 * 4.570 * 0.82 = 588.3",
+      "  k July, axis 157   = 157 * 4.575 * 0.82 = 589.0   (0.1% apart)",
+      "  k July, axis 159   = 159 * 4.575 * 0.82 = 596.5   (1.4% apart)",
+      "",
+      "Two builds this different landing on the same fit to 0.1% is what makes",
+      "157 the reading that survives. 159 requires the constant to have moved",
+      "1.4% and then moved back.",
+      "",
+      "WHAT STILL ARGUES FOR 159, and why this is not closed: the July file's",
+      "fifthAtFd373 = 145.4 fits k = 596.5 exactly and misses by 2.0 mph at",
+      "k = 588.3. That number is only evidence if it was read off the screen",
+      "rather than back-computed from 159 at the time — which is exactly what",
+      "the July file already flags and nobody can now establish. Under G3 above",
+      "there is also a legitimate escape: the July build was a DIFFERENT build,",
+      "so its k is allowed to differ from today's.",
+      "",
+      "The decisive experiment, if a GR86 with enough power to hit a limiter is",
+      "ever built: gear it short enough to be rev-limited in a middle gear and",
+      "compare the Top Speed readout against k/(FD*G). That is the one case",
+      "where the readout and the model must agree exactly."
+    ],
+
+    "gearSpeedsAtFit": {
+      "_note": "limiter speed per gear at the fit, fd 4.57, k 588.3. 7th = 157 by construction — that IS the fit.",
+      "1": 44.1, "2": 62.8, "3": 80.5, "4": 99.0, "5": 117.0, "6": 135.5, "7": 157.0
+    },
+
+    "whichGearTheCarActuallyReaches": [
+      "Measured top speed is ~139.9, and that is what decides whether a ratio",
+      "does any work. Compare it against the gear BELOW the top one:",
+      "",
+      "  fd 4.57 (the fit): 6th runs out at 135.5, top speed 139.9 — so the car",
+      "                     shifts into 7th and uses it. ALL SEVEN GEARS ENGAGE.",
+      "  fd 4.00:           6th runs out at 154.8, top speed 139.6 — the car",
+      "                     never leaves 6th. 7TH IS DEAD.",
+      "  fd 3.50:           5th runs out at 152.8, top speed 139.2 — the car",
+      "                     never leaves 5th. 6TH AND 7TH ARE DEAD.",
+      "",
+      "This reproduces, on a completely different build, the exact argument the",
+      "July sweep used to set vFrac = 1.00 for road: the flat part of the",
+      "performance surface is broad, and what breaks the tie is that gearing at",
+      "the fit is the only setting where every ratio you paid PI for is used."
+    ],
+
+    "theTensionWorthRecording": [
+      "It is not free, though, and this build makes the cost bigger than July's.",
+      "0-100 is best at fd 4.00 (8.867) and the fit costs 0.133 s against it",
+      "(9.000). July's equivalent gap was 0.035 s. 0-60 goes the other way and",
+      "favours the short end (3.333 at 4.56-4.60 against 3.500 at 3.50).",
+      "",
+      "So on this car the honest statement is: gear at the fit and you use the",
+      "whole gearbox and give up ~0.13 s to 100; gear at 4.00 and you take the",
+      "0.13 s and carry a dead 7th. vFrac = 1.00 stands, but the app should not",
+      "pretend the choice is free."
+    ]
+  },
+
+  "protocolNotes": [
+    "TWO METHOD FINDINGS FROM THIS SITTING, both worth more than a single row.",
     "",
-    "Aero Efficiency matters more than the others. It is a live number that",
-    "responds to the tune, which by the Session B classification makes it class",
-    "A — solvable by algebra rather than lap times — and it sits next to Aero",
-    "Balance, which case A3 is already about. If it is downforce-over-drag then",
-    "it is the missing objective for every aero decision the app currently makes",
-    "by house heuristic."
+    "1. THE PANEL SAYS 'SIMULATING...' WHILE IT RECOMPUTES. Caught at fd 3.50,",
+    "   where the three Miscellaneous readouts had not settled when the shot",
+    "   was taken. So a reading can be STALE, and the repo's standing claim that",
+    "   panel figures 'carry no run-to-run variance' is true only once they have",
+    "   settled. New rule: nothing on the screen may say SIMULATING when a row",
+    "   is recorded.",
+    "",
+    "2. TOP SPEED IS NOT MONOTONIC IN THE FINAL DRIVE at this resolution:",
+    "   4.56 -> 139.9, 4.57 -> 139.9, 4.58 -> 139.5, 4.60 -> 139.7. That is a",
+    "   non-monotonic wiggle of 0.4 mph across settings 0.04 apart, so 0.4 mph",
+    "   is at or below the readout's own noise floor and top-speed differences",
+    "   under ~0.5 mph are not results. The app must not quote precision the",
+    "   readout does not have."
   ],
 
-  "notes": "Mechanical Balance 0.51 and Aero Balance 0.45 are real readouts on this build. AB sits inside the app's 0.42-0.48 target band; MB sits BELOW the app's 0.55-0.65 target. Neither is usable in the balance solve as recorded, because the ARB and wing slider values in effect at the time were not read — a balance readout without the sliders that produced it is an observation with no x-axis. Read arF/arR and aeF/aeR next time the car is on this screen."
+  "notes": "Two free controls came out of the sweep. LATERAL G IS COMPLETELY INSENSITIVE TO GEARING — 1.26 at 60 and 1.42 at 120 on all six rows — which is what makes it usable as a grip instrument later (case S5) without holding the final drive. BRAKING IS NOT: 60-0 moved 67.1 -> 68.0 ft and 100-0 moved 151.8 -> 152.8 between fd 4.56 and fd 3.50, presumably engine braking, so the brake work in case S4 must hold the final drive fixed or it will be measuring gearing. Mechanical Balance 0.51 and Aero Balance 0.45 held across every row, confirming they do not respond to gearing, but both remain unusable in the balance solve until the ARB and wing slider values that produced them are read."
 }
