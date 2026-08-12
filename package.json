@@ -4,7 +4,9 @@
   "description": "FH6 tuning calculator, fine-tune loop, build planner and library — single-file, no build step.",
   "private": true,
   "scripts": {
-    "test": "node tests/run.js"
+    "test": "node tests/run.js",
+    "status": "node tests/status.js",
+    "fit": "node tests/fit-balance.js"
   },
   "repository": "github:bston97/forza-tune-goon",
   "license": "UNLICENSED"

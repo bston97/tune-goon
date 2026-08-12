@@ -12,9 +12,7 @@ Live at **https://bston97.github.io/forza-tune-goon/**.
 **The project is Forza Tune Goon; the page heading is not.** The repo, URL, PWA
 name and docs all say Forza Tune Goon, but the `<h1>` still reads "FH6 Tune
 Builder" and the exported sheet still says "Forza Horizon 6 · Tune Sheet" —
-that is deliberate, asked for directly, not something left half-renamed. The
-local working directory is still `Forza Tune Builder`; renaming it is safe but
-has to happen outside a session, since it is the cwd.
+that is deliberate, asked for directly, not something left half-renamed.
 
 Renamed from **Tune Goon** on 2026-08-08 (repo slug `tune-goon` →
 `forza-tune-goon`, so the Pages URL moved with it). GitHub redirects the old
@@ -30,12 +28,15 @@ not a deliberate exception.
 node tests/run.js
 ```
 
-381+ assertions across thirteen files, plus a 684-build structural sweep, a
+**532 assertions across sixteen files**, plus a 684-build structural sweep, a
 2,304-combination render/export sweep over every gated-part combination, and a
 monotonicity sweep. Exits non-zero on any failure or crash — safe to use as a
 gate. See `tests/shim.js` for how a plain-Node DOM shim runs the app's real
 `<script>` block with no browser; see any `tests/*.test.js` for the pattern
 (`ok(label, condition, extraInfoIfFailed)`).
+
+`run.js` only collects `*.test.js`. Two other scripts live in `tests/` and are
+run by hand, never as part of the gate — see the measurement program below.
 
 **What the tests do NOT catch:** calibration drift. A change that shifts every
 ARB value by 10x still passes the stress sweep, because that sweep only checks
@@ -44,6 +45,44 @@ rebound) — not "is this the right number." There is no automated check against
 the community baselines (HokiHoshi's axle-share method, ForzaTune's documented
 FH6 bands). If you touch a formula in the `compute()` function, sanity-check
 the output against a few real cars by hand, not just the test suite.
+
+## The measurement program — read this before touching any constant
+
+Started 2026-08-12. **Nothing has been measured yet.** Every constant in
+`compute()` is still a house heuristic or FH4/FH5 carry-over (see the tier list
+further down), and the green suite proves *structure*, not calibration — it
+would pass just as happily with every ARB off by 10×.
+
+Three documents and three tools:
+
+| file | what it is |
+|---|---|
+| **`TESTS.md`** | the master catalogue — every case across every subsystem, the car-selection reasoning, the photo protocol, and the suggested order |
+| **`MEASURE.md`** | fill-in working sheets for the sessions in flight (Session A gearing, Session B the reverse-engineering plan) |
+| `tests/data/*.json` | measured fixtures, one per car per session, plus `*-TEMPLATE.json` scaffolds to copy |
+| `node tests/status.js` | coverage report — which cases have real numbers, which have somewhere to type, which are still design |
+| `node tests/fit-balance.js <fixture>` | solves a Mechanical/Aero Balance sweep against five candidate models and says which the data rules out |
+| `tests/data/index.js` | shared fixture loader, so two test files can never again disagree about the same reading |
+
+**The organising idea is a classification, not a car list.** Every constant sits
+in one of four classes by *what in the game responds to it*: a live readout
+(Mechanical/Aero Balance — solvable outright, it is algebra not calibration),
+the Performance panel (objective, no driving), telemetry (driving), or nothing
+short of lap times. Push each constant as far up that table as it goes and
+spend driving time only on what is genuinely stuck. `TESTS.md` opens with this.
+
+**Promotion order, no exceptions.** Fixture file with provenance → a test that
+asserts it independently of `compute()` → only then `compute()` changes, with
+the date and the car in the comment above the constant. **Two cars minimum**
+before a constant is treated as general — that is the lesson `vFrac` taught
+twice. And a green suite after new measurements means the measurements were
+not wired to anything.
+
+**The fixtures are built to fail informatively.** `tests/data/index.js` returns
+a caller's historical literal while a reading is unresolved and prints an
+`[UNRESOLVED]` line; filling the number in switches every consumer at once and
+fails whichever assertion was tuned to the other value. That failure is the
+mechanism, not a problem.
 
 ## Three modes, chosen before anything is typed
 

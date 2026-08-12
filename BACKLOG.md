@@ -582,9 +582,11 @@ other than Boston opens a PR.
   push to `main` and on PRs. This is the highest-value file in the section:
   the whole "run the tests before and after every change" discipline currently
   depends on remembering.
-- **`.gitattributes`** — Windows working copy, single HTML file that
-  everything diffs against. `* text=auto eol=lf` prevents a stray CRLF commit
-  turning into a 2,796-line diff.
+- **`.gitattributes`** — **DONE 2026-08-12**, ahead of the first measurement
+  session being run from the Windows box. Windows working copy, single HTML
+  file that everything diffs against; `* text=auto eol=lf` prevents a stray
+  CRLF commit turning into a 2,796-line diff, and the image extensions are
+  marked binary so git never tries to normalise them.
 - **`.github/ISSUE_TEMPLATE/calibration.yml`** — the project-specific one, and
   genuinely useful. A form that requires the stat block (car, year, class,
   discipline, weight, front %, hp, torque, drivetrain, gears, part tiers), the
@@ -809,9 +811,11 @@ real contradiction in the reference data and should be settled before anyone
 leans on the gearing constant again, and E4 is the same species of defect in
 the provenance record.
 
-### E1 — CLAUDE.md undercounts the test suite
+### E1 — CLAUDE.md undercounts the test suite — **DONE 2026-08-12**
 
-CLAUDE.md line 33 says "381+ assertions across thirteen files." Actual, as of
+Fixed: now reads "532 assertions across sixteen files."
+
+CLAUDE.md line 33 said "381+ assertions across thirteen files." Actual, as of
 2026-08-08: **532 assertions across sixteen files** (`arb`, `find`, `gates`,
 `gearing`, `locked`, `modes`, `mono`, `pi`, `planyear`, `review2`, `scan`,
 `smoke2`, `smoke3`, `stock`, `stress`, `sweep`). Just stale — update the number
@@ -883,7 +887,9 @@ the 1.3% disagreement stops being the only difference between them. Settle the
 axis, put `FIT`, `AXIS` and the top ratio in one dated fixture, and have both
 files import it.
 
-### E3 — CLAUDE.md says the working directory has not been renamed. It has.
+### E3 — CLAUDE.md says the working directory has not been renamed. It has. — **DONE 2026-08-12**
+
+Fixed: the sentence is deleted.
 
 Lines 15–17: "The local working directory is still `Forza Tune Builder`;
 renaming it is safe but has to happen outside a session, since it is the cwd."

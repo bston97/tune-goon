@@ -1,0 +1,12 @@
+# Normalise line endings on commit. The working copy is Windows and the whole
+# app is one 2,796-line index.html that every diff lands in — a single CRLF
+# round-trip would rewrite all of it and bury a real change in noise. Git
+# stores LF; checkout still gets whatever the platform wants.
+* text=auto eol=lf
+
+# Binary, so git never tries to normalise or diff them as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.webp binary
