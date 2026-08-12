@@ -53,6 +53,16 @@
   },
 
   "aeroBalanceSolved": [
+    "*** WITHDRAWN THE SAME DAY. THIS SECTION IS WRONG. See",
+    "*** balance-ab-gr86-2026-08-12.json -> aeroBalanceNotSolved.",
+    "*** A second point (F 190, R 290) predicts 0.396 and measures 0.42, which",
+    "*** is five times the rounding window. There IS a bodyshell term, case A1",
+    "*** predicted it, and this section talked it away on a single point.",
+    "*** Kept unedited below because the error is the lesson: 0.4502 against a",
+    "*** printed 0.45 is NOT a four-decimal match — AB prints to two decimals,",
+    "*** so anything in [0.445,0.455] shows as 0.45. A 2-dp readout cannot",
+    "*** confirm a model to 4 dp.",
+    "",
     "AERO BALANCE IS FRONT DOWNFORCE OVER TOTAL DOWNFORCE, IN POUNDS.",
     "",
     "  190 / (190 + 232) = 0.45024   ->  screen prints 0.45",
