@@ -1,0 +1,157 @@
+{
+  "_README": [
+    "The Mechanical Balance sweep, MEASURE.md Phase 1, on the GR86. One variable",
+    "per row: bars moved alone, then the front spring moved alone.",
+    "",
+    "FOUR ROWS SETTLED AND THEY GIVE MB A SHAPE. Two were photographed while the",
+    "panel still said SIMULATING and are recorded as null — see lostRows, which",
+    "is the protocol rule earning its place on the day it was written."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — ANTIROLL BARS and SPRINGS tabs",
+  "readout": "mb",
+  "varied": "arF/arR, then spF",
+
+  "build": {
+    "tires": "semi-slick", "susp": "race", "arb": "both", "diff": "race",
+    "trans": "race", "aero": "both", "twf": 3, "twr": 3, "gears": 7,
+    "wt": 2428, "fw": 54, "hp": 290, "tq": 303, "dt": "AWD"
+  },
+
+  "baseline": {
+    "spF": 468.1, "spR": 374.9, "rhF": 4.2, "rhR": 4.4, "pF": 31.5, "pR": 31.5,
+    "note": "the app's tune. Pressure was returned to 31.5 before this sweep and held, which matters — it moves MB.",
+    "fdNote": "the final drive was left near 4.51 from the fit sweep rather than the app's 4.34. Irrelevant to MB, which did not move with gearing at any point today, but recorded so the panel columns are not compared against earlier rows."
+  },
+
+  "rows": [
+    { "n": 1, "purpose": "SYMMETRY — equal bars", "arF": 30, "arR": 30, "spF": 468.1, "spR": 374.9, "mb": null,
+      "rowNote": "photographed while Mech. Balance still read SIMULATING. Re-read as row 4, which is the same setting." },
+
+    { "n": 2, "purpose": "SAME-RATIO PAIR (a) — 1:2 at low magnitude", "arF": 20, "arR": 40, "spF": 468.1, "spR": 374.9, "mb": null,
+      "rowNote": "also caught mid-SIMULATING. THIS IS THE ONE THAT HURTS — it is half of the pair that separates a pure ratio from an additive term." },
+
+    { "n": 3, "purpose": "BARS, strongly rear-biased. 80 is past the slider maximum so 65 was used", "arF": 40, "arR": 65, "spF": 468.1, "spR": 374.9, "mb": 0.55,
+      "s60": 3.333, "s100": 8.967, "top": 140.4, "brake60_0": 68.2, "brake100_0": 153.0, "lateralG60": 1.26, "lateralG120": 1.42 },
+
+    { "n": 4, "purpose": "SYMMETRY, re-read and settled — the control for rows 3, 5 and 6", "arF": 30, "arR": 30, "spF": 468.1, "spR": 374.9, "mb": 0.51,
+      "s60": 3.333, "s100": 8.967, "top": 140.1, "brake60_0": 68.1, "brake100_0": 152.9, "lateralG60": 1.26, "lateralG120": 1.42 },
+
+    { "n": 5, "purpose": "SPRINGS — front softened, bars held at 30/30", "arF": 30, "arR": 30, "spF": 328.1, "spR": 374.9, "mb": 0.55,
+      "s60": 3.333, "s100": 8.967, "top": 140.4, "brake60_0": 68.4, "brake100_0": 153.2, "lateralG60": 1.26, "lateralG120": 1.42,
+      "rowNote": "bars not visible in this screenshot (SPRINGS tab); 30/30 is assumed from the instruction and from row 4 immediately preceding." },
+
+    { "n": 6, "purpose": "SPRINGS — front stiffened, bars held at 30/30", "arF": 30, "arR": 30, "spF": 608.1, "spR": 374.9, "mb": 0.48,
+      "s60": 3.333, "s100": 8.967, "top": 140.5, "brake60_0": 66.6, "brake100_0": 151.4, "lateralG60": 1.26, "lateralG120": 1.42,
+      "rowNote": "same assumption on the bars." }
+  ],
+
+  "whatMBActuallyIs": [
+    "MECHANICAL BALANCE IS THE REAR AXLE'S SHARE OF ROLL STIFFNESS, and both the",
+    "bars and the springs are in it. The direction is unambiguous across four",
+    "settled rows:",
+    "",
+    "  bars   30/30 -> 0.51     40/65 -> 0.55     stiffer REAR bar   -> MB UP",
+    "  springs  328 -> 0.55       468 -> 0.51       608 -> 0.48",
+    "                                              stiffer FRONT spring -> MB DOWN",
+    "",
+    "Both say the same thing: MB rises as the rear gets relatively stiffer. It",
+    "is NOT front-over-total. Every model in MEASURE.md Phase 1 was written as",
+    "front-over-total — M1 through M5 all have the form F/(F+R) — so the whole",
+    "candidate list was the right shape upside down.",
+    "",
+    "WHY THE EARLIER ONE-ROW GUESSES BOTH FAILED, now visible: bars-only fitted",
+    "the app row and springs-only fitted the default row because each was",
+    "reading the front share of ONE component of a quantity that has at least",
+    "three. The two whole-tune rows could not have distinguished them.",
+    "",
+    "SOLVING THE FOUR ROWS. Write it as rear share of a weighted sum with a",
+    "per-axle constant, MB = R/(F+R) where",
+    "",
+    "  F = wa.arF + ws.spF + tF        R = wa.arR + ws.spR + tR",
+    "",
+    "Four readings, four unknowns up to scale, so it is exactly determined and",
+    "has NO degrees of freedom left to validate with. With that caveat stated",
+    "loudly, the numbers that come out are:",
+    "",
+    "  wa / ws  =  about 8      one point of anti-roll bar is worth roughly",
+    "                           8 lb/in of spring rate",
+    "  tF  =  about 0.29 x R    large per-axle constants, presumably the tires,",
+    "  tR  =  about 0.41 x R    geometry and unsprung mass",
+    "",
+    "The bar-to-spring ratio is the useful part and it is credible: bars run",
+    "1-65 and springs a few hundred, so 8:1 gives the two roughly comparable",
+    "authority over the full slider range, which is what a tuner would expect.",
+    "The constants being large and REAR-BIASED is the interesting part, and it",
+    "is what makes equal bars and a front-stiff spring pair still read 0.51",
+    "rather than something well under 0.5.",
+    "",
+    "IT ALSO EXPLAINS THE TIRE-PRESSURE RESULT from the previous fixture: a tire",
+    "term sits inside tF and tR, so changing pressure moves them, and MB shifted",
+    "0.51 -> 0.50 with nothing else touched. Consistent, and it means pressure",
+    "must stay pinned for any future MB row."
+  ],
+
+  "theAppMissesItsOwnTarget": [
+    "THE APP'S OWN TUNE READS MB 0.51. THE APP'S OWN TARGET BAND IS 0.55-0.65.",
+    "",
+    "So a user who follows the app exactly, then opens the Verify In Game",
+    "section and checks Mechanical Balance as instructed, finds the tune outside",
+    "the band the same app told them to hit. Not marginally — 0.04 below a band",
+    "that is 0.10 wide.",
+    "",
+    "This is arguably by design: CLAUDE.md's position is that the formulas get",
+    "close and the readouts catch what the numbers cannot carry. But the gap is",
+    "systematic rather than incidental, and the app gives no indication which",
+    "way to move or by how much.",
+    "",
+    "WHAT THE SWEEP SHOWS WOULD FIX IT, on this car: bars at 40/65 read 0.55,",
+    "landing exactly on the bottom of the band. That is a strongly rear-biased",
+    "pair, against the app's own nearly-equal 31.3/30.1. So the correction the",
+    "user needs is not a nudge, it is a different shape of bar setup.",
+    "",
+    "Whether 0.55-0.65 is the RIGHT target is still an open, driving-only",
+    "question (case T6) and nothing here speaks to it. What is now measurable is",
+    "how to hit any target, which is exactly the split Phase 1 predicted:",
+    "solving the function is a menu job, choosing the band is a driving job."
+  ],
+
+  "lostRows": [
+    "ROWS 1 AND 2 WERE PHOTOGRAPHED WHILE THE PANEL STILL SAID SIMULATING, and",
+    "are recorded as null rather than guessed from what the number later",
+    "settled to.",
+    "",
+    "Row 1 costs nothing — row 4 is the same setting, re-read and settled.",
+    "",
+    "ROW 2 IS THE EXPENSIVE ONE. 20/40 was half of the same-ratio pair, the two",
+    "readings that split the model space in half by testing whether MB depends",
+    "only on the ratio of the bars or also on their absolute size. The",
+    "additive-constant result above says there IS such a term, so the pair would",
+    "now be a genuine test of the fitted model rather than a screening step —",
+    "and the model currently has no degrees of freedom left, which means it has",
+    "never been tested at all.",
+    "",
+    "THE RULE THAT CAUGHT IT was written this morning, from a single stale",
+    "reading in the gearing sweep: nothing may say SIMULATING when a row is",
+    "recorded. It cost two rows the first day it applied, which is the correct",
+    "price — the alternative is two rows of quiet fiction in a file that",
+    "everything downstream trusts."
+  ],
+
+  "sliderRange": [
+    "THE ANTI-ROLL BAR MAXIMUM IS 65. Boston: 80 was not settable. That",
+    "confirms VMETA's arF/arR hi of 65 in index.html:549-550 against the game",
+    "for the first time, and it is a piece of case R3 answered in passing.",
+    "",
+    "It also reshapes the same-ratio pair, which was written as 20/40 against",
+    "40/80. 40/80 is unreachable. The pair that fits inside the range and holds",
+    "the same 1:2 ratio is 20/40 against 32.5/65 — and the ARB step is 0.1, so",
+    "32.5 is a legal setting."
+  ],
+
+  "notes": "Lateral G sat at 1.26 and 1.42 on every row of this sweep, unmoved by a bar pair going from 30/30 to 40/65 and by the front spring moving from 328 to 608. Combined with the pressure row, that is now three separate tune changes that do not move lateral G. Case S5 asks whether lateral G responds to the tune at all; the answer is looking like no, which would mean the panel cannot see grip-side tuning and those constants stay lap-times-only. Braking did move with the springs — 68.4 ft at the soft front spring against 66.6 at the stiff one — so the panel is not blind to the suspension, just to whatever lateral G is measuring."
+}

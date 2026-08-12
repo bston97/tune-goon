@@ -380,6 +380,22 @@ curve-drawing exercise. They are nested, so the simplest one that survives wins.
 | **M4** | `r = (arF + c·spF) / (arR + c·spR)` | springs contribute roll stiffness too |
 | **M5** | `r = (arF + k + c·spF) / (arR + k + c·spR)` | both |
 
+**Measured 2026-08-12, and the list above was the right shape upside down.**
+MB is the **rear** axle's share, not the front's: stiffening the rear bar
+raises it, stiffening the front spring lowers it. Every model here is written
+as `F/(F+R)`. The surviving form, from four settled rows, is
+
+```
+MB = R / (F + R)      F = wa·arF + ws·spF + tF      R = wa·arR + ws·spR + tR
+```
+
+with one bar point worth roughly **8 lb/in of spring**, and per-axle constants
+`tF` and `tR` that are large and rear-biased — presumably tires, geometry and
+unsprung mass, which is also why tire pressure moves MB. Four readings and four
+unknowns, so it is exactly determined and **has never been tested**. The
+same-ratio pair is what tests it: `20/40` against `32.5/65`, since the bar
+slider maxes at 65 and 40/80 is unreachable.
+
 Not on the list, and worth watching the residuals for: track width and roll
 centre. Neither is a tuning slider, so both would show up as a **per-car
 constant** — a car whose residuals are all offset one way is the signature.
