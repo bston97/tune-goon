@@ -58,12 +58,12 @@ The game itself is the only instrument that works. Most of what is unknown can
 be read **without driving a lap**, off readouts that are simulation output
 rather than driving.
 
-**Corrected 2026-08-12:** those readouts do *not* have zero run-to-run
-variance, which this line claimed until Boston checked. Leaving a final drive
-and returning to it moves 0-60 and top speed slightly, and the panel prints
-`SIMULATING…` while it recomputes. Still far better than lap times — but a
-repeat spread has to be established before any panel difference counts as a
-result. See `tests/data/gearing-gr86-2026-08-12.json`.
+**Tested 2026-08-12 and it holds.** One setting re-entered six times returned
+identical figures everywhere except 100-0, which moved 0.1 ft once. The panel
+does print `SIMULATING…` while it recomputes, so a reading taken before it
+settles is stale — but a settled reading is exact. Consequence worth stating:
+small differences are therefore real and may not be dismissed as noise. See
+`tests/data/gearing-gr86-defaulttune-2026-08-12.json`.
 
 ## Method rules — these are what keep the data worth having
 

@@ -44,7 +44,7 @@
 
   "held": {
     "ratios": [2.92, 2.05, 1.60, 1.30, 1.10, 0.95, 0.82],
-    "ratiosNote": "Read off this screen and IDENTICAL to both SPREAD[7] and the July build's ratios. Boston's read was that they looked edited; they are not — this is the game's own 7-speed race-box default set, now confirmed on two separate builds of the car. SPREAD[7] stands."
+    "ratiosNote": "CORRECTED SAME DAY — see gearing-gr86-defaulttune-2026-08-12.json. These ratios are IDENTICAL to SPREAD[7] because they ARE SPREAD[7]: the app's own ratio set, applied to this car. They are not the game's default, which is 4.17/2.89/2.17/1.66/1.32/1.07/0.85. Boston's instinct that they 'looked edited' was right and was talked out of; the version that called them confirmed was wrong and more confident, which is the failure mode this repo keeps documenting. Everything derived in this file is still valid FOR THIS SETUP, because the car really was running these ratios when it was measured."
   },
 
   "varied": "fd",
@@ -166,19 +166,21 @@
     "   SIMULATING, and treat a difference smaller than the repeat spread as no",
     "   result.",
     "",
-    "2. THE SPREAD IS VISIBLE IN THIS VERY SWEEP, which is how it was caught.",
-    "   Top speed went 4.56 -> 139.9, 4.57 -> 139.9, 4.58 -> 139.5, 4.60 ->",
-    "   139.7: non-monotonic, 0.4 mph, across settings 0.04 apart. Under the old",
-    "   assumption that had to be a real effect of the gearing. Under the",
-    "   corrected one it is the readout resampling itself.",
+    "2. THE NON-MONOTONIC TOP SPEED IN THIS SWEEP IS REAL. Top speed went",
+    "   4.56 -> 139.9, 4.57 -> 139.9, 4.58 -> 139.5, 4.60 -> 139.7: 0.4 mph,",
+    "   non-monotonic, across settings 0.04 apart.",
     "",
-    "   WHAT THIS COSTS US, STATED PLAINLY: the vFrac calibration sweep in",
-    "   CLAUDE.md spans 0.12 s across its whole 0-100 range. If the repeat",
-    "   spread turns out to be a meaningful fraction of that, part of the sweep",
-    "   that vFrac was fitted to is noise. Establishing the spread — read one",
-    "   setting five times, leaving and returning between reads — is now the",
-    "   highest-value two minutes available, because it sets the threshold every",
-    "   future panel measurement is judged against, retrospectively included."
+    "   This was first written up as the readout resampling itself. IT IS NOT.",
+    "   The repeat test in gearing-gr86-defaulttune-2026-08-12.json read one",
+    "   setting six times and got identical figures on everything except a",
+    "   single 0.1 ft blip on 100-0, so repeat variance is effectively zero and",
+    "   0.4 mph of movement is a property of the gearing rather than of the",
+    "   instrument. Recorded as unexplained rather than explained away — a real",
+    "   non-monotonicity at this scale is interesting and nothing in the current",
+    "   model predicts it.",
+    "",
+    "   The vFrac sweep's 0.12 s range is therefore signal too, which is the",
+    "   good outcome of the two available."
   ],
 
   "notes": "Two free controls came out of the sweep. LATERAL G IS COMPLETELY INSENSITIVE TO GEARING — 1.26 at 60 and 1.42 at 120 on all six rows — which is what makes it usable as a grip instrument later (case S5) without holding the final drive. BRAKING IS NOT: 60-0 moved 67.1 -> 68.0 ft and 100-0 moved 151.8 -> 152.8 between fd 4.56 and fd 3.50, presumably engine braking, so the brake work in case S4 must hold the final drive fixed or it will be measuring gearing. Mechanical Balance 0.51 and Aero Balance 0.45 held across every row, confirming they do not respond to gearing, but both remain unusable in the balance solve until the ARB and wing slider values that produced them are read."

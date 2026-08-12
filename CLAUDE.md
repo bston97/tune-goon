@@ -186,7 +186,11 @@ is. Rough tiers, most to least trustworthy:
 1. **Confirmed on Boston's own screen** — Mechanical Balance and Aero Balance
    are real in-game readouts (confirmed 2026-07-30); the exact target bands
    (0.55–0.65 / 0.42–0.48) are still house numbers, not published. The gearing
-   graph and the `SPREAD` gear tables (confirmed 2026-07-31, see below).
+   graph (confirmed 2026-07-31). **The `SPREAD` gear tables were listed here
+   too and are demoted to tier 4 as of 2026-08-12** — the screen that
+   "confirmed" them was showing the app's own ratio set read back off a car it
+   had been applied to, and the game's real defaults contradict it. See the
+   gearing section below.
 2. **Traceable FH6-specific source** — ForzaTune's guide, Game8, official
    patch notes. Diff accel bands, aero balance range, the drag-tire nerf.
    Re-scanned 2026-08-01: ForzaTune's FH6 guide moved three of our values —
@@ -221,9 +225,25 @@ top gear's line just reaches the right edge. At that setting top gear redlines
 at the car's maximum usable speed — call it `fdFit` — and since speed at redline
 goes as 1/FD, gearing to `vFrac` of that maximum is just `FD = fdFit / vFrac`.
 
-The `SPREAD` tables are the game's own race-box ratios: the 7-speed on that
-screen was 2.92/2.05/1.60/1.30/1.10/0.95/0.82, matching `SPREAD[7]` exactly. So
-only the final drive is ever solved; leave the ratios alone.
+~~The `SPREAD` tables are the game's own race-box ratios: the 7-speed on that
+screen was 2.92/2.05/1.60/1.30/1.10/0.95/0.82, matching `SPREAD[7]` exactly.~~
+**Withdrawn 2026-08-12 — this was circular and is false.** With the game's
+default tune restored on a race-transmission GR86, the actual default ratios
+are **4.17/2.89/2.17/1.66/1.32/1.07/0.85 at final drive 3.63** — nowhere near
+`SPREAD[7]`, and wider at every gear. The screen that "confirmed" the table was
+showing *the app's own ratio set read back off a car it had been applied to*.
+The numbers matched exactly because they were the same numbers.
+
+This is load-bearing, not cosmetic. `index.html:1083` takes the top ratio from
+`SPREAD` to build the speed constant — `topGear = SPREAD[gr][gr-1]`, then
+`kSpeed = vgraph × fdfit × topGear` — so on a car running the game's ratios
+`k` is out by 0.82/0.85 ≈ **3.5%**, and `index.html:1146` prints every per-gear
+speed off the same wrong table. What rescues it: the app also *emits* a ratio
+set (`ratioSet()`), and if that is applied then `SPREAD` is what the car has
+and everything is self-consistent. So the defect is not "the gearing maths is
+wrong" — it is **"the app assumes its own ratios are fitted and never says
+so."** Only the final drive is solved, but the gear speeds beside it quietly
+assume a gearbox the car may not have.
 
 **How this got shipped wrong, because the failure mode will recur.** An earlier
 revision inferred from a photo that the axis *rescaled* with the gearing, so the
@@ -264,18 +284,19 @@ Speed, braking distances and lateral G for whatever is currently set. Those are
 the actual objective, and they are simulation output rather than driving.
 Sweeping the final drive against them is how `vFrac` finally got measured.
 
-**They are not noise-free, though — that claim stood here until 2026-08-12 and
-was wrong.** Boston: switching off a final drive and back onto it moves 0-60
-and top speed slightly, and the panel visibly prints `SIMULATING…` while it
-recomputes. So the figures are a *re-run simulation*, not a lookup, and the
-same setting read twice is two samples rather than one fact. Two consequences,
-both load-bearing: a reading taken while anything still says `SIMULATING…` is
-stale and must be discarded, and **a difference smaller than the readout's own
-repeat spread is not a result.** The measured GR86 sweep showed top speed
-wobbling non-monotonically by 0.4 mph across final drives 0.04 apart, which is
-that spread showing through. Anything quoted off this panel needs the repeat
-spread established first, including — uncomfortably — the `vFrac` sweep below,
-whose whole 0-100 range was 0.12 s.
+**Measured 2026-08-12, and the claim holds.** The panel visibly prints
+`SIMULATING…` while it recomputes, so a reading taken before it settles is
+stale and must be discarded — but once settled it is effectively
+deterministic. One setting re-entered six times, three approached from above
+and three from below, returned identical figures on 0-60, 0-100, top speed,
+60-0, both lateral G values and all three Miscellaneous readouts; the only
+movement anywhere was 100-0 reading 145.9 ft once against 145.8 the other five
+times. No difference between approach directions, so there is no path
+dependence in how a slider is arrived at either.
+
+That makes the panel a genuinely exact instrument, which cuts both ways: a
+0.4 mph difference in top speed is a **result**, not noise, and cannot be
+waved away. See `tests/data/gearing-gr86-defaulttune-2026-08-12.json`.
 
 **The calibration sweep** (GR86, 2026-07-31, ratios held at the race-box
 default, final drive the only variable, fit = 4.575):
