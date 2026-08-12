@@ -440,6 +440,29 @@ tune either. Both cannot be true as stated.
   a whole group of currently class-D constants moves up to class B and becomes
   measurable without driving. **High value if it works.**
 
+### S7 — Caster: 5.0, 6.5 or 7? *(10 min, then driving)*
+
+Requested by Boston 2026-08-12. Three values are on the table for the same car
+and none of them agree:
+
+| source | value |
+|---|---|
+| the game's own default (GR86, race suspension) | **5.0°** |
+| the app, road family (`index.html:508`) | **6.5°**, from ForzaTune's 5.5–6.5 band — sitting at the top of it |
+| community, per Boston | **7.0°**, reported to beat what the in-game description implies |
+
+- **Vary:** caster only, 5.0 / 6.5 / 7.0 / maximum. **Read:** lateral G at both
+  speeds, 60-0, 100-0, 0-60.
+- **Means:** if the panel separates them at all, caster moves up from
+  lap-times-only into something measurable standing still. If it does not, the
+  panel is the wrong instrument and it goes to Group T with a fixed route and
+  best-of-5 — which is what Boston proposed, and the right call if the panel
+  comes back flat.
+- **Note the app is not neutral here.** It already picks the top of a published
+  band, so "7 is better" and "6.5 is right" differ by less than the app's own
+  distance from the game's default. Whatever wins, the constant has a source
+  for the first time.
+
 ### S6 — Does weight alone move the panel figures predictably? *(10 min)*
 - **Vary:** weight reduction stages only.
 - **Means:** isolates the mass term that is otherwise tangled with PI in every
