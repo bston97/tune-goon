@@ -1386,6 +1386,19 @@ function render(){
     (G.tops&&r.topGearSrc==='assumed'
       ? '<div class="note" style="margin-top:8px"><b>Top ratio assumed at '+r.topGear.toFixed(2)+'</b> &mdash; these speeds hold only if this app\'s ratios are fitted. Read yours off the Gearing tab; the game\'s own box was 0.85, worth 3.8% here.</div>'
       : '')+
+    /* Only the TOP ratio is known, so a top gear far from SPREAD's leaves a big
+       step into it — and that step is an artifact of the assumed table, not a
+       hole in the car's gearing. Say so, or it reads as something to fix. The
+       measured boxes differ by 43% at 1st and 3.7% at top, so no uniform
+       rescale would help; the gap is genuine ignorance about the lower gears.
+
+       Threshold is 10% because this note is about the VISIBLE artifact, not
+       about the assumption — which is disclosed on the ratio-list label and the
+       sheet regardless. The GR86's 0.85 against 0.82 is 3.7% and shows nothing
+       worth explaining; firing there would just be noise on the common case. */
+    (G.tops&&r.topGearSrc==='read'&&Math.abs(r.topGear/SPREAD[i.gr][i.gr-1]-1)>0.10
+      ? '<div class="note" style="margin-top:8px"><b>Top gear is yours; the gears below it are assumed.</b> Your '+r.topGear.toFixed(2)+' is a long way from the '+SPREAD[i.gr][i.gr-1].toFixed(2)+' this table assumes, so the step into last gear below is an artifact of that assumption &mdash; not a gap in your gearbox. Only the top figure is anchored to a reading.</div>'
+      : '')+
     (G.tops
       ? '<div class="note" style="margin-top:8px">Where each gear meets the limiter at '+fmt('fd',eff('fd'))+
         '. <b>Which of them you actually reach is a question this cannot answer</b> &mdash; that needs the speed the car really hits on <em>this</em> gearing, which no screen reports.</div>'

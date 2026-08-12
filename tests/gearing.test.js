@@ -243,6 +243,19 @@ console.log('--- and the fix: the top ratio is read, not assumed ---');
      read.gears.join('/'));
   ok('and the gears below it are still SPREAD, unmeasured',
      read.gears.slice(0, 6).join() === X.SPREAD[7].slice(0, 6).join());
+  /* Found by hand-checking four real cars rather than by any test: on a car
+     whose top ratio is far from SPREAD's, replacing only the top slot leaves a
+     visible step into last gear — 130 to 180 mph on a 6-speed at 0.72. That
+     step is an artifact of the assumed lower gears, and unlabelled it reads as
+     gearing to go and fix. No uniform rescale fixes it either: the two measured
+     boxes differ by 43% at 1st and 3.7% at top. */
+  const far = draw({ gr: '6', fdfit: '3.90', vgraph: '180', topratio: '0.72' });
+  ok('a far-off top ratio explains the step into last gear',
+     /Top gear is yours; the gears below it are assumed/.test(far));
+  ok('and says the step is the assumption, not the gearbox',
+     /not a gap in your gearbox/.test(far));
+  ok('but the GR86\'s own 3.7% does not trip it',
+     !/Top gear is yours/.test(draw({ fdfit: '4.34', vgraph: '159', topratio: '0.85' })));
   /* The defect was silence, not arithmetic — an assumed ratio must say so. */
   const quiet = draw({ fdfit: '4.34', vgraph: '159', topratio: '' });
   ok('an assumed ratio is disclosed on the card', /Top ratio assumed at 0\.82/.test(quiet));
