@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Measure · Forza Tune Goon</title>
+<meta name="theme-color" content="#0c0e13">
+<link rel="icon" href="./favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Measure">
+<style>
+  :root{
+    --bg:#0c0e13; --panel:#141821; --panel2:#1b202b; --line:#272e3d;
+    --tx:#e6ebf5; --dim:#8b95a9; --acc:#4da3ff; --mod:#ffd43b;
+    --ok:#38d9a9; --no:#ff8787; --hot:#ffa94d;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--tx);
+       font:15px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+       padding-bottom:env(safe-area-inset-bottom)}
+  .wrap{max-width:720px;margin:0 auto;padding:12px 12px 96px}
+
+  /* ---- sticky bar: which sheet, how full, and the way out ---- */
+  .bar{position:sticky;top:0;z-index:20;background:rgba(12,14,19,.94);
+       backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+       padding:8px 12px calc(8px);margin:0 -12px 12px}
+  .bar .t{display:flex;align-items:baseline;gap:8px}
+  .bar h1{font-size:15px;margin:0;letter-spacing:.2px;font-weight:600}
+  .bar .p{margin-left:auto;font:600 12px ui-monospace,Consolas,monospace;color:var(--dim);
+       white-space:nowrap}
+  .prog{height:3px;background:var(--panel2);border-radius:2px;margin-top:7px;overflow:hidden}
+  .prog i{display:block;height:100%;background:var(--acc);width:0;transition:width .2s}
+
+  .chips{display:flex;gap:6px;overflow-x:auto;margin:9px -12px 0;padding:0 12px 2px;
+       -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chips button{flex:0 0 auto;background:var(--panel2);border:1px solid var(--line);
+       color:var(--dim);padding:7px 11px;border-radius:20px;font-size:12.5px;font-weight:600;
+       white-space:nowrap;font-family:inherit;cursor:pointer}
+  .chips button.on{background:var(--acc);border-color:var(--acc);color:#06121f}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+       padding:12px;margin-bottom:10px}
+  .panel>h2{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--dim);
+       margin:0 0 8px;font-weight:600}
+  .note{font-size:12.5px;color:var(--dim);line-height:1.55;margin:0 0 10px}
+  .note b{color:#c8d2e4}
+  .lede{font-size:13px;color:#c8d2e4;line-height:1.6;margin:0 0 10px}
+
+  label{display:block;font-size:10.5px;color:var(--dim);margin:0 0 3px;
+       text-transform:uppercase;letter-spacing:.5px}
+  input,select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+       color:var(--tx);border-radius:7px;padding:10px 10px;
+       font:16px ui-monospace,Consolas,monospace}
+  textarea{min-height:70px;resize:vertical;line-height:1.5}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+  input.has{border-color:#2f4a63;background:#16202b}
+  input[type=number]{-moz-appearance:textfield}
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .f{min-width:0}
+
+  /* ---- a case: collapsible so the phone screen stays one job long ---- */
+  details.case{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+       margin-bottom:10px;overflow:hidden}
+  details.case>summary{cursor:pointer;list-style:none;padding:12px;display:flex;
+       align-items:center;gap:9px;font-weight:600;font-size:14px}
+  details.case>summary::-webkit-details-marker{display:none}
+  details.case>summary::before{content:'▸';color:var(--acc);font-size:12px;width:10px}
+  details.case[open]>summary::before{content:'▾'}
+  details.case>summary .cnt{margin-left:auto;font:600 11.5px ui-monospace,Consolas,monospace;
+       color:var(--dim);white-space:nowrap}
+  details.case[data-done="1"]>summary .cnt{color:var(--ok)}
+  details.case .body{padding:0 12px 12px}
+  .first{display:inline-block;font-size:9.5px;letter-spacing:.7px;text-transform:uppercase;
+       color:var(--mod);border:1px solid var(--mod);border-radius:4px;padding:1px 5px;
+       font-weight:700;vertical-align:2px}
+
+  /* ---- one observation ---- */
+  .row{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;
+       background:var(--panel2)}
+  .row>.h{font-size:12.5px;color:#c8d2e4;line-height:1.5;margin-bottom:8px}
+  .row>.h .n{font:700 11px ui-monospace,Consolas,monospace;color:var(--acc);margin-right:6px}
+  .set{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+  .set span{font:600 12px ui-monospace,Consolas,monospace;background:#111721;
+       border:1px solid var(--line);border-radius:5px;padding:4px 7px;color:var(--hot)}
+  .set span i{color:var(--dim);font-style:normal;font-weight:400}
+
+  /* the observation itself, as opposed to the conditions it was taken under */
+  button.fill{width:100%;margin-bottom:10px;font-size:13px;padding:10px}
+
+  .pay{margin-top:9px;padding-top:9px;border-top:1px dashed var(--line)}
+  .pay label{color:var(--acc);font-weight:700}
+  .pay input{border-color:#2f5f8f;font-size:18px;padding:12px 10px}
+
+  .tri{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+  .tri button{background:var(--panel2);border:1px solid var(--line);color:var(--dim);
+       padding:9px 2px;border-radius:6px;font-size:12px;font-weight:600;font-family:inherit;
+       cursor:pointer}
+  .tri button.on[data-v="1"]{background:var(--ok);border-color:var(--ok);color:#06121f}
+  .tri button.on[data-v="0"]{background:var(--no);border-color:var(--no);color:#06121f}
+  .tri button.on[data-v=""]{background:var(--panel);border-color:var(--dim);color:var(--tx)}
+
+  /* ---- the standing rules, which are the point of the sheet ---- */
+  .rules{font-size:12.5px;color:var(--dim);line-height:1.6;margin:0;padding-left:18px}
+  .rules li{margin-bottom:4px}
+  .rules b{color:var(--tx)}
+
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  button.b{border:0;border-radius:8px;padding:12px;font-size:14px;font-weight:600;
+       cursor:pointer;font-family:inherit;background:var(--acc);color:#06121f}
+  button.alt{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
+  button.alt:active{border-color:var(--acc)}
+  .wide{grid-column:1/-1}
+
+  /* ---- fixed footer: export is always one thumb away ---- */
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(12,14,19,.96);
+       backdrop-filter:blur(8px);border-top:1px solid var(--line);
+       padding:9px 12px calc(9px + env(safe-area-inset-bottom))}
+  .foot .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+  .foot button{border:0;border-radius:8px;padding:12px 10px;font-size:13.5px;font-weight:600;
+       font-family:inherit;cursor:pointer}
+  #next{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
+  #exp{background:var(--acc);color:#06121f}
+  #more{background:var(--panel2);color:var(--tx);border:1px solid var(--line);padding:12px 13px}
+
+  dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);
+       border-radius:12px;padding:14px;max-width:660px;width:calc(100% - 24px)}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  dialog h3{margin:0 0 8px;font-size:14px}
+  dialog pre{background:#0b0f16;border:1px solid var(--line);border-radius:8px;padding:10px;
+       max-height:46vh;overflow:auto;font:12px ui-monospace,Consolas,monospace;
+       color:#c8d2e4;white-space:pre;margin:0 0 10px}
+  .fn{font:16px ui-monospace,Consolas,monospace}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:88px;z-index:40;
+       background:var(--ok);color:#06121f;font-weight:600;font-size:13px;padding:9px 14px;
+       border-radius:20px;opacity:0;pointer-events:none;transition:opacity .18s}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="bar">
+    <div class="t"><h1 id="stitle">Measure</h1><div class="p" id="prog">0/0</div></div>
+    <div class="prog"><i id="progbar"></i></div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<div class="foot"><div class="in">
+  <button id="next">Next empty</button>
+  <button id="exp">Export JSON</button>
+  <button id="more">☰</button>
+</div></div>
+
+<dialog id="dlg">
+  <h3 id="dlgt">Export</h3>
+  <div id="dlgb"></div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================================
+   Measure — the phone half of the measurement program.
+
+   TESTS.md is the catalogue and MEASURE.md holds the working sheets; both are
+   written to be read at a desk. This page is the same plan in the form you
+   actually need standing at the console with a controller in one hand: one
+   case per screen, the purpose of every row on the row, and an export that
+   lands as a file `tests/data/` already understands.
+
+   TWO RULES SHAPE THE WHOLE UI, both taken from how the 3.73 disaster
+   happened:
+
+   1. ONE VARIABLE PER OBSERVATION. Every row states what it holds and what it
+      changed, in the row, not in a header three screens up.
+   2. RECORD RAW READINGS, NEVER CONCLUSIONS. There is nowhere on this page to
+      type an interpretation. The purpose text says what an answer would MEAN
+      so it does not have to be remembered — but the field takes the digits the
+      screen showed and nothing else.
+
+   The export is deliberately the templates in `tests/data/` verbatim, filled
+   in. Those files are the schema of record; this page never invents a shape
+   of its own, so a sheet filled in here is a fixture the moment it lands, and
+   `node tests/status.js` counts it without knowing this page exists.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   The templates, copied from tests/data/*.json. Kept verbatim — including
+   _README and every _note — so the exported file is indistinguishable from
+   one filled in by hand. If a template changes on disk, change it here too;
+   the fidelity is the whole point.
+   ------------------------------------------------------------------------ */
+
+const T_RANGES = {
+  "_README": [
+    "Group R — slider ranges. Copy to ranges-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "WHY THIS IS FIRST. The app emits spring rates as absolute lb/in and tells",
+    "the user the game clamps to the car's range if it is narrower",
+    "(index.html:1379, :2183). It never checks whether the clamp fired. An",
+    "asymmetric clamp - front pinned, rear not - destroys the F/R ratio the",
+    "whole spring model rests on, silently, on a screen the app cannot see.",
+    "",
+    "Fill `min` and `max` off the tuning menu by dragging each slider to each",
+    "end and reading the value. `appValue` is what the app printed for this car",
+    "on a road tune. Run: node tests/status.js"
+  ],
+  "car": "", "class": "", "date": "",
+  "screen": "tuning menu — slider extremes",
+  "build": { "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+             "aero": "both", "wt": null, "fw": null, "dt": "", "gears": null },
+  "case": "R1+R3",
+  "sliders": [
+    { "id": "spF",  "name": "Spring rate F",  "vmetaLo": 20,  "vmetaHi": 3000, "min": null, "max": null, "appValue": null },
+    { "id": "spR",  "name": "Spring rate R",  "vmetaLo": 20,  "vmetaHi": 3000, "min": null, "max": null, "appValue": null },
+    { "id": "arF",  "name": "ARB F",          "vmetaLo": 1,   "vmetaHi": 65,   "min": null, "max": null, "appValue": null },
+    { "id": "arR",  "name": "ARB R",          "vmetaLo": 1,   "vmetaHi": 65,   "min": null, "max": null, "appValue": null },
+    { "id": "reF",  "name": "Rebound F",      "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "reR",  "name": "Rebound R",      "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "buF",  "name": "Bump F",         "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "buR",  "name": "Bump R",         "vmetaLo": 1,   "vmetaHi": 20,   "min": null, "max": null, "appValue": null },
+    { "id": "camF", "name": "Camber F",       "vmetaLo": -10, "vmetaHi": 2,    "min": null, "max": null, "appValue": null },
+    { "id": "camR", "name": "Camber R",       "vmetaLo": -10, "vmetaHi": 2,    "min": null, "max": null, "appValue": null },
+    { "id": "toeF", "name": "Toe F",          "vmetaLo": -5,  "vmetaHi": 5,    "min": null, "max": null, "appValue": null },
+    { "id": "toeR", "name": "Toe R",          "vmetaLo": -5,  "vmetaHi": 5,    "min": null, "max": null, "appValue": null },
+    { "id": "cast", "name": "Caster",         "vmetaLo": 1,   "vmetaHi": 8,    "min": null, "max": null, "appValue": null },
+    { "id": "bal",  "name": "Brake balance",  "vmetaLo": 30,  "vmetaHi": 70,   "min": null, "max": null, "appValue": null },
+    { "id": "pres", "name": "Brake pressure", "vmetaLo": 50,  "vmetaHi": 150,  "min": null, "max": null, "appValue": null },
+    { "id": "dfa",  "name": "Diff front accel", "vmetaLo": 0, "vmetaHi": 100,  "min": null, "max": null, "appValue": null },
+    { "id": "dra",  "name": "Diff rear accel",  "vmetaLo": 0, "vmetaHi": 100,  "min": null, "max": null, "appValue": null },
+    { "id": "pF",   "name": "Tire psi F",     "vmetaLo": 10,  "vmetaHi": 55,   "min": null, "max": null, "appValue": null },
+    { "id": "pR",   "name": "Tire psi R",     "vmetaLo": 10,  "vmetaHi": 55,   "min": null, "max": null, "appValue": null }
+  ],
+  "R2_rangeByPartTier": {
+    "_note": "R2 — does the suspension tier move the spring range, or only unlock sliders? Same car, refit each tier.",
+    "street": { "spFmin": null, "spFmax": null, "spRmin": null, "spRmax": null },
+    "sport":  { "spFmin": null, "spFmax": null, "spRmin": null, "spRmax": null },
+    "race":   { "spFmin": null, "spFmax": null, "spRmin": null, "spRmax": null }
+  },
+  "R5_boundary": {
+    "_note": "R5 — type a spring rate below min and above max. What does the game do?",
+    "belowMin": "", "aboveMax": "",
+    "options": "clamps silently / refuses the entry / rounds to nearest legal"
+  },
+  "notes": ""
+};
+
+const T_PARTS = {
+  "_README": [
+    "Group P — what parts actually change. Copy to parts-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "P1 is the gating matrix: fit each tier, open the tuning menu, tick which",
+    "sliders EXIST. This is the case where photos earn their keep, because it is",
+    "a list of what is present rather than a value to read.",
+    "",
+    "P1 also settles BACKLOG E4: the gate comment in index.html:1207 cites",
+    "Destructoid's slider guide as a traceable FH6 source while CLAUDE.md's",
+    "audit says no such source exists. Measuring the matrix makes the argument",
+    "moot either way.",
+    "",
+    "Use true / false. Leave null for a tier not tested."
+  ],
+  "car": "", "date": "",
+  "screen": "tuning menu — which sliders exist",
+  "case": "P1",
+  "_expected": {
+    "_note": "What the app currently assumes (index.html:1215-1224). Two claims flagged as most likely wrong.",
+    "suspension": "race/rally/offroad -> springs + ride height + damping + alignment(incl caster); street/sport -> springs + ride height ONLY (SUSPECT); stock -> nothing",
+    "diff": "race+ -> accel + decel + AWD centre; street/sport -> accel ONLY (SUSPECT); stock -> nothing",
+    "arb": "race -> that end's bar, front and rear gated apart; stock -> nothing. NOTE the form offers no street/sport ARB tier at all",
+    "trans": "the form collapses Stock and Street into one option — if Street differs from Stock, a fourth option is needed"
+  },
+  "suspension": {
+    "stock":   { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "street":  { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "sport":   { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "race":    { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "rally":   { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null },
+    "offroad": { "springRate": null, "rideHeight": null, "damping": null, "camber": null, "toe": null, "caster": null }
+  },
+  "differential": {
+    "stock":   { "accel": null, "decel": null, "centre": null },
+    "street":  { "accel": null, "decel": null, "centre": null },
+    "sport":   { "accel": null, "decel": null, "centre": null },
+    "race":    { "accel": null, "decel": null, "centre": null },
+    "drift":   { "accel": null, "decel": null, "centre": null },
+    "rally":   { "accel": null, "decel": null, "centre": null },
+    "offroad": { "accel": null, "decel": null, "centre": null }
+  },
+  "antirollBars": {
+    "stock":  { "frontBar": null, "rearBar": null },
+    "street": { "frontBar": null, "rearBar": null, "_exists": "does a street ARB tier exist to buy at all?" },
+    "sport":  { "frontBar": null, "rearBar": null, "_exists": "same question" },
+    "race":   { "frontBar": null, "rearBar": null },
+    "_frontRearSeparate": null
+  },
+  "transmission": {
+    "stock":  { "finalDrive": null, "individualGears": null },
+    "street": { "finalDrive": null, "individualGears": null },
+    "sport":  { "finalDrive": null, "individualGears": null },
+    "race":   { "finalDrive": null, "individualGears": null }
+  },
+  "aero": {
+    "none":  { "frontSlider": null, "rearSlider": null },
+    "front": { "frontSlider": null, "rearSlider": null },
+    "rear":  { "frontSlider": null, "rearSlider": null },
+    "both":  { "frontSlider": null, "rearSlider": null }
+  },
+  "P2_statBlockEffect": {
+    "_note": "P2 — fit ONE part, record the stat block after. This is what makes 'hold everything else' achievable in every later case.",
+    "rows": [
+      { "part": "baseline, nothing fitted", "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "front aero",      "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "rear aero",       "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "race suspension", "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "weight reduction stage 1", "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "tire compound -> sport",   "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "tire width +1 front",      "wt": null, "fw": null, "pi": null, "hp": null, "tq": null },
+      { "part": "tire width +1 rear",       "wt": null, "fw": null, "pi": null, "hp": null, "tq": null }
+    ]
+  },
+  "P3_P4_gripEffect": {
+    "_note": "P3/P4 — what compound and width actually buy. The app moves ONLY brake balance on width (wStep = twr - twf), so 0/0 and 3/3 give an identical tune. If width changes grip or braking measurably, that is a formula the app does not have.",
+    "rows": [
+      { "change": "compound stock",  "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound street", "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound sport",  "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound semi",   "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "compound slick",  "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 0/0",       "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 3/3",       "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 0/3",       "lateralG": null, "s60_0": null, "s100_0": null },
+      { "change": "width 3/0",       "lateralG": null, "s60_0": null, "s100_0": null }
+    ]
+  },
+  "notes": ""
+};
+
+/* The balance template, with the Aero variant built from the same skeleton —
+   the solver reads `readout` to know which it is holding. The aero row plan is
+   the one written out in the template's own _AERO_ROWS block; it lives here as
+   real rows because a row you cannot type into is a row that does not get
+   measured. */
+const T_BALANCE = {
+  "_README": [
+    "Template for a Mechanical or Aero Balance sweep. Copy to",
+    "balance-<car>-<yyyy-mm-dd>.json, fill in `car`/`build`, then fill the `mb`",
+    "(or `ab`) field on each row as you read it. Rows may be filled in any",
+    "order and partially — the solver ignores rows with a null readout, so you",
+    "can run it after five readings to see whether the sweep is discriminating",
+    "yet.",
+    "",
+    "  node tests/fit-balance.js tests/data/balance-<car>-<date>.json",
+    "",
+    "The rows below are ordered by how much they tell you, not by convenience.",
+    "Rows 1-5 are the whole experiment in miniature: if you only have ten",
+    "minutes, do those and stop. Everything after them refines a model those",
+    "five have already chosen.",
+    "",
+    "ONE VARIABLE PER ROW. Every row states what it holds. If something else",
+    "moved, the row is discarded, not interpreted.",
+    "",
+    "Record MB/AB to every digit the game prints. The solver's noise floor",
+    "assumes 2-3 decimal places; rounding to 2 throws away the discrimination",
+    "the same-ratio pair depends on."
+  ],
+  "car": "", "class": "", "pi": null, "date": "",
+  "screen": "tuning menu — Mechanical Balance readout",
+  "readout": "mb",
+  "build": {
+    "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+    "aero": "both", "tires": "", "twf": 0, "twr": 0,
+    "wt": null, "fw": null, "dt": "", "gears": null
+  },
+  "baseline": {
+    "spF": null, "spR": null, "rhF": null, "rhR": null,
+    "note": "the app's own values for this car, used as the hold-point for the bar sweeps"
+  },
+  "varied": "arF/arR",
+  "rows": [
+    { "n": 1, "purpose": "SYMMETRY — is MB exactly 0.5 with equal bars? If not, something other than the bars is in the formula",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 2, "purpose": "SAME-RATIO PAIR (a) — with row 3, separates a pure ratio from anything with an additive term",
+      "arF": 20, "arR": 40, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 3, "purpose": "SAME-RATIO PAIR (b) — identical F:R as row 2 at double the magnitude. Equal readouts = pure ratio; different = offset or springs",
+      "arF": 40, "arR": 80, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 4, "purpose": "SPRINGS (a) — bars held at 30/30, front spring -30%. If MB moves, springs are in the formula and are solvable",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 5, "purpose": "SPRINGS (b) — bars held at 30/30, front spring +30%",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 6, "purpose": "RIDE HEIGHT (a) — bars 30/30, springs back at baseline, front ride height at minimum",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 7, "purpose": "RIDE HEIGHT (b) — front ride height at maximum",
+      "arF": 30, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 8,  "purpose": "arF sweep at arR=30 — shape of the front term", "arF": 1,  "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 9,  "purpose": "arF sweep", "arF": 15, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 10, "purpose": "arF sweep", "arF": 45, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 11, "purpose": "arF sweep — top of the slider", "arF": 65, "arR": 30, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 12, "purpose": "arR sweep at arF=30 — confirms the rear term is the mirror of the front, or is not", "arF": 30, "arR": 1,  "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 13, "purpose": "arR sweep", "arF": 30, "arR": 15, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 14, "purpose": "arR sweep", "arF": 30, "arR": 45, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null },
+    { "n": 15, "purpose": "arR sweep", "arF": 30, "arR": 65, "spF": null, "spR": null, "rhF": null, "rhR": null, "mb": null }
+  ],
+  "notes": ""
+};
+
+const T_AERO = {
+  "_README": [
+    "Group A — Aero Balance. Copy to balance-ab-<car>-<yyyy-mm-dd>.json.",
+    "Same solver as the mechanical sweep, `readout` set to ab:",
+    "",
+    "  node tests/fit-balance.js tests/data/balance-ab-<car>-<date>.json",
+    "",
+    "A3 — rows 4 and 5 — is the case that matters most in this group. Those two",
+    "readings bracket every AB the car can produce. The app prints the",
+    "0.42-0.48 target on every build with aero fitted; on a car whose bracket",
+    "excludes that range it is printing a goal the user would chase to the end",
+    "of a slider and never reach.",
+    "",
+    "ONE VARIABLE PER ROW. Record every digit the game prints."
+  ],
+  "car": "", "class": "", "pi": null, "date": "",
+  "screen": "tuning menu — Aero Balance readout",
+  "readout": "ab",
+  "build": {
+    "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+    "aero": "both", "tires": "", "twf": 0, "twr": 0,
+    "wt": null, "fw": null, "dt": "", "gears": null
+  },
+  "baseline": {
+    "spF": null, "spR": null, "rhF": null, "rhR": null,
+    "note": "the app's own values for this car, held for every row that is not a rake row"
+  },
+  "varied": "aeF/aeR",
+  "rows": [
+    { "n": 1, "purpose": "SYMMETRY — AB with equal wings. Expected NOT 0.5: the body makes downforce the wings do not, so this reads the car's own balance rather than checking symmetry",
+      "aeF": 50, "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 2, "purpose": "SAME-RATIO PAIR (a)", "aeF": 25, "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 3, "purpose": "SAME-RATIO PAIR (b) — identical F:R at double the magnitude", "aeF": 50, "aeR": 100, "rhF": null, "rhR": null, "ab": null },
+    { "n": 4, "purpose": "A3 FLOOR — both wings at minimum. This is the bodyshell's own balance, with the wings contributing nothing",
+      "aeF": 0, "aeR": 0, "rhF": null, "rhR": null, "ab": null },
+    { "n": 5, "purpose": "A3 CEILING — both at maximum. With row 4 this brackets every AB the car can produce; if 0.42-0.48 sits outside the bracket the app is printing an unreachable target",
+      "aeF": 100, "aeR": 100, "rhF": null, "rhR": null, "ab": null },
+    { "n": 6, "purpose": "aeF sweep at aeR=50 — shape of the front term", "aeF": 0,   "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 7, "purpose": "aeF sweep", "aeF": 25,  "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 8, "purpose": "aeF sweep", "aeF": 75,  "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 9, "purpose": "aeF sweep", "aeF": 100, "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 10, "purpose": "RAKE (a) — wings held 50/50, front ride height at minimum. Does AB move with attitude or only with the wings?",
+      "aeF": 50, "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 11, "purpose": "RAKE (b) — wings held 50/50, front ride height at maximum",
+      "aeF": 50, "aeR": 50, "rhF": null, "rhR": null, "ab": null },
+    { "n": 12, "purpose": "A6 — one end only. Remove the front wing. If AB is still printed and still off-target, that is a readout the tune cannot reach and the card should say so",
+      "aeF": null, "aeR": 50, "rhF": null, "rhR": null, "ab": null }
+  ],
+  "notes": ""
+};
+
+const T_PANEL = {
+  "_README": [
+    "Groups S, C, D — everything the Performance panel can settle. Copy to",
+    "panel-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "Six figures per configuration, deterministic, about a second each. ONE",
+    "VARIABLE PER ROW - every row names what it changed from the baseline. If",
+    "two things moved, the row is discarded, not interpreted.",
+    "",
+    "S1 IS THE IMPORTANT ONE. What the Top Speed readout responds to is what",
+    "the readout IS, and the app's oldest unresolved question rides on it:",
+    "Boston's reading is that it is the projected maximum with the whole build",
+    "aimed at top speed, but it moved 140.0 -> 144.4 across the GR86",
+    "final-drive sweep, so it is not independent of the tune either. Both",
+    "cannot be true as stated. The SET of inputs it moves with settles it.",
+    "",
+    "Do S3 before S2. If 0-60 barely moves between the worst and best tire,",
+    "the car is power-limited and S2's thirty minutes are not worth spending",
+    "on it."
+  ],
+  "car": "", "class": "", "pi": null, "date": "",
+  "screen": "Performance panel",
+  "build": { "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+             "aero": "both", "tires": "", "twf": 0, "twr": 0,
+             "wt": null, "fw": null, "hp": null, "tq": null, "dt": "", "gears": null },
+  "baseline": {
+    "_note": "the app's road tune for this car — every S row returns here before changing one thing",
+    "fd": null, "aeF": null, "aeR": null, "pF": null, "pR": null,
+    "camF": null, "camR": null, "rhF": null, "rhR": null, "dfa": null, "dra": null
+  },
+  "S1_topSpeedRespondsTo": {
+    "_note": "S1 — vary ONE input, return to baseline, vary the next. Record Top Speed each time. The set that moves it defines what the number is.",
+    "rows": [
+      { "changed": "nothing (baseline)",        "topSpeed": null },
+      { "changed": "final drive -0.5",          "topSpeed": null },
+      { "changed": "final drive +0.5",          "topSpeed": null },
+      { "changed": "aero front to minimum",     "topSpeed": null },
+      { "changed": "aero front to maximum",     "topSpeed": null },
+      { "changed": "aero rear to minimum",      "topSpeed": null },
+      { "changed": "aero rear to maximum",      "topSpeed": null },
+      { "changed": "tire compound one step down", "topSpeed": null },
+      { "changed": "tire pressure +6 psi both",  "topSpeed": null },
+      { "changed": "ride height to maximum",     "topSpeed": null },
+      { "changed": "camber to zero both",        "topSpeed": null }
+    ]
+  },
+  "S3_tractionOrPowerLimited": {
+    "_note": "S3 — do this before S2. Big 0-60 change = traction-limited, the launch group matters. Small = power-limited, skip S2 on this car.",
+    "worstTire": { "compound": "", "s0_60": null, "s0_100": null },
+    "bestTire":  { "compound": "", "s0_60": null, "s0_100": null }
+  },
+  "S2_accelerationFactors": {
+    "_note": "S2 — one variable per row, all returning to baseline.",
+    "rows": [
+      { "changed": "nothing (baseline)",   "s0_60": null, "s0_100": null },
+      { "changed": "final drive -0.5",     "s0_60": null, "s0_100": null },
+      { "changed": "final drive +0.5",     "s0_60": null, "s0_100": null },
+      { "changed": "diff accel lock 0",    "s0_60": null, "s0_100": null },
+      { "changed": "diff accel lock 50",   "s0_60": null, "s0_100": null },
+      { "changed": "diff accel lock 100",  "s0_60": null, "s0_100": null },
+      { "changed": "tire pressure -6 psi", "s0_60": null, "s0_100": null },
+      { "changed": "tire pressure +6 psi", "s0_60": null, "s0_100": null },
+      { "changed": "weight reduction fitted", "s0_60": null, "s0_100": null }
+    ]
+  },
+  "S4_braking": {
+    "_note": "S4 — 5 balance points x 3 pressure points. The cleanest experiment in the catalogue: brake balance depends on nothing but wStep, and the panel measures braking directly. Tests brake-bias-per-width-step (currently 1.5% per step, no source at all).",
+    "rows": [
+      { "bal": 45, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 50, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 55, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 60, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 65, "pres": 100, "s60_0": null, "s100_0": null },
+      { "bal": 55, "pres": 75,  "s60_0": null, "s100_0": null },
+      { "bal": 55, "pres": 125, "s60_0": null, "s100_0": null }
+    ]
+  },
+  "S5_lateralGRespondsTo": {
+    "_note": "S5 — THE SLEEPER. If lateral G moves with camber and pressure and not just compound, a whole group of lap-times-only constants becomes measurable standing still. Ten minutes to find out.",
+    "rows": [
+      { "changed": "nothing (baseline)",     "lateralG": null },
+      { "changed": "ARB front to minimum",   "lateralG": null },
+      { "changed": "ARB front to maximum",   "lateralG": null },
+      { "changed": "spring front -30%",      "lateralG": null },
+      { "changed": "spring front +30%",      "lateralG": null },
+      { "changed": "camber front to 0",      "lateralG": null },
+      { "changed": "camber front to -5",     "lateralG": null },
+      { "changed": "tire pressure -6 psi",   "lateralG": null },
+      { "changed": "tire pressure +6 psi",   "lateralG": null }
+    ]
+  },
+  "C1_disciplineSignatures": {
+    "_note": "C1 — parts FIXED, only the tune changes, so this costs no shopping. Tarmac only: dirt and cross-country tunes on the panel just look worse because the panel is not testing them on dirt. Write the predicted ordering in `prediction` BEFORE reading.",
+    "prediction": "",
+    "rows": [
+      { "tune": "game default (control)", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — road",   "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — sprint", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — touge",  "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "tune": "app — drag",   "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null }
+    ]
+  },
+  "D3_awdCentreSplit": {
+    "_note": "D3 — AWD only. The app's neutral base moved 55 -> 60 on ForzaTune's band without ever being measured.",
+    "rows": [
+      { "dc": 40, "s0_60": null, "lateralG": null },
+      { "dc": 50, "s0_60": null, "lateralG": null },
+      { "dc": 60, "s0_60": null, "lateralG": null },
+      { "dc": 70, "s0_60": null, "lateralG": null },
+      { "dc": 85, "s0_60": null, "lateralG": null }
+    ]
+  },
+  "notes": ""
+};
+
+/* Session A has no template on disk — the only gearing file there is the GR86
+   measurement itself. This skeleton follows that file's shape (build / held /
+   readings / notes) so a second car lands beside it looking the same. */
+const T_GEARING = {
+  "_README": [
+    "Group G — gearing. Copy to gearing-<car>-<yyyy-mm-dd>.json.",
+    "",
+    "G1 IS THE ONE THAT UNBLOCKS THE SUITE. The axis maximum was recorded twice",
+    "off the same car and screen, 1.3% apart, and the whole gear-speed model",
+    "hangs off it via k = axisMax * fit * topRatio. READ IT COLD — before",
+    "looking at either candidate, because knowing them anchors the reading.",
+    "",
+    "On the GR86 specifically, the number goes into",
+    "tests/data/gearing-gr86-2026-07-31.json -> readings.axisMax, and the two",
+    "test files that carry the rival literals then disagree out loud. That",
+    "failure is the point.",
+    "",
+    "G4: only SPREAD[7] has ever been confirmed. 4, 5, 6, 8, 9 and 10 look",
+    "interpolated off a curve and feed both per-gear speeds and ratioSet().",
+    "Transcription only — fit a race box and copy the defaults off the screen."
+  ],
+  "car": "", "class": "", "pi": null, "date": "",
+  "screen": "tuning menu gearing graph",
+  "case": "G1+G2+G4+G5+G6",
+  "build": { "tires": "", "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+             "aero": "both", "twf": 0, "twr": 0, "gears": null,
+             "wt": null, "fw": null, "hp": null, "tq": null, "dt": "" },
+  "G1_axisMaxCold": {
+    "_note": "G1 — the single number the gear-speed model hangs off. One reading, taken before you look at anything else. Candidates are 157 and 159; do not read them first.",
+    "axisMax": null
+  },
+  "G2_axisVsGearing": {
+    "_note": "G2 — does the axis move when the GEARING moves? It should not: the range is a property of the car. If these two differ, everything derived from a single axis reading is suspect.",
+    "axisAtFdLow": null, "axisAtFdHigh": null, "fdLow": null, "fdHigh": null
+  },
+  "G3_axisVsPower": {
+    "_note": "G3 (= P5) — does the axis move when POWER is fitted? If it does, the two historical GR86 readings may BOTH be right, taken at different build states, and E2 is a recording defect rather than a misreading.",
+    "axisBeforeUpgrade": null, "axisAfterUpgrade": null, "partFitted": ""
+  },
+  "G6_fitRepeatability": {
+    "_note": "G6 — read the fit, leave the menu entirely, come back, read it again. Never checked, and every gear speed downstream rests on it.",
+    "fitRead1": null, "fitRead2": null
+  },
+  "G4_spread": {
+    "_note": "G4 — race-box DEFAULT ratios per gear count. Transcription, no interpretation. One car per row; name it.",
+    "rows": [
+      { "gears": 4,  "car": "", "r1": null, "r2": null, "r3": null, "r4": null },
+      { "gears": 5,  "car": "", "r1": null, "r2": null, "r3": null, "r4": null, "r5": null },
+      { "gears": 6,  "car": "", "r1": null, "r2": null, "r3": null, "r4": null, "r5": null, "r6": null },
+      { "gears": 8,  "car": "", "r1": null, "r2": null, "r3": null, "r4": null, "r5": null, "r6": null, "r7": null, "r8": null },
+      { "gears": 9,  "car": "", "r1": null, "r2": null, "r3": null, "r4": null, "r5": null, "r6": null, "r7": null, "r8": null, "r9": null },
+      { "gears": 10, "car": "", "r1": null, "r2": null, "r3": null, "r4": null, "r5": null, "r6": null, "r7": null, "r8": null, "r9": null, "r10": null }
+    ]
+  },
+  "G5_speedConstantSecondCar": {
+    "_note": "G5 — k = axisMax * fit * topRatio holds on the GR86 within 1.5%. Pure kinematics, so it SHOULD generalise — which is how tier-4 constants are born. Read the axis and the fit on a different car, set some other final drive, then read three gear endpoints off the chart. Each should match k/(FD*G) within ~2%.",
+    "axisMax": null, "fit": null, "fdSet": null,
+    "rows": [
+      { "gear": null, "mph": null },
+      { "gear": null, "mph": null },
+      { "gear": null, "mph": null }
+    ]
+  },
+  "notes": ""
+};
+
+/* ---------------------------------------------------------------------------
+   Sessions. `first` marks the seven cases TESTS.md puts at the front of the
+   order — each is under fifteen minutes and each can invalidate work further
+   down the list, so cheap tests that can kill expensive ones go first.
+   ------------------------------------------------------------------------ */
+const SESSIONS = [
+  { id:'ranges',  stem:'ranges',  tab:'R · Ranges',  title:'R · Slider ranges', tpl:T_RANGES,
+    lede:'Upstream of everything. The app emits absolute spring rates and assumes the game clamps quietly; nobody has ever checked whether the clamp fires — and an asymmetric clamp destroys the F/R ratio the whole spring model rests on.',
+    firstKeys:['sliders'], titles:{ sliders:'R1+R3 · every slider, both ends' } },
+  { id:'parts',   stem:'parts',   tab:'P · Parts',   title:'P · Parts and gating', tpl:T_PARTS,
+    lede:'The gating matrix is FH5 carryover and has never been confirmed on an FH6 screen. Fit the part, open the tuning menu, tick what exists. Two claims are flagged as most likely wrong; both are a 30-second check.',
+    bools:/^(suspension|differential|antirollBars|transmission|aero)\./,
+    firstKeys:['suspension','differential'],
+    titles:{ suspension:'P1 · suspension tiers', differential:'P1 · differential tiers',
+             antirollBars:'P1 · anti-roll bar tiers', transmission:'P1 · transmission tiers',
+             aero:'P1 · aero ends' } },
+  { id:'gearing', stem:'gearing', tab:'G · Gearing', title:'G · Gearing', tpl:T_GEARING,
+    lede:'Read the axis maximum cold, before looking at the candidates. Everything in the gear-speed model hangs off that one number, and the suite is currently holding two of them.',
+    firstKeys:['G1_axisMaxCold'] },
+  { id:'mb',      stem:'balance', tab:'M · Mech bal', title:'M · Mechanical Balance', tpl:T_BALANCE,
+    lede:'Not a calibration — a solve. MB is a number the game prints that responds to the sliders, so the function can be recovered exactly. Rows 1–5 choose the model on their own; everything after refines it.',
+    firstKeys:['rows'], titles:{ rows:'M1–M7 · the sweep, in order of what it tells you' } },
+  { id:'ab',      stem:'balance', tab:'A · Aero bal', title:'A · Aero Balance', tpl:T_AERO,
+    lede:'Same method, different question. Rows 4 and 5 bracket every AB the car can produce — and if 0.42–0.48 sits outside that bracket, the app is printing a target the user would chase to the end of a slider and never reach.',
+    firstKeys:['rows'], titles:{ rows:'A1–A6 · the sweep, floor and ceiling first' } },
+  { id:'panel',   stem:'panel',   tab:'S · Panel',   title:'S/C/D · Performance panel', tpl:T_PANEL,
+    lede:'Six figures per configuration, a second each, no run-to-run variance. S1 first: what the Top Speed readout responds to is what the readout IS. Do S3 before S2 — if the car is power-limited, S2 is not worth its thirty minutes.',
+    firstKeys:['S1_topSpeedRespondsTo','S3_tractionOrPowerLimited'] }
+];
+
+/* Keys that describe a row rather than being a reading in it. They render as
+   the row's heading or as context, never as an input. */
+const CTX = new Set(['n','purpose','changed','part','tune','change','name','id','options',
+  'usedBy','impliedK','vmetaLo','vmetaHi']);
+/* Top-level provenance, hoisted into the header card. */
+const HEAD = ['car','class','pi','date'];
+const STATIC = ['screen','case','varied','readout'];
+/* Leaves that take words, not digits. */
+const TEXT = new Set(['car','class','date','tires','dt','belowMin','aboveMax','prediction',
+  'compound','notes','note','partFitted','change','susp','arb','diff','trans','aero']);
+
+/* ---------------------------------------------------------------------------
+   Store. One document per sheet, so M7 (the same three rows on three more
+   cars) is three documents rather than one overwritten one.
+   ------------------------------------------------------------------------ */
+const KEY = 'fh6meas';
+let DB = { docs: {}, cur: null };
+try { DB = JSON.parse(localStorage.getItem(KEY)) || DB; } catch (e) {}
+if (!DB.docs) DB = { docs: {}, cur: null };
+
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch (e) {} };
+const uid  = () => 'd' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+const today = () => new Date().toISOString().slice(0, 10);
+
+function newDoc(sid) {
+  const id = uid();
+  DB.docs[id] = { session: sid, values: { date: today() }, updated: Date.now() };
+  DB.cur = id; save(); return id;
+}
+function doc() {
+  if (DB.cur && DB.docs[DB.cur]) return DB.docs[DB.cur];
+  const any = Object.keys(DB.docs)[0];
+  if (any) { DB.cur = any; return DB.docs[any]; }
+  newDoc(SESSIONS[0].id); return DB.docs[DB.cur];
+}
+const session = () => SESSIONS.find(s => s.id === doc().session) || SESSIONS[0];
+
+/* ---------------------------------------------------------------------------
+   Rendering. The walk is driven by the template itself rather than a
+   hand-written field list: a leaf that is null or "" is something to read, a
+   leaf that already has a value is something to SET before reading. That is
+   exactly the distinction the templates encode, and deriving the form from it
+   means a row can never silently go missing from the phone.
+   ------------------------------------------------------------------------ */
+let FIELDS = [];   /* every rendered input, in document order */
+
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+/* The JSON keys are the app's own short names and read fine in a fixture; on
+   a phone at arm's length, over a controller, "Mb" is not a label for the one
+   number the session exists to collect. Anything not here falls through to the
+   camel-case split, which handles the self-explaining ones. */
+const LABEL = {
+  car:'Car', class:'Class', pi:'PI', date:'Date',
+  wt:'Weight lb', fw:'Front %', hp:'HP', tq:'Torque', dt:'Drivetrain', gears:'Gears',
+  tires:'Tires', susp:'Suspension', arb:'ARBs', diff:'Diff', trans:'Trans', aero:'Aero',
+  twf:'Tire width F', twr:'Tire width R',
+  spF:'Spring F', spR:'Spring R', rhF:'Ride height F', rhR:'Ride height R',
+  arF:'ARB F', arR:'ARB R', aeF:'Aero F', aeR:'Aero R',
+  camF:'Camber F', camR:'Camber R', toeF:'Toe F', toeR:'Toe R', cast:'Caster',
+  bal:'Brake balance', pres:'Brake pressure', dfa:'Diff accel F', dra:'Diff accel R',
+  pF:'Tire psi F', pR:'Tire psi R', reF:'Rebound F', reR:'Rebound R',
+  buF:'Bump F', buR:'Bump R',
+  mb:'MECHANICAL BALANCE', ab:'AERO BALANCE', fd:'Final drive', dc:'Centre split',
+  min:'Slider min', max:'Slider max', appValue:'What the app printed',
+  s0_60:'0-60', s0_100:'0-100', s60_0:'60-0', s100_0:'100-0',
+  topSpeed:'Top speed', lateralG:'Lateral G', compound:'Compound',
+  spFmin:'Spring F min', spFmax:'Spring F max', spRmin:'Spring R min', spRmax:'Spring R max',
+  belowMin:'Typed below the minimum, the game…', aboveMax:'Typed above the maximum, the game…',
+  axisMax:'AXIS MAXIMUM mph', fit:'Fit — final drive at the right-hand edge',
+  fdSet:'Final drive set', fdLow:'Low final drive', fdHigh:'High final drive',
+  axisAtFdLow:'Axis at the low FD', axisAtFdHigh:'Axis at the high FD',
+  axisBeforeUpgrade:'Axis before', axisAfterUpgrade:'Axis after', partFitted:'Part fitted',
+  fitRead1:'Fit, first read', fitRead2:'Fit, after leaving the menu',
+  gear:'Gear no.', mph:'Ends at mph', prediction:'Predicted ordering — write it first',
+  springRate:'Spring rate', rideHeight:'Ride height', damping:'Damping',
+  camber:'Camber', toe:'Toe', caster:'Caster',
+  accel:'Accel lock', decel:'Decel lock', centre:'AWD centre',
+  frontBar:'Front bar', rearBar:'Rear bar',
+  finalDrive:'Final drive', individualGears:'Individual gears',
+  frontSlider:'Front slider', rearSlider:'Rear slider'
+};
+for (let i = 1; i <= 10; i++) LABEL['r' + i] = 'Gear ' + i;
+
+function pretty(k) {
+  if (LABEL[k]) return LABEL[k];
+  const m = k.match(/^([A-Z]\d+(?:_[A-Z]\d+)*)_(.*)$/);
+  const pre = m ? m[1].replace(/_/g, '+') : '';
+  let s = (m ? m[2] : k).replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/_/g, ' ').toLowerCase();
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+  return pre ? pre + ' · ' + s : s;
+}
+const isLeaf = v => v === null || v === '' || typeof v !== 'object';
+const empty  = v => v === null || v === '';
+
+function val(path) { const v = doc().values[path]; return v == null ? '' : v; }
+function setVal(path, v) {
+  const d = doc();
+  if (v === '' || v == null) delete d.values[path]; else d.values[path] = v;
+  d.updated = Date.now(); save(); progress();
+}
+
+/* One input, bound to its path in the exported JSON. */
+function field(path, key, kind) {
+  const id = 'f_' + path.replace(/[^a-z0-9]/gi, '_');
+  FIELDS.push(path);
+  const txt = kind === 'text' || TEXT.has(key);
+  const v = esc(val(path));
+  return '<div class="f"><label for="' + id + '">' + esc(pretty(key)) + '</label>' +
+    '<input id="' + id + '" data-p="' + esc(path) + '"' +
+    (txt ? ' type="text"' : ' type="text" inputmode="decimal"') +
+    ' value="' + v + '"' + (v !== '' ? ' class="has"' : '') + '></div>';
+}
+
+/* Yes / no / not tested — the gating matrix is a list of what is present, not
+   a value to read, so it gets buttons rather than a keyboard. */
+function tri(path, key) {
+  FIELDS.push(path);
+  const v = val(path);
+  const b = (lbl, code) => '<button type="button" data-tri="' + esc(path) + '" data-v="' + code +
+    '"' + (String(v) === code ? ' class="on"' : '') + '>' + lbl + '</button>';
+  return '<div class="f"><label>' + esc(pretty(key)) + '</label><div class="tri">' +
+    b('Yes', '1') + b('No', '0') + b('—', '') + '</div></div>';
+}
+
+/* The one number the row exists for. Everything else in a balance row is a
+   held condition being written down so the row can be trusted later; the
+   readout is the observation. It gets its own line rather than the fifth cell
+   of a grid. */
+const isPayload = (key, sess) => key === (sess.tpl.readout || '\0') || key === 'axisMax';
+
+/* The keys the baseline block holds — the conditions each row repeats. */
+const baseKeys = sess => sess.tpl.baseline
+  ? Object.keys(sess.tpl.baseline).filter(k => !k.startsWith('_') && k !== 'note')
+  : [];
+
+/* A row: its purpose, what to set, then what to read. */
+function rowCard(obj, path, sess, fallbackTitle) {
+  const head = ['purpose', 'changed', 'part', 'tune', 'change', 'name']
+    .map(k => obj[k]).find(x => typeof x === 'string' && x);
+  const n = obj.n != null ? obj.n : (obj.id != null ? obj.id : null);
+  const sets = [], reads = [], pay = [];
+
+  for (const k of Object.keys(obj)) {
+    if (k.startsWith('_') || CTX.has(k)) continue;
+    const v = obj[k], p = path + '.' + k;
+    if (!isLeaf(v)) { continue; }
+    if (empty(v)) {
+      if (isPayload(k, sess)) pay.push(field(p, k));
+      else reads.push(sess.bools && sess.bools.test(p) ? tri(p, k) : field(p, k));
+    } else {
+      sets.push('<span><i>' + esc(pretty(k)) + '</i> ' + esc(v) + '</span>');
+    }
+  }
+  /* Context the template carries but that is not a reading — slider limits the
+     app assumes, the options an answer may take. */
+  if (obj.vmetaLo != null) sets.unshift('<span><i>app assumes</i> ' +
+    esc(obj.vmetaLo) + '…' + esc(obj.vmetaHi) + '</span>');
+
+  let h = '<div class="row">';
+  if (head || n != null || fallbackTitle)
+    h += '<div class="h">' + (n != null ? '<span class="n">' + esc(n) + '</span>' : '') +
+      esc(head || fallbackTitle || '') + '</div>';
+  if (sets.length) h += '<div class="set">' + sets.join('') + '</div>';
+  if (obj.options) h += '<p class="note">' + esc(obj.options) + '</p>';
+  if (reads.length) h += '<div class="' + (reads.length > 1 ? 'grid' : '') + '">' +
+    reads.join('') + '</div>';
+  if (pay.length) h += '<div class="pay">' + pay.join('') + '</div>';
+  return h + '</div>';
+}
+
+/* Which cases are expanded, kept across the re-renders that a fill or a sheet
+   switch causes. Losing your place mid-sweep is how a row gets skipped. */
+const OPEN = new Set();
+
+/* A case: one collapsible block, counted in its own header so the phone shows
+   what is left without scrolling into it. */
+function caseBlock(key, v, sess) {
+  const before = FIELDS.length;
+  let body = '';
+  const note = v && v._note;
+
+  if (Array.isArray(v)) {
+    v.forEach((el, i) => { body += rowCard(el, key + '.' + i, sess); });
+  } else {
+    /* leaves that sit directly on the section: empty ones are readings, filled
+       ones are context the template carries — R5's list of answers a boundary
+       test can have, for one, which is the whole question that case asks. */
+    const direct = [], ctx = [], pay = [];
+    for (const k of Object.keys(v)) {
+      if (k.startsWith('_')) continue;
+      const sub = v[k], p = key + '.' + k;
+      if (!isLeaf(sub)) continue;
+      if (!empty(sub)) { ctx.push('<span><i>' + esc(pretty(k)) + '</i> ' + esc(sub) + '</span>'); continue; }
+      if (isPayload(k, sess)) pay.push(field(p, k));
+      else direct.push(sess.bools && sess.bools.test(p) ? tri(p, k) : field(p, k));
+    }
+    if (direct.length || ctx.length || pay.length) body += '<div class="row">' +
+      (ctx.length ? '<div class="set">' + ctx.join('') + '</div>' : '') +
+      (direct.length ? '<div class="' + (direct.length > 1 ? 'grid' : '') + '">' +
+        direct.join('') + '</div>' : '') +
+      (pay.length ? '<div class="pay">' + pay.join('') + '</div>' : '') + '</div>';
+    for (const k of Object.keys(v)) {
+      if (k.startsWith('_')) continue;
+      const sub = v[k], p = key + '.' + k;
+      if (isLeaf(sub)) continue;
+      if (Array.isArray(sub)) sub.forEach((el, i) => { body += rowCard(el, p + '.' + i, sess); });
+      else body += rowCard(sub, p, sess, pretty(k));
+    }
+  }
+
+  const mine = FIELDS.slice(before);
+  const filled = mine.filter(p => val(p) !== '').length;
+  const badge = (sess.firstKeys || []).includes(key)
+    ? ' <span class="first">do first</span>' : '';
+  const title = (sess.titles && sess.titles[key]) || pretty(key);
+
+  /* Every row records the conditions it was taken under, which is what makes
+     it trustworthy later — and on a fifteen-row sweep that is sixty typings of
+     the same four numbers. One tap fills the ones still empty from the
+     baseline; a row you deliberately moved (springs ±30%, ride height at the
+     stops) is never overwritten, because only empty fields are touched. */
+  const bk = baseKeys(sess);
+  const fillable = bk.length && mine.some(p => bk.includes(p.split('.').pop()));
+
+  return '<details class="case" data-k="' + esc(key) + '"' + (OPEN.has(key) ? ' open' : '') +
+    ' data-done="' + (mine.length && filled === mine.length ? '1' : '0') + '">' +
+    '<summary>' + esc(title) + badge +
+    '<span class="cnt">' + filled + '/' + mine.length + '</span></summary>' +
+    '<div class="body">' + (note ? '<p class="note">' + esc(note) + '</p>' : '') +
+    (fillable ? '<button class="b alt fill" data-fill="' + esc(key) + '">' +
+      'Fill the held values from the baseline</button>' : '') +
+    body + '</div></details>';
+}
+
+function render() {
+  const sess = session(), tpl = sess.tpl;
+  FIELDS = [];
+  let h = '';
+
+  /* the plan itself, collapsed — the README of the template it exports */
+  h += '<p class="lede">' + esc(sess.lede) + '</p>';
+  h += '<details class="case"><summary>The plan, and the rules</summary><div class="body">' +
+    '<p class="note">' + tpl._README.map(esc).join('<br>') + '</p>' +
+    '<ul class="rules">' +
+    '<li><b>One variable per observation.</b> If two things moved, the row is discarded, not interpreted.</li>' +
+    '<li><b>Type the number, never photograph it</b> — for anything positional. Photograph <b>digits</b> freely; never measure geometry off a photo. That is how the 3.73 disaster happened.</li>' +
+    '<li><b>Record raw readings, never conclusions.</b> The interpretation lives in the analysis, where it can be revised without re-driving anything.</li>' +
+    '<li><b>Predictions before readings</b>, wherever an ordering is expected.</li>' +
+    '<li><b>Every session ends with a committed fixture</b>, even one that changes nothing.</li>' +
+    '</ul></div></details>';
+
+  /* What the app currently assumes, where the template records it. This is the
+     claim being tested — on the gating matrix especially, the tick you are
+     about to make is only interesting against what the app believes. */
+  if (tpl._expected) {
+    h += '<details class="case"><summary>What the app assumes today</summary><div class="body">';
+    if (tpl._expected._note) h += '<p class="note">' + esc(tpl._expected._note) + '</p>';
+    for (const k of Object.keys(tpl._expected)) {
+      if (k.startsWith('_')) continue;
+      h += '<div class="row"><div class="h">' + esc(pretty(k)) + '</div>' +
+        '<p class="note" style="margin:0">' + esc(tpl._expected[k]) + '</p></div>';
+    }
+    h += '</div></details>';
+  }
+
+  /* who and what — the provenance every fixture needs to be worth anything */
+  h += '<div class="panel"><h2>Car and build</h2><div class="grid">';
+  for (const k of HEAD) if (k in tpl) h += field(k, k, k === 'pi' ? 'num' : 'text');
+  h += '</div>';
+  const stat = STATIC.filter(k => tpl[k]).map(k => pretty(k) + ': ' + tpl[k]);
+  if (stat.length) h += '<p class="note" style="margin-top:10px">' + esc(stat.join(' · ')) + '</p>';
+  if (tpl.build) {
+    h += '<h2 style="margin-top:12px">Build</h2><div class="grid3">';
+    for (const k of Object.keys(tpl.build)) {
+      if (k.startsWith('_')) continue;
+      if (empty(tpl.build[k])) h += field('build.' + k, k);
+    }
+    h += '</div>';
+    const held = Object.keys(tpl.build).filter(k => !k.startsWith('_') && !empty(tpl.build[k]))
+      .map(k => pretty(k) + ' ' + tpl.build[k]);
+    if (held.length) h += '<p class="note" style="margin-top:8px">Held: ' + esc(held.join(' · ')) + '</p>';
+  }
+  if (tpl.baseline) {
+    h += '<h2 style="margin-top:12px">Baseline — the hold-point every row returns to</h2>';
+    if (tpl.baseline._note || tpl.baseline.note)
+      h += '<p class="note">' + esc(tpl.baseline._note || tpl.baseline.note) + '</p>';
+    h += '<div class="grid3">';
+    for (const k of Object.keys(tpl.baseline)) {
+      if (k.startsWith('_') || k === 'note') continue;
+      if (empty(tpl.baseline[k])) h += field('baseline.' + k, k);
+    }
+    h += '</div>';
+  }
+  h += '</div>';
+
+  /* the cases */
+  for (const k of Object.keys(tpl)) {
+    if (k.startsWith('_') || HEAD.includes(k) || STATIC.includes(k) ||
+        k === 'build' || k === 'baseline' || k === 'notes') continue;
+    const v = tpl[k];
+    if (isLeaf(v)) continue;
+    h += caseBlock(k, v, sess);
+  }
+
+  /* free text, last, and only for things that have nowhere else to go */
+  h += '<div class="panel"><h2>Notes</h2>' +
+    '<p class="note">Anything the fields could not hold — a slider that behaved oddly, ' +
+    'a reading you distrust. Raw observations, not conclusions.</p>' +
+    '<textarea data-p="notes">' + esc(val('notes')) + '</textarea></div>';
+
+  document.getElementById('app').innerHTML = h;
+  document.getElementById('stitle').textContent = sess.title;
+  renderChips();
+  progress();
+}
+
+function renderChips() {
+  const cur = doc().session;
+  document.getElementById('chips').innerHTML = SESSIONS.map(s =>
+    '<button data-s="' + s.id + '"' + (s.id === cur ? ' class="on"' : '') + '>' +
+    esc(s.tab) + '</button>').join('');
+}
+
+function progress() {
+  const filled = FIELDS.filter(p => val(p) !== '').length;
+  document.getElementById('prog').textContent = filled + '/' + FIELDS.length;
+  document.getElementById('progbar').style.width =
+    (FIELDS.length ? filled / FIELDS.length * 100 : 0) + '%';
+  /* per-case counts, without a re-render that would close what is open */
+  document.querySelectorAll('details.case').forEach(d => {
+    const ins = d.querySelectorAll('[data-p],[data-tri]');
+    const paths = new Set();
+    ins.forEach(i => paths.add(i.dataset.p || i.dataset.tri));
+    const cnt = d.querySelector('.cnt');
+    if (!cnt || !paths.size) return;
+    const f = [...paths].filter(p => val(p) !== '').length;
+    cnt.textContent = f + '/' + paths.size;
+    d.dataset.done = f === paths.size ? '1' : '0';
+  });
+}
+
+/* ---------------------------------------------------------------------------
+   Export. Clone the template, write every filled path into it, hand back the
+   file. Nothing is invented and nothing filled in is dropped — an empty
+   reading stays null, which is what `tests/status.js` counts as still to do.
+   ------------------------------------------------------------------------ */
+function setPath(obj, path, v) {
+  const parts = path.split('.');
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const k = parts[i];
+    if (o[k] == null || typeof o[k] !== 'object') return;
+    o = o[k];
+  }
+  o[parts[parts.length - 1]] = v;
+}
+
+function build() {
+  const sess = session();
+  const out = JSON.parse(JSON.stringify(sess.tpl));
+  const vals = doc().values;
+  for (const p of Object.keys(vals)) {
+    const raw = vals[p];
+    if (raw === '' || raw == null) continue;
+    const key = p.split('.').pop();
+    let v;
+    if (raw === '1' && sess.bools && sess.bools.test(p)) v = true;
+    else if (raw === '0' && sess.bools && sess.bools.test(p)) v = false;
+    else if (!TEXT.has(key) && raw !== '' && !isNaN(Number(raw))) v = Number(raw);
+    else v = raw;
+    setPath(out, p, v);
+  }
+  return out;
+}
+
+const slug = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '').replace(/^(19|20)\d\d-/, '');
+
+function filename() {
+  const sess = session(), v = doc().values;
+  const car = slug(v.car) || 'car';
+  const tag = sess.id === 'ab' ? 'ab-' : '';
+  return sess.stem + '-' + tag + car + '-' + (v.date || today()) + '.json';
+}
+
+/* <dialog> and the clipboard both need a modern browser and, for the
+   clipboard, a secure context. This page is also perfectly usable opened
+   straight off disk, so neither is allowed to be the thing that loses a
+   session's readings. */
+function openDlg() {
+  const d = document.getElementById('dlg');
+  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  setTimeout(() => t.classList.remove('on'), 1600);
+}
+
+function exportSheet() {
+  const json = JSON.stringify(build(), null, 2);
+  const name = filename();
+  const dlg = document.getElementById('dlg');
+  document.getElementById('dlgt').textContent = 'Export';
+  document.getElementById('dlgb').innerHTML =
+    '<label>Filename — it must keep its prefix, tests/status.js reads the stem</label>' +
+    '<input class="fn" id="fname" value="' + esc(name) + '">' +
+    '<p class="note" style="margin:10px 0">Drop it in <b>tests/data/</b>, then ' +
+    '<b>node tests/status.js</b> to see it counted and <b>node tests/run.js</b> to ' +
+    'see what it contradicts. A green suite after new measurements means the ' +
+    'measurements were not wired to anything.</p>' +
+    '<pre>' + esc(json) + '</pre>' +
+    '<div class="btns">' +
+    '<button class="b alt" id="copy">Copy JSON</button>' +
+    '<button class="b" id="dl">Download</button>' +
+    (navigator.share ? '<button class="b alt wide" id="share">Share…</button>' : '') +
+    '<button class="b alt wide" id="close">Close</button></div>';
+  openDlg();
+
+  const fn = () => document.getElementById('fname').value.trim() || name;
+  document.getElementById('copy').onclick = () => {
+    if (navigator.clipboard) navigator.clipboard.writeText(json).then(
+      () => toast('JSON copied'), () => toast('Copy blocked — select the text'));
+    else toast('No clipboard here — use Download');
+  };
+  document.getElementById('dl').onclick = () => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    a.download = fn(); a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
+  if (navigator.share) document.getElementById('share').onclick = async () => {
+    const file = new File([json], fn(), { type: 'application/json' });
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] }))
+        await navigator.share({ files: [file], title: fn() });
+      else await navigator.share({ title: fn(), text: json });
+    } catch (e) {}
+  };
+  document.getElementById('close').onclick = () => dlg.close();
+}
+
+/* Sheets on this device — one per car per session, because M7 is the same
+   three rows on three more cars and overwriting them would lose the point. */
+function menu() {
+  const dlg = document.getElementById('dlg');
+  document.getElementById('dlgt').textContent = 'Sheets on this device';
+  const ids = Object.keys(DB.docs).sort((a, b) => DB.docs[b].updated - DB.docs[a].updated);
+  let h = '<div style="display:grid;gap:8px;margin-bottom:12px">';
+  for (const id of ids) {
+    const d = DB.docs[id];
+    const s = SESSIONS.find(x => x.id === d.session);
+    const n = Object.keys(d.values).filter(k => d.values[k] !== '').length;
+    h += '<div class="row" style="margin:0"><div class="h">' +
+      (id === DB.cur ? '<span class="n">▶</span>' : '') +
+      esc((s ? s.tab : d.session) + ' · ' + (d.values.car || 'unnamed') +
+        ' · ' + (d.values.date || '')) + '</div>' +
+      '<div class="note" style="margin-bottom:8px">' + n + ' fields filled</div>' +
+      '<div class="btns" style="margin:0">' +
+      '<button class="b alt" data-open="' + id + '">Open</button>' +
+      '<button class="b alt" data-del="' + id + '">Delete</button></div></div>';
+  }
+  h += '</div><div class="btns">' +
+    '<button class="b" id="newsheet">New sheet — this session</button>' +
+    '<button class="b alt" id="close">Close</button></div>';
+  document.getElementById('dlgb').innerHTML = h;
+  openDlg();
+
+  document.getElementById('newsheet').onclick = () => {
+    newDoc(session().id); dlg.close(); render(); window.scrollTo(0, 0);
+  };
+  document.getElementById('close').onclick = () => dlg.close();
+  dlg.querySelectorAll('[data-open]').forEach(b => b.onclick = () => {
+    DB.cur = b.dataset.open; save(); dlg.close(); render(); window.scrollTo(0, 0);
+  });
+  dlg.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+    const d = DB.docs[b.dataset.del];
+    const n = Object.keys(d.values).filter(k => d.values[k] !== '').length;
+    if (n > 1 && !confirm('Delete this sheet? ' + n + ' filled fields go with it.')) return;
+    delete DB.docs[b.dataset.del];
+    if (DB.cur === b.dataset.del) DB.cur = null;
+    save(); dlg.close(); render();
+  });
+}
+
+/* ---------------------------------------------------------------------------
+   Wiring
+   ------------------------------------------------------------------------ */
+document.addEventListener('input', e => {
+  const p = e.target.dataset && e.target.dataset.p;
+  if (!p) return;
+  setVal(p, e.target.value.trim());
+  e.target.classList.toggle('has', e.target.value.trim() !== '');
+});
+
+/* Copy the baseline into a case's held fields. ONLY the empty ones: rows 4-7
+   of a balance sweep exist precisely because a held value was moved, and
+   overwriting one would turn the row into a duplicate of row 1 while still
+   carrying its own readout. Returns how many it filled. */
+function fillHeld(key) {
+  const bk = baseKeys(session());
+  let n = 0;
+  for (const p of FIELDS) {
+    if (p.indexOf(key + '.') !== 0) continue;
+    const k = p.split('.').pop();
+    if (!bk.includes(k) || val(p) !== '') continue;
+    const b = val('baseline.' + k);
+    if (b === '') continue;
+    setVal(p, b); n++;
+  }
+  return n;
+}
+
+/* Remember which cases are open, so a fill or a sheet switch does not lose
+   your place halfway down a sweep. */
+document.addEventListener('toggle', e => {
+  const d = e.target.closest && e.target.closest('details.case');
+  if (!d || !d.dataset.k) return;
+  if (d.open) OPEN.add(d.dataset.k); else OPEN.delete(d.dataset.k);
+}, true);
+
+document.addEventListener('click', e => {
+  const fl = e.target.closest('[data-fill]');
+  if (fl) {
+    const n = fillHeld(fl.dataset.fill);
+    OPEN.add(fl.dataset.fill);
+    render();
+    toast(n ? n + ' held value' + (n === 1 ? '' : 's') + ' filled'
+            : 'Nothing to fill — set the baseline first');
+    return;
+  }
+  const t = e.target.closest('[data-tri]');
+  if (t) {
+    setVal(t.dataset.tri, t.dataset.v);
+    t.parentElement.querySelectorAll('button').forEach(b =>
+      b.classList.toggle('on', b === t && t.dataset.v !== ''));
+    return;
+  }
+  const c = e.target.closest('#chips button');
+  if (c) {
+    const sid = c.dataset.s;
+    /* reuse the newest sheet for that session, or start one */
+    const ids = Object.keys(DB.docs).filter(i => DB.docs[i].session === sid)
+      .sort((a, b) => DB.docs[b].updated - DB.docs[a].updated);
+    if (ids.length) { DB.cur = ids[0]; save(); } else newDoc(sid);
+    render(); window.scrollTo(0, 0);
+  }
+});
+
+/* Enter moves to the next field rather than doing nothing — at the console the
+   thumb is on the number pad and the next reading is one screen away. */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const p = e.target.dataset && e.target.dataset.p;
+  if (!p || e.target.tagName === 'TEXTAREA') return;
+  e.preventDefault();
+  const all = [...document.querySelectorAll('input[data-p]')];
+  const i = all.indexOf(e.target);
+  if (i > -1 && all[i + 1]) all[i + 1].focus();
+});
+
+document.getElementById('exp').onclick = exportSheet;
+document.getElementById('more').onclick = menu;
+document.getElementById('next').onclick = () => {
+  /* first empty reading in document order, opening whatever case holds it */
+  for (const p of FIELDS) {
+    if (val(p) !== '') continue;
+    const el = document.querySelector('[data-p="' + p + '"],[data-tri="' + p + '"]');
+    if (!el) continue;
+    const d = el.closest('details.case');
+    if (d && !d.open) d.open = true;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (el.tagName === 'INPUT') setTimeout(() => el.focus(), 260);
+    return;
+  }
+  toast('Every field on this sheet is filled');
+};
+
+render();
+</script>
+</body>
+</html>
