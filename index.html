@@ -413,8 +413,8 @@
 
       <div id="extra">
         <h2 style="margin-top:4px">Gearing readings <span class="hint">&mdash; one trip to the Gearing tab</span></h2>
-        <div class="hint" style="margin-bottom:8px">Two chart readings. They multiply together into this car's speed
-          constant &mdash; neither works without the other &mdash; and from them the app can put
+        <div class="hint" style="margin-bottom:8px">Three readings off one screen. They multiply together into this car's speed
+          constant &mdash; none works without the others &mdash; and from them the app can put
           real mph on every gear at any final drive you choose.
           <br><br><b>1.</b> On the Gearing tab, sweep the Final Drive slider until the <b>top
           gear's line finishes in the top-right corner</b> of the speed graph &mdash; still
@@ -422,7 +422,12 @@
           Enter that slider value as the <b>fit</b>.
           <br><b>2.</b> Read the number under the right-hand end of the bottom axis. It never
           moves. That is <b>Graph max</b>.
-          <br><b>3.</b> Optional: if you want to run your own final drive rather than the app's,
+          <br><b>3.</b> Read your <b>top gear's ratio</b> off the same screen &mdash; the last
+          number in the ratio list, the one you left alone while sweeping. The fit is only
+          meaningful against the gearbox it was read on, and gearboxes differ: the GR86's stock
+          race 7-speed tops out at 0.85 where this app's own set ends at 0.82, which is 3.8% on
+          every speed below.
+          <br><b>4.</b> Optional: if you want to run your own final drive rather than the app's,
           enter it too &mdash; every gear figure is then worked out at <em>your</em> setting, with
           ratios to match.</div>
         <div class="row2">
@@ -431,14 +436,18 @@
           <div><label>2 &middot; Graph max (mph)</label>
             <input id="vgraph" type="number" inputmode="decimal" placeholder="159"></div>
         </div>
-        <label style="margin-top:9px">3 &middot; Final drive you run <span class="hint">opt.</span></label>
-        <input id="fdset" type="number" inputmode="decimal" step="0.01" placeholder="4.58">
+        <div class="row2" style="margin-top:9px">
+          <div><label>3 &middot; Top gear ratio</label>
+            <input id="topratio" type="number" inputmode="decimal" step="0.01" placeholder="0.85"></div>
+          <div><label>4 &middot; Final drive you run <span class="hint">opt.</span></label>
+            <input id="fdset" type="number" inputmode="decimal" step="0.01" placeholder="4.58"></div>
+        </div>
         <div class="hint" style="margin-top:8px"><b>The corner test, precisely:</b> a line cut off
           <em>by</em> the edge touches it too, so "reaches the edge" is not enough. Too tall and
           the line is still rising when the edge chops it off &mdash; or it has vanished. Too
           short and it flattens onto the limiter well before the edge. You want it arriving at
           both at once. Leave the individual ratios alone while you sweep &mdash; only the top one
-          affects this.<br><br>Skip this step entirely and the final drive is a power-to-weight
+          affects this, which is why it is the one number to read off.<br><br>Skip this step entirely and the final drive is a power-to-weight
           guess with no gear speeds &mdash; it still calculates, but the gearing section will say
           so. (The Performance panel's Top Speed is never asked for: that figure assumes the whole
           build is aimed at speed, aero and all, so nothing can safely be measured against it.)</div>
@@ -1080,7 +1089,18 @@ function compute(i){
      produce a worse answer than the fit's one, you have to be in the tuning
      menu to apply a final drive either way, and it trusted a tire size that is
      easy to get wrong after a width upgrade. */
-  const topGear=SPREAD[i.gr][i.gr-1];
+  /* The top ratio of the gearbox the FIT WAS READ ON, which is not necessarily
+     the one this app emits. Measured 2026-08-12: the GR86's stock race 7-speed
+     is 4.17/2.89/2.17/1.66/1.32/1.07/0.85, while SPREAD[7] ends at 0.82 — and
+     the form tells the user to leave the ratios alone while sweeping, so the
+     fit is ALWAYS read on the game's box. Building k from SPREAD put every gear
+     speed 3.8% low on every build the app has ever produced (159 × 4.34 × 0.82
+     = 565.9 against a measured ~588.3). SPREAD is the fallback, not the truth:
+     it is right only for someone who has already applied the app's own ratios,
+     which is exactly the circular reading that "confirmed" the table in the
+     first place. */
+  const topGear=(isFinite(i.topratio)&&i.topratio>0) ? i.topratio : SPREAD[i.gr][i.gr-1];
+  const topGearSrc=(isFinite(i.topratio)&&i.topratio>0) ? 'read' : 'assumed';
   let fd, fdSrc='rough', fdRaw=null;
   if(isFinite(i.fdset)&&i.fdset>0){
     /* The user's own final drive wins outright. This field exists because the
@@ -1130,20 +1150,33 @@ function compute(i){
 
          speed at redline in gear G = k / (FD · G),  k = axisMax · fdFit · G_top
 
-     Confirmed end-to-end on the GR86: k = 159 × 4.575 × 0.82 = 596.5 puts 5th
-     at final drive 3.73 at 145.4 mph, which is exactly the Top Speed the game
-     reported for that setup — the car was rev-limited in 5th with 6th and 7th
-     unreachable. Two dead gears, and the readout was measuring the limiter
-     rather than the car. */
+     k is the invariant, not the axis. Measured across two builds and three
+     tunes on the GR86, this product held between 588.1 and 590.7 — 0.44% —
+     while the axis itself read 157 on some and 159 on others, because when the
+     axis moves the fit moves to compensate. So the one rule is that the three
+     readings must come off the same tune in the same sitting; paired that way
+     any of them is right, mixed they are not.
+
+     G_top is the third reading for exactly that reason: it belongs to the
+     gearbox the fit was taken on. */
   /* The speed constant needs the fit and the axis — NOT the fit to be the
      chosen final drive. A user-set final drive still gets full gear speeds,
      verdicts and ratios, as long as the two anchor readings exist. */
   const kSpeed=(isFinite(i.fdfit)&&i.fdfit>0&&isFinite(i.vgraph)&&i.vgraph>0)
     ? i.vgraph*i.fdfit*topGear : null;
+  /* If the top ratio was read, it belongs in the ratio list too, not just in k.
+     Leaving SPREAD's there broke the definition of the fit: k built on a 0.85
+     box and speeds taken off a 0.82 one put top gear at 165 on a 159 chart,
+     when "top gear reaches the edge" is the reading the whole fit is. Only the
+     top ratio is known, so only the top ratio is replaced — the gears below it
+     stay SPREAD's, which is what the card and sheet have to admit to. */
+  const gearRatios=topGearSrc==='read'
+    ? SPREAD[i.gr].map((g,n)=>n===i.gr-1?topGear:g)
+    : SPREAD[i.gr];
   /* Derived at whatever final drive is being asked about, so the card can
      recompute against a hand-edited one. compute() answers for its own
      recommendation; render() re-runs this against eff('fd'). */
-  const G0=gearsAt(kSpeed,i.gr,fd,SPREAD[i.gr]);
+  const G0=gearsAt(kSpeed,i.gr,fd,gearRatios);
   const gearTop=G0.tops;
   /* topCeil is where top gear meets the limiter — a ceiling on top speed, NOT a
      prediction of it. Measured 2026-07-31 on the GR86: at final drive 4.82 top
@@ -1226,7 +1259,7 @@ function compute(i){
   const v={};
   for(const k in raw) v[k]= raw[k]==null ? null : snap(k,raw[k]);
 
-  return {i,d,PI,f,w,v,fdSrc,gearTop,topCeil,fdBand,kSpeed,gears:SPREAD[i.gr]};
+  return {i,d,PI,f,w,v,fdSrc,gearTop,topCeil,fdBand,kSpeed,topGear,topGearSrc,gears:gearRatios};
 }
 
 /* ===================== ADJUSTMENT ENGINE ===================== */
@@ -1331,9 +1364,14 @@ function render(){
      })[r.fdSrc]+'</div>'+
     '<div class="gears">'+r.gears.map((g,n)=>'<div class="g"><span>'+ORDN(n+1)+'</span><span>'+g.toFixed(2)+
       gearMark(G,n)+'</span></div>').join('')+'</div>'+
+    /* The defect this closes was never bad arithmetic — it was silence. The app
+       assumed its own top ratio and printed the speeds as though measured. */
+    (G.tops&&r.topGearSrc==='assumed'
+      ? '<div class="note" style="margin-top:8px"><b>Top ratio assumed at '+r.topGear.toFixed(2)+'</b> &mdash; these speeds hold only if this app\'s ratios are fitted. Read yours off the Gearing tab; the game\'s own box was 0.85, worth 3.8% here.</div>'
+      : '')+
     (G.tops
       ? '<div class="note" style="margin-top:8px">Where each gear meets the limiter at '+fmt('fd',eff('fd'))+
-        '. <b>Which of them you actually reach is a question this cannot answer</b> &mdash; that needs the speed the car hits on <em>this</em> gearing, and the Performance panel\'s Top Speed may instead be the maximum it would do geared purely for speed. Compare these against the graph and you will see where your shifts land.</div>'
+        '. <b>Which of them you actually reach is a question this cannot answer</b> &mdash; that needs the speed the car really hits on <em>this</em> gearing, which no screen reports.</div>'
       : '')+
     /* Individual ratios — the thing the app previously refused to touch. Offered
        only when the speeds are anchored, and framed as a hypothesis, because
@@ -2310,7 +2348,7 @@ const slug=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')|
 
 /* ===================== WIRE-UP ===================== */
 const FIELDS=['name','year','cls','disc','wt','fw','hp','tq','dt','pi','gr','tire','aero','twf','twr',
-              'susp','arb','trans','diff','fdfit','vgraph','fdset'];
+              'susp','arb','trans','diff','fdfit','vgraph','topratio','fdset'];
 let restored=false;
 try{
   const s=JSON.parse(localStorage.getItem('fh6last')||'null');
@@ -2465,7 +2503,7 @@ function readForm(needStats){
   const i={name:g('name').trim(),year:g('year').trim(),cls:g('cls'),disc:g('disc'),wt:n('wt'),fw:n('fw'),
            hp:n('hp'),tq:n('tq'),dt:g('dt'),pi:n('pi'),gr:parseInt(g('gr')),tire:g('tire'),
            aero:g('aero'),twf:n('twf'),twr:n('twr'),susp:g('susp'),arb:g('arb'),trans:g('trans'),diff:g('diff'),
-           fdfit:n('fdfit'),vgraph:n('vgraph'),fdset:n('fdset')};
+           fdfit:n('fdfit'),vgraph:n('vgraph'),topratio:n('topratio'),fdset:n('fdset')};
   const req=needStats ? [['wt','Weight'],['fw','Front %'],['hp','HP'],['tq','Torque']]
                       : [['wt','Weight'],['hp','HP']];
   for(const [k,lbl] of req){
@@ -2612,6 +2650,11 @@ function preflight(){
   row('Chart readings', anchored?g('fdfit')+' fit &middot; '+g('vgraph')+' max':'not entered',
       anchored?'ok':'no',
       anchored?'':'without both, the final drive is a power-to-weight guess and there are no gear speeds');
+  /* Not a blocker — the gear speeds are still roughly right without it — but it
+     is the reading whose absence is invisible on the finished sheet. */
+  row('Top gear ratio', has(g('topratio'))?g('topratio'):'assumed',
+      has(g('topratio'))?'ok':'warn2',
+      has(g('topratio'))?'':'the gear speeds will assume this app\'s own ratios are fitted, which is a few per cent out on the game\'s gearbox');
   row('Final drive', BASE?fmt('fd',eff('fd')):'&mdash;',
       BASE?(BASE.fdSrc==='rough'?'no':'ok'):'no',
       !BASE?'nothing calculated yet':BASE.fdSrc==='rough'?'a guess &mdash; verify it on the graph first':'');
@@ -2682,7 +2725,7 @@ document.getElementById('lib').onclick=()=>{
    visible dropdowns stay: they're the context you're building in. */
 document.getElementById('newcar').onclick=()=>{
   if(MODE==='tune') setStep(1);              // a fresh car starts the walk over
-  ['name','year','wt','fw','hp','tq','pi','fdfit','vgraph','fdset']
+  ['name','year','wt','fw','hp','tq','pi','fdfit','vgraph','topratio','fdset']
     .forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('twf').value='0'; document.getElementById('twr').value='0';
   document.getElementById('trans').value='sport'; document.getElementById('diff').value='race';

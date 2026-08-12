@@ -32,7 +32,7 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
 
 const GR86 = { name: 'GR86', cls: 'A', disc: 'road', wt: 2900, fw: 53, hp: 350, tq: 260,
   dt: 'RWD', gr: 7, tire: 'sport', aero: 'both', twf: 0, twr: 0, susp: 'race', arb: 'both',
-  trans: 'race', diff: 'race', vmax: NaN, fdfit: NaN, vgraph: NaN, fdset: NaN };
+  trans: 'race', diff: 'race', vmax: NaN, fdfit: NaN, vgraph: NaN, topratio: NaN, fdset: NaN };
 const at = o => X.compute(Object.assign({}, GR86, o));
 const HTML = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
 const set = (id, v) => { document.getElementById(id).value = v; };
@@ -43,15 +43,15 @@ const draw = o => {
   return els['out'].innerHTML;
 };
 
-console.log('--- the gear table is the game\'s own 7-speed race box ---');
+console.log('--- SPREAD is the app\'s own table, not the game\'s ---');
 /* Boston asked whether the fit is measured with the app's ratios or the game's
-   defaults. They are the same table — the app never asks for ratios, only for
-   the final drive — and only the TOP ratio affects the fit, since that is the
-   line whose endpoint lands in the corner. */
-ok('the app never asks for individual ratios',
-   !/id="g[1-9]"|id="gear[1-9]"/.test(require('fs').readFileSync(
-     require('path').join(__dirname, '..', 'index.html'), 'utf8')));
-ok('SPREAD[7] matches the screen',
+   defaults, and the answer this file used to give was "they are the same
+   table". They are not — see the k block below — so the fit is read on the
+   game's box and only the TOP ratio matters, since that is the line whose
+   endpoint lands in the corner. That is the one ratio the app now asks for. */
+ok('the app asks for the top ratio only, never the full set',
+   /id="topratio"/.test(HTML) && !/id="g[1-9]"|id="gear[1-9]"/.test(HTML));
+ok('SPREAD[7] is unchanged, as the fallback it now is',
    JSON.stringify(X.SPREAD[7]) === JSON.stringify([2.92, 2.05, 1.60, 1.30, 1.10, 0.95, 0.82]),
    X.SPREAD[7].join(' / '));
 
@@ -202,6 +202,53 @@ ok("the game's real 7-speed top gear is not SPREAD's", gameTop !== X.SPREAD[7][6
 ok('and using SPREAD instead of the fitted ratio costs about 3.8%',
    near((gameTop / X.SPREAD[7][6] - 1) * 100, 3.7, 0.4),
    ((gameTop / X.SPREAD[7][6] - 1) * 100).toFixed(1) + '% low');
+
+console.log('--- and the fix: the top ratio is read, not assumed ---');
+/* C1, 2026-08-12. The measured sitting: axis 159, fit 4.34 read on the game's
+   own gearbox, whose top gear is 0.85. The app used to build k from SPREAD's
+   0.82 and land at 565.9 against a k measured on that same car of ~588.3. */
+{
+  const read = at({ fdfit: 4.34, vgraph: 159, topratio: gameTop });
+  const assumed = at({ fdfit: 4.34, vgraph: 159 });
+  ok('the entered top ratio builds k, not SPREAD',
+     near(read.kSpeed, 159 * 4.34 * gameTop, 0.01), read.kSpeed.toFixed(1));
+  ok('which is the k measured on that car', near(read.kSpeed, FXG.K(), 4),
+     read.kSpeed.toFixed(1) + ' vs ' + FXG.K().toFixed(1) + ' measured');
+  /* Not tighter than that, and deliberately not asserted tighter: the fit was
+     recorded as "about 4.34", and 4.34 against 4.35 is already 0.23%. What the
+     fix has to clear is the gap it closes, so the test is comparative — the
+     read ratio inside the k spread, the assumed one an order of magnitude out. */
+  const err = m => Math.abs(m / FXG.K() - 1);
+  ok('read lands inside the measured k spread, assumed nowhere near',
+     err(read.kSpeed) < 0.01 && err(assumed.kSpeed) > 0.03,
+     (err(read.kSpeed) * 100).toFixed(2) + '% vs ' + (err(assumed.kSpeed) * 100).toFixed(2) + '%');
+  ok('the old assumed value is the 565.9 that was wrong',
+     near(assumed.kSpeed, 565.9, 0.5), assumed.kSpeed.toFixed(1));
+  ok('so every gear speed moves with it',
+     read.gearTop.every((v, n) => v > assumed.gearTop[n]));
+  /* Blank must keep working: every saved build predates this field. */
+  ok('a blank top ratio still falls back to SPREAD',
+     assumed.kSpeed === 159 * 4.34 * X.SPREAD[7][6]);
+  ok('and a junk one does too', at({ fdfit: 4.34, vgraph: 159, topratio: 0 }).kSpeed
+     === assumed.kSpeed);
+  ok('the source is reported either way',
+     read.topGearSrc === 'read' && assumed.topGearSrc === 'assumed');
+  /* The read ratio has to reach the ratio LIST as well as k, or the fit stops
+     meaning what it says: k on a 0.85 box with speeds off a 0.82 one put top
+     gear at 165 on a 159 chart, and "top gear reaches the edge" is the whole
+     reading. Only the top ratio is known, so only the top one is replaced. */
+  ok('top gear lands exactly on the graph max at the fit',
+     near(read.gearTop[6], 159, 0.1), read.gearTop[6].toFixed(1));
+  ok('the read ratio is in the printed list', read.gears[6] === gameTop,
+     read.gears.join('/'));
+  ok('and the gears below it are still SPREAD, unmeasured',
+     read.gears.slice(0, 6).join() === X.SPREAD[7].slice(0, 6).join());
+  /* The defect was silence, not arithmetic — an assumed ratio must say so. */
+  const quiet = draw({ fdfit: '4.34', vgraph: '159', topratio: '' });
+  ok('an assumed ratio is disclosed on the card', /Top ratio assumed at 0\.82/.test(quiet));
+  ok('and a read one is not', !/Top ratio assumed/.test(
+     draw({ fdfit: '4.34', vgraph: '159', topratio: '0.85' })));
+}
 
 r = at({ fdfit: 4.575, vgraph: 159 });
 ok('gear speeds computed', Array.isArray(r.gearTop) && r.gearTop.length === 7);
