@@ -1,0 +1,108 @@
+{
+  "_README": [
+    "The fit re-swept on the app's own tune, where the app's ratios are actually",
+    "fitted so the top gear really is 0.82 and the axis reads 159. First time",
+    "the axis, the fit and the gearbox have all belonged to the same setup.",
+    "",
+    "IT RESOLVES E2, AND IT DOES SO BY MAKING THE QUESTION THE WRONG ONE.",
+    "See kIsTheInvariant."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — GEARING tab",
+  "tune": "the app's tune, tire pressure still at 50 psi",
+  "varied": "fd",
+
+  "build": {
+    "tires": "semi-slick", "susp": "race", "arb": "both", "diff": "race",
+    "trans": "race", "aero": "both", "twf": 3, "twr": 3, "gears": 7,
+    "wt": 2428, "fw": 54, "hp": 290, "tq": 303, "dt": "AWD"
+  },
+
+  "held": {
+    "ratios": [2.92, 2.05, 1.60, 1.30, 1.10, 0.95, 0.82],
+    "ratiosNote": "the APP's ratio set, applied — so SPREAD[7]'s top gear of 0.82 is genuinely on the car for these rows",
+    "axisMax": 159,
+    "pF": 50.0, "pR": 50.0
+  },
+
+  "rows": [
+    { "fd": 4.53, "s60": 3.333, "s100": 8.983, "top": 140.3, "brake60_0": 66.3, "brake100_0": 151.2, "lateralG60": 1.26, "lateralG120": 1.42, "mb": 0.50, "ab": 0.45, "aeroEff": 0.743 },
+    { "fd": 4.52, "s60": 3.333, "s100": 8.967, "top": 140.0, "brake60_0": 66.4, "brake100_0": 151.3, "lateralG60": 1.26, "lateralG120": 1.42, "mb": 0.50, "ab": 0.45, "aeroEff": 0.743 },
+    { "fd": 4.51, "s60": 3.333, "s100": 8.983, "top": 140.4, "brake60_0": 66.2, "brake100_0": 151.1, "lateralG60": 1.26, "lateralG120": 1.42, "mb": 0.50, "ab": 0.45, "aeroEff": 0.743 }
+  ],
+
+  "fit": null,
+  "fitNote": "Boston swept to 4.53, 4.52 and 4.51 and did not state which one he judged as just touching the edge. It barely matters — see kIsTheInvariant, where the three differ by 0.44% in k — but the row should say which, so it is left null rather than guessed.",
+
+  "kIsTheInvariant": [
+    "E2 IS RESOLVED, AND THE ANSWER IS THAT THE QUESTION WAS WRONG. Neither 157",
+    "nor 159 was a misreading, and it does not matter which is 'the' axis.",
+    "",
+    "  k = axisMax * fit * topRatio",
+    "",
+    "  July build      157 * 4.575 * 0.82  =  589.0",
+    "  this morning    157 * 4.570 * 0.82  =  588.3",
+    "  now, fd 4.51    159 * 4.510 * 0.82  =  588.1",
+    "  now, fd 4.52    159 * 4.520 * 0.82  =  589.4",
+    "  now, fd 4.53    159 * 4.530 * 0.82  =  590.7",
+    "",
+    "Everything lands between 588.1 and 590.7 — a spread of 0.44% across two",
+    "builds, three tunes, two axis readings and two weeks.",
+    "",
+    "THE MECHANISM: WHEN THE AXIS MOVES, THE FIT MOVES TO COMPENSATE. The axis",
+    "is the chart's scale; the fit is the final drive at which the top gear",
+    "reaches the end of that scale. A longer scale needs a shorter final drive",
+    "to reach it, and the product is conserved. So k is the physical constant —",
+    "speed at redline per unit of final drive times gear — and the axis on its",
+    "own is chart furniture with no meaning at all.",
+    "",
+    "WHAT THIS RETIRES: every argument in this repo about which axis value is",
+    "correct, including this morning's k-agreement argument for 157 and this",
+    "afternoon's every-reproducible-tune-says-159 argument. Both were reasoning",
+    "about a number that is only half of a measurement.",
+    "",
+    "WHAT REPLACES IT, and it is the only rule the app needs: READ THE AXIS AND",
+    "THE FIT ON THE SAME TUNE, IN THE SAME SITTING. Pair them and k comes out",
+    "right regardless of what either reads. Mix them and it does not. The July",
+    "fixture's 157-or-159 confusion was never an axis problem — it was two",
+    "half-measurements filed as if they were one."
+  ],
+
+  "theAppsKIsFourPercentLow": [
+    "AND THIS QUANTIFIES THE SPREAD DEFECT IN THE LIVE WORKFLOW.",
+    "",
+    "Boston reads the fit BEFORE applying the app's tune, so it is read on the",
+    "game's gearbox, whose top gear is 0.85. He read about 4.34 — which is why",
+    "the app recommended 4.34, since vFrac for road is 1.00 and the",
+    "recommendation is the fit itself. The app then built its speed constant",
+    "with SPREAD's top ratio instead of the one that was on the car:",
+    "",
+    "  what the app computed   159 * 4.34 * 0.82  =  565.9",
+    "  what it should have     159 * 4.34 * 0.85  =  586.6",
+    "  what the car actually is, measured on its own gearbox   ~588.3",
+    "",
+    "So the app's k is 3.8% low, and every per-gear speed it printed is 3.8%",
+    "low with it. Using the real top ratio of the gearbox the fit was read on",
+    "gets within 0.3% of the measured value, which is the whole fix.",
+    "",
+    "CONFIRMATION THAT THE TWO GEARBOXES ARE CONSISTENT, not merely close: the",
+    "fit on the game's gearbox was 4.34 and on the app's it is about 4.52, a",
+    "ratio of 1.041, against a top-ratio ratio of 0.85/0.82 = 1.037. The fit",
+    "moves inversely with the top ratio exactly as k = axis * fit * topRatio",
+    "requires. The model is right; only the constant fed into it was wrong.",
+    "",
+    "THE FIX, in order of how well it matches what Boston actually does:",
+    "  1. Ask for the top ratio of the gearbox the fit was read on, and use it.",
+    "     One extra number off a screen he is already looking at.",
+    "  2. Or tell him to re-read the fit after applying the app's ratios, which",
+    "     is a second trip to the tuning menu for the same information.",
+    "Option 1 also stops SPREAD being load-bearing at all, which is worth having",
+    "given the table is known wrong for six of its seven rows."
+  ],
+
+  "notes": "Top speed across the three rows went 140.3, 140.0, 140.4 — non-monotonic again, and 0-100 went 8.983, 8.967, 8.983, which is one frame down and back. Both patterns match the earlier sweep. Given the repeat test showed zero variance within a sitting, these remain real, and nothing in the current model predicts a non-monotonic top speed across 0.01 of final drive. Recorded, unexplained, for the third time."
+}
