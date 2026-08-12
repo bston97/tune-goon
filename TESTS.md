@@ -355,6 +355,45 @@ Speed is not a drag equilibrium.
 on one car, all varying the same input, cannot separate the variables. The
 cases below vary the inputs *independently*, which the original sweep never did.
 
+### S0 — The repeat check. Run this FIRST in every panel session *(2 min)*
+
+**Not a case so much as the instrument's own calibration**, and it has to be
+re-run rather than looked up. It establishes, for the configuration in front of
+you, how much the panel moves when *nothing* moves — which is the threshold
+every other reading in that session gets judged against.
+
+- **Set:** whatever the session is about to measure. Change nothing.
+- **Do:** move a slider one step off its value and back, six times — three
+  arriving from above, three from below. Let it settle; nothing may say
+  `SIMULATING…` when the figure is read.
+- **Read:** all six panel figures each time.
+- **Means:** the spread is the session's noise floor. A later difference
+  smaller than it is **no result**. The from-above and from-below groups also
+  have to agree — if they don't, that is path dependence, which is worse than
+  variance and would mean the order a slider is swept changes what it measures.
+
+**Why it repeats.** Measured once on 2026-08-12 (GR86, A 700, AWD, game default
+tune) the answer was essentially zero: six identical reads bar a single 0.1 ft
+blip on 100-0. But Boston reports having seen the figures move by more than
+that on other occasions — usually small, but larger than this. **So the clean
+result belongs to that configuration and must not be generalised into a
+standing assumption**, which is exactly the mistake this file exists to stop.
+One car, one build, one tune state is one data point about the instrument.
+
+Re-run it:
+
+- on each new car
+- on each new **tune state** — a full custom tune is the case Boston
+  specifically wants sampled, since the one measurement so far was on the
+  game's default
+- before trusting any conclusion that rests on a difference under ~1%
+
+**A hypothesis worth watching while the samples accumulate:** the only figure
+that moved was 100-0, the longest-running simulation on the screen. If variance
+scales with how much simulated time a figure covers, then top speed and 100-0
+are the fragile ones and 0-60 is the solid one — which would tell us which
+columns can carry a fine distinction and which cannot.
+
 ### S1 — What does the Top Speed readout actually respond to? *(20 min)*
 The most important unresolved question in the app. Boston's reading is that it
 is the projected maximum with the whole build aimed at top speed — but it moved
@@ -509,6 +548,10 @@ need driving; a few (`lockup`, `hits the limiter early`) are panel-visible.
   not interpreted.
 - **Record raw readings, never conclusions.**
 - **Predictions before readings**, wherever an ordering is expected.
+- **Every panel session opens with `S0`, the repeat check**, and its spread is
+  recorded in that session's own fixture. A difference smaller than the spread
+  measured *in that configuration* is not a result. Borrowing another session's
+  noise floor is not allowed — that is the assumption `S0` exists to replace.
 - **Every session ends with a committed fixture**, even one that changes
   nothing. Confirming a constant is worth as much as overturning it.
 - **Promotion order:** fixture with provenance → a test asserting it

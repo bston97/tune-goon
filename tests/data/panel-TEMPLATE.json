@@ -34,6 +34,20 @@
     "camF": null, "camR": null, "rhF": null, "rhR": null, "dfa": null, "dra": null
   },
 
+  "S0_repeatCheck": {
+    "_note": "S0 — RUN THIS FIRST, EVERY SESSION, and fill it before any other block. Move one slider a step off its value and back, six times: three arriving from above, three from below, nothing else touched, nothing saying SIMULATING when the figure is read. The spread across these six IS this session's noise floor, and any later difference smaller than it is no result. The from-above and from-below groups must also agree; if they do not, that is path dependence and it is worse than variance. Do NOT copy a previous session's numbers in here — measured once on 2026-08-12 the spread was essentially zero, but Boston has seen the figures move by more than that elsewhere, so the floor belongs to the configuration, not to the game.",
+    "settingHeld": "",
+    "rows": [
+      { "n": 1, "approach": "from above", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "n": 2, "approach": "from above", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "n": 3, "approach": "from above", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "n": 4, "approach": "from below", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "n": 5, "approach": "from below", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null },
+      { "n": 6, "approach": "from below", "s0_60": null, "s0_100": null, "topSpeed": null, "s60_0": null, "s100_0": null, "lateralG": null }
+    ],
+    "spreadNote": "write the observed spread per figure here once the six rows are in, e.g. '0-60 0.000, top speed 0.0, 100-0 0.1 ft'"
+  },
+
   "S1_topSpeedRespondsTo": {
     "_note": "S1 — vary ONE input, return to baseline, vary the next. Record Top Speed each time. The set that moves it defines what the number is.",
     "rows": [
