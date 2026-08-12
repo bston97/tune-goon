@@ -9,6 +9,50 @@ This file is the master list. `BACKLOG.md` A–G is the surrounding plan.
 
 ---
 
+## The letters — read this first
+
+Cases are named **group letter + number**. `G1` is the first case in the
+gearing group; `M3` is the third in the mechanical balance group. That is all
+they are: a short handle so a reading can say which question it answers,
+because "the axis one" stops being unambiguous the moment there are two.
+
+| letter | group | what it is about |
+|---|---|---|
+| **R** | Slider ranges | what the game's sliders will actually accept |
+| **P** | Parts | which sliders each part tier unlocks, and what a part changes |
+| **G** | Gearing | the graph, the axis, the ratio tables |
+| **M** | Mechanical Balance | solving the MB readout as a function of the bars |
+| **A** | Aero Balance | the same for the AB readout and the wings |
+| **S** | Speed, acceleration, braking | everything the Performance panel can settle |
+| **D** | Differential | lock settings and the AWD centre split |
+| **C** | Discipline signatures | does a road tune measure differently from a drag tune |
+| **T** | Telemetry and driving | the ones that need laps, not a menu |
+| **V** | The rebuild | replacing heuristics with the solved forms, then re-testing |
+
+**The car slots are a separate scheme and are not cases.** `CORE-1` through
+`CORE-3` are the three cars every discipline gets measured on; `SAT-` slots are
+satellites that appear in one or two cases each. Plain names for them are in
+the roster table below.
+
+### The collision, which is genuinely confusing
+
+`BACKLOG.md` numbers its own sections A–G too, and they mean **completely
+different things** — backlog `A` is the measurement plan, `E` is loose ends,
+`G` is the nameplate families and the Mitsubishi roster. So:
+
+- **`G1` here** = read the gearing axis maximum. **`G6` in the backlog** = the
+  Mitsubishi garage.
+- **`A3` here** = the aero floor and ceiling. **`A3` in the backlog** = the
+  `SPREAD` tables, which in this file is `G4`.
+- **`E2`** only exists in the backlog — it is the 157-versus-159 axis defect,
+  and it is what case `G1` settles.
+
+Nothing renames cleanly at this point without breaking every reference already
+written down, so the rule is: **a bare letter-number means a case in this file.
+A backlog item is always written `BACKLOG G6`, never bare.**
+
+---
+
 ## The car question, answered
 
 **A fixed core of three cars, each tuned to every discipline.** Not different
@@ -62,15 +106,15 @@ Shortlisted on FH5-era figures, which is what stock data is good for. **Every
 number below is a candidate to check, not data**; weight and front % get read
 off the upgrade screen before anything is entered.
 
-| slot | first pick | alternates |
-|---|---|---|
-| CORE-1 | **2003 Nissan 350Z** ~3,190 lb, ~53% F | 1999 Silvia S15 Spec-R (2,755/55) · 2002 RX-7 Spirit R (2,870/50) |
-| CORE-2 | **2016 Mazda MX-5** ~2,340 lb | 1985 AE86 · 2004 Honda S2000 (2,800) |
-| CORE-3 | **2015 Challenger SRT Hellcat** ~4,500 lb, 8-spd RWD | 2020 Audi RS 6 Avant · Bentley Continental GT |
-| SAT-F-low | **Porsche 911 GT3** ~39% F, ~3,150 lb | 1995 Toyota MR2 (43%) |
-| SAT-F-high | **2018 Civic Type R (FK8)** ~3,100 lb, ~62% F | 2015 Golf GTI · Mini Cooper S |
-| SAT-DT | CORE-1 with the drivetrain swapped | — |
-| SAT-G | **2018 Mustang GT** (10-spd) | 2017 Camaro ZL1 (10-spd) |
+| slot | in plain words | first pick | alternates |
+|---|---|---|---|
+| CORE-1 | the platform car | **2003 Nissan 350Z** ~3,190 lb, ~53% F | 1999 Silvia S15 Spec-R (2,755/55) · 2002 RX-7 Spirit R (2,870/50) |
+| CORE-2 | the light one | **2016 Mazda MX-5** ~2,340 lb | 1985 AE86 · 2004 Honda S2000 (2,800) |
+| CORE-3 | the heavy one | **2015 Challenger SRT Hellcat** ~4,500 lb, 8-spd RWD | 2020 Audi RS 6 Avant · Bentley Continental GT |
+| SAT-F-low | the rear-biased one | **Porsche 911 GT3** ~39% F, ~3,150 lb | 1995 Toyota MR2 (43%) |
+| SAT-F-high | the front-biased one | **2018 Civic Type R (FK8)** ~3,100 lb, ~62% F | 2015 Golf GTI · Mini Cooper S |
+| SAT-DT | the swap twin | CORE-1 with the drivetrain swapped | — |
+| SAT-G | the long gearbox | **2018 Mustang GT** (10-spd) | 2017 Camaro ZL1 (10-spd) |
 
 Three notes that come out of the roster rather than the slots:
 
