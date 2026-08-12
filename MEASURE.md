@@ -10,7 +10,7 @@ Roughly **four hours standing still** covers Phases 1–4 of Session B. The
 driving work is the last 20% of the value, not the first.
 
 **On the phone, at the console, use
-[`measure.html`](https://bston97.github.io/forza-tune-goon/measure.html)** —
+[`measure.html`](https://bston97.github.io/tune-goon/measure.html)** —
 these same sessions as a data-entry form, one case per screen, with the purpose
 of every row on the row. It exports a filled-in copy of the `tests/data`
 template it was built from, so what comes off the phone drops straight into

@@ -6,7 +6,7 @@ each possible answer would mean.
 
 `MEASURE.md` holds the fill-in working sheets for the sessions in flight.
 This file is the master list. `BACKLOG.md` A–G is the surrounding plan.
-[`measure.html`](https://bston97.github.io/forza-tune-goon/measure.html) is all
+[`measure.html`](https://bston97.github.io/tune-goon/measure.html) is all
 of it as a phone form: six sessions covering groups R, P, G, M, A and S/C/D,
 each case collapsible, each export a fixture `tests/data/` already understands.
 Standing at the console, that is the one to open.
