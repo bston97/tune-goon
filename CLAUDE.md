@@ -261,9 +261,21 @@ curve.
 **So geometry picks the starting point and the Performance panel picks the
 setting.** That panel — same screen, left-hand side — reports 0-60, 0-100, Top
 Speed, braking distances and lateral G for whatever is currently set. Those are
-the actual objective, they are simulation output rather than driving, and they
-carry no run-to-run variance. Sweeping the final drive against them is how
-`vFrac` finally got measured.
+the actual objective, and they are simulation output rather than driving.
+Sweeping the final drive against them is how `vFrac` finally got measured.
+
+**They are not noise-free, though — that claim stood here until 2026-08-12 and
+was wrong.** Boston: switching off a final drive and back onto it moves 0-60
+and top speed slightly, and the panel visibly prints `SIMULATING…` while it
+recomputes. So the figures are a *re-run simulation*, not a lookup, and the
+same setting read twice is two samples rather than one fact. Two consequences,
+both load-bearing: a reading taken while anything still says `SIMULATING…` is
+stale and must be discarded, and **a difference smaller than the readout's own
+repeat spread is not a result.** The measured GR86 sweep showed top speed
+wobbling non-monotonically by 0.4 mph across final drives 0.04 apart, which is
+that spread showing through. Anything quoted off this panel needs the repeat
+spread established first, including — uncomfortably — the `vFrac` sweep below,
+whose whole 0-100 range was 0.12 s.
 
 **The calibration sweep** (GR86, 2026-07-31, ratios held at the race-box
 default, final drive the only variable, fit = 4.575):

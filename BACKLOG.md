@@ -55,8 +55,15 @@ confirmation has already been tried and produced nothing usable (see CLAUDE.md
 summaries are actively wrong about the gearing graph).
 
 The game itself is the only instrument that works. Most of what is unknown can
-be read **without driving a lap**, off readouts that are simulation output with
-no run-to-run variance.
+be read **without driving a lap**, off readouts that are simulation output
+rather than driving.
+
+**Corrected 2026-08-12:** those readouts do *not* have zero run-to-run
+variance, which this line claimed until Boston checked. Leaving a final drive
+and returning to it moves 0-60 and top speed slightly, and the panel prints
+`SIMULATING…` while it recomputes. Still far better than lap times — but a
+repeat spread has to be established before any panel difference counts as a
+result. See `tests/data/gearing-gr86-2026-08-12.json`.
 
 ## Method rules — these are what keep the data worth having
 
