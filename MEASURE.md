@@ -1,4 +1,14 @@
-# Session sheet — gearing first
+# Session sheets
+
+Two sessions, different jobs. **Session A** (gearing) settles specific
+constants by isolating one variable at a time. **Session B** (whole-tune
+validation) tests whether the tune the app hands you is actually good, across
+several cars and disciplines. Do A first — it is shorter and B inherits its
+gearing numbers — but B is the one that answers "is our system right."
+
+---
+
+# Session A — gearing first
 
 Read-and-type sheet for the first measurement session. Everything here is
 **no driving**: tuning-menu gearing graph and the Performance panel only, both
@@ -139,3 +149,152 @@ for that car's ratio set. Within ~2% is a pass.
 
 Two cars minimum before a constant is treated as general. One car gives you
 that car's fit — the lesson `vFrac` taught twice.
+
+---
+
+# Session B — whole-tune validation
+
+## What this is, and why it is not just "tune 4 cars and see how it goes"
+
+The instinct is right: nothing currently tests whether a *whole tune* is any
+good. The 532 assertions check structure — in range, finite, bump ≤ rebound,
+nulls handled — and `sweep.test.js` checks one constant against measured data.
+Nothing checks the package.
+
+But "tune 4 cars for each discipline and see how it goes" has two problems
+worth fixing before spending the evening on it:
+
+1. **4 cars × 7 disciplines = 28 builds**, and most of that time is *shopping*
+   — buying parts and managing PI — not tuning. 
+2. **The verdict would be feel**, which cannot tell you *which* part of the
+   tune was wrong. Everything moved at once. That is precisely how `vFrac`
+   got set to 0.95 and then 1.14: a conclusion drawn from a comparison where
+   more than one thing differed.
+
+Two changes make it cheap and diagnostic instead:
+
+**Parts stay fixed; only the tune changes.** Switching discipline in the app
+changes slider values, not the build. So one physical build per car can be
+re-tuned four ways and measured four times without buying anything. That turns
+28 builds into **4 builds and 20 readings**.
+
+**The Performance panel is the verdict, not feel.** It scores a whole tune in
+about a second, with no run-to-run variance: 0-60, 0-100, top speed, 60-0,
+100-0, lateral G. Six objective numbers per configuration.
+
+## What the panel can and cannot judge — read before choosing disciplines
+
+It sees straight-line performance plus one lateral-G figure. So it validates
+**gearing, brakes, aero, and pressures**; it partly sees the **diff**; and it
+barely sees springs, ARBs or damping except as they move lateral G. It cannot
+see balance, kerb compliance or trail-braking at all.
+
+**And it cannot judge the loose-surface disciplines.** Dirt and cross-country
+tunes measured on the panel will simply look worse than tarmac tunes, because
+the panel is not testing them on dirt. That is not a finding, it is the wrong
+instrument. Those need A9's best-of-5 lap protocol — expensive, do it later.
+
+**So Session B covers the four tarmac disciplines only: Road, Sprint, Touge,
+Drag.**
+
+## The cars — pick for spread, or you test one car four times
+
+The formulas key off weight, front %, drivetrain and gear count. Four Evos
+would be four readings of the same point in that space. Suggested four, all
+from the garage:
+
+| slot | car | why |
+|---|---|---|
+| 1 | **GR86** | RWD, ~2,900 lb, 53% front, 7-speed. Continuity — every existing fixture is this car. |
+| 2 | **A Civic** | FWD, ~2,600 lb, 62%+ front. The only way to touch the FWD diff band and the front-heavy ARB split. |
+| 3 | **Lancer Evo VI TME** | AWD, ~3,200 lb, mid. Already on the G6 roster, so the build counts twice. |
+| 4 | **Challenger / Charger Hellcat** | RWD, ~4,400 lb, 8-speed. Weight scaling and a long gearbox, from the heavy end. |
+
+That spans 2,600–4,400 lb, ~53–62% front, all three drivetrains, and gear
+counts 6/7/8. Substitute freely as long as the spread survives.
+
+## What you type INTO the app, per car
+
+Only **four numbers are required**: weight, front %, HP, torque
+(`index.html:2469`). Everything else defaults. But the ones below all change
+the tune, so enter them or the test is measuring defaults:
+
+| field | where it comes from | notes |
+|---|---|---|
+| Weight | Upgrade screen, post-build | **post-upgrade**, not stock |
+| Front % | Upgrade screen | rejected outside 20–80 |
+| HP | Upgrade screen, post-build | post-upgrade |
+| Torque | Upgrade screen, post-build | drives the diff accel lock |
+| Class + PI | Upgrade screen | PI drives the spring frequency curve |
+| Drivetrain | the car | |
+| Gears | the transmission fitted | |
+| Tire compound | what you fitted | drives pressures |
+| Tire widths F/R | steps above stock, 0–3 | only the **difference** matters — 0/0 and 3/3 give an identical tune |
+| Aero fitted | front / rear / both / none | gates the aero values entirely |
+| Susp / ARB / trans / diff tier | what you fitted | gates which sliders exist at all |
+| Fit (`fdfit`) | gearing graph — FD where top gear's line just touches the right edge | Session A step 1 |
+| Graph max (`vgraph`) | gearing graph bottom axis | Session A step 1 |
+| Final drive you run (`fdset`) | whatever you actually set | wins over the app's recommendation |
+
+## What you read OUT of the game, per configuration
+
+Five configurations per car: the game's own default tune as a control, then the
+app's tune for each of the four tarmac disciplines. **Buy nothing between
+rows** — only the tuning sliders move.
+
+### Car 1: ______________________  class ____  gears ____  drivetrain ____
+
+Stat block entered: wt ______ · fw ______ · hp ______ · tq ______ · PI ______
+
+| tune | 0-60 | 0-100 | top speed | 60-0 | 100-0 | lateral G |
+|---|---|---|---|---|---|---|
+| game default (control) | | | | | | |
+| app — Road | | | | | | |
+| app — Sprint | | | | | | |
+| app — Touge | | | | | | |
+| app — Drag | | | | | | |
+
+*(repeat this block per car — four in total)*
+
+## Write your predictions down BEFORE you read the panel
+
+This is the step that makes it a test rather than a story told afterwards. The
+app claims each discipline does something specific; the panel can check four of
+those claims. Expected ordering, from the constants currently in `DISC`:
+
+- **Drag** should win 0-60 and top speed, and lose lateral G and both braking
+  distances. It is the most distinctive tune the app produces — pressures
+  forced to 50/15, aero suppressed at both ends, decel lock 0 — so if drag does
+  *not* separate clearly from the others, the discipline constants are not
+  doing their job and that is the headline finding.
+- **Touge** should win lateral G and lose top speed (softest tarmac springs,
+  shortest gearing).
+- **Road** should take the best braking and sit mid-pack elsewhere.
+- **Sprint** should sit between Road and Drag on top speed.
+- **Every app tune should beat the game default on something.** If the default
+  wins a column outright across several cars, that column's formulas are wrong
+  — and that is worth knowing far more than any of the orderings above.
+
+Write the four orderings you expect in the margin, then read. Where the panel
+disagrees with the prediction, that is the row to chase.
+
+## What this can and cannot conclude
+
+It can conclude: the discipline constants produce measurably different cars in
+the direction claimed; the gearing lands where it should; the app's tune beats
+doing nothing. Those are the claims currently resting on nothing.
+
+It cannot conclude anything about ARBs, damping or balance. Those need A2 —
+Mechanical Balance is a live readout that responds to the tune, which makes it
+solvable outright rather than measurable by proxy. That is the highest-value
+session in the backlog and it is 40 minutes standing still. **Do it after
+this**, because Session B will probably generate the motivation for it.
+
+## Filing the results
+
+One JSON per car under `tests/data/`, named `tune-<car>-<yyyy-mm-dd>.json`,
+same shape as the GR86 gearing fixture: `car / class / pi / date / screen /
+build / rows`, with `varied: "disc"` and one row per configuration. Then a
+`disc.test.js` that asserts the measured orderings hold — the Layer 2
+signature matrix from `BACKLOG.md` B, with real numbers behind it instead of
+internal comparisons.
