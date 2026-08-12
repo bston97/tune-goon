@@ -9,15 +9,6 @@ attacks them in that order. Do A first — it is short and B inherits its number
 Roughly **four hours standing still** covers Phases 1–4 of Session B. The
 driving work is the last 20% of the value, not the first.
 
-**On the phone, at the console, use
-[`measure.html`](https://bston97.github.io/tune-goon/measure.html)** —
-these same sessions as a data-entry form, one case per screen, with the purpose
-of every row on the row. It exports a filled-in copy of the `tests/data`
-template it was built from, so what comes off the phone drops straight into
-`tests/data/` and `node tests/status.js` counts it. This file stays the place
-to *think*; that page is the place to *type*. Nothing is lost by using the
-paper version instead, and `measure.test.js` holds the two in sync.
-
 **`TESTS.md` is the master catalogue** — every case across every subsystem,
 including the slider-range and parts groups that sit upstream of both sessions
 here, the photo protocol, and the fine-tune phase that closes the loop. These
