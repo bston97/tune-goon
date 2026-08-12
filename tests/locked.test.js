@@ -71,6 +71,21 @@ console.log('--- C3: the aero percentage is a slider position, not downforce ---
   ok('sheet clean', !/undefined|NaN|\{\{/.test(s));
 }
 
+console.log('--- C4: the sheet calibrates the balance move too ---');
+/* The sheet is the artifact read at the console, so it is the one that most
+   needed the corrected figure — a tuner following "+/-0.5 ARB per 1%" would
+   have moved about 2 points, watched the readout barely twitch, and concluded
+   the target band was unreachable rather than that the rule was wrong. */
+{
+  const s = sheetFor({ arb: 'both' });
+  ok('names the axle the readout belongs to', /<strong>rear<\/strong> axle's share/.test(s));
+  ok('gives the two-reading calibration', /add 10 to the rear bar, read it again/.test(s));
+  ok('quotes what it measured', /10 points of bar moved it 0\.015/.test(s));
+  ok('and the move that closed the app\'s own gap', /0\.51 to 0\.55 took \+27 bar/.test(s));
+  ok('the discredited rule is not on the sheet', !/ARB per 1% of shift/.test(s));
+  ok('sheet clean', !/undefined|NaN|\{\{/.test(s));
+}
+
 console.log('--- partial locks are labelled, not blank ---');
 page = build({ diff: 'sport' });
 ok('sport diff: decel row says not adjustable', /Decel<\/div><div class="v"><span class="na">/.test(page));

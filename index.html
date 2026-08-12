@@ -1419,7 +1419,7 @@ function render(){
       ? 'Race anti-roll bars are what expose these sliders. They are cheap in PI and are the main tool for setting balance, so this is usually the first thing to fix.'
       : 'Split proportional to axle load (stiffer bar on the heavier axle = neutral roll stiffness), then trimmed toward rotation.'+
         (eff('arF')==null||eff('arR')==null ? ' <b>Only one bar is fitted</b>, so balance here is half-blind &mdash; the difference between the two is what actually sets it.' :
-        ' <b>Check Mechanical Balance on this same tab &mdash; target 0.55&ndash;0.65, sweet spot 0.60.</b> Below 0.55 understeers, above 0.65 goes unstable. Adjust before you leave the tab: soften the end with the problem rather than stiffening the strong end, roughly &plusmn;0.5 ARB per 1% of shift.'+
+        ' <b>Check Mechanical Balance on this same tab &mdash; target 0.55&ndash;0.65, sweet spot 0.60.</b> It is the rear axle\'s share of roll stiffness, so a stiffer rear bar raises it. Below 0.55 understeers, above 0.65 goes unstable. <b>Do not guess the size of the move &mdash; calibrate it:</b> note the reading, add 10 to the rear bar, note it again. That difference is this car\'s per-10-points, and the rest is division. On the car this was measured on it came to 0.015, so a 0.04 gap wanted <b>+27 bar</b> &mdash; not the couple of points that feels right.'+
         ((i.twf>0||i.twr>0)
           ? ' <b>Widened car:</b> a wider track stiffens roll beyond what these numbers assume &mdash; the readout sees that, the formula does not, so if it lands outside the band that gap is the width. Trust the readout.'
           : ''))));
@@ -1496,7 +1496,7 @@ function render(){
      track width, cage stiffness, the actual power curve. */
   R.push(sec('var(--acc)','Verify In Game',[['&mdash;','5 checks, in order']],
     '<b>1 &middot; Enter everything above, top to bottom</b> &mdash; the sections are already in the game\'s tab order.'+
-    '<br><b>2 &middot; Antiroll tab:</b> Mechanical Balance reads <b>0.55&ndash;0.65</b>, sweet spot 0.60. Off the band &rarr; soften the problem end, about &plusmn;0.5 ARB per 1% of shift.'+
+    '<br><b>2 &middot; Antiroll tab:</b> Mechanical Balance reads <b>0.55&ndash;0.65</b>, sweet spot 0.60 &mdash; it is the <em>rear</em> axle\'s share, so a stiffer rear bar raises it. Off the band, calibrate instead of guessing: read it, add 10 to the rear bar, read it again, and scale the gap by the difference. Expect a bigger move than feels right &mdash; measured, 10 points of bar was worth 0.015.'+
     ((eff('aeF')!=null&&eff('aeR')!=null)
       ? '<br><b>3 &middot; Aero tab:</b> Aero Balance reads <b>0.42&ndash;0.48</b>, sweet spot 0.45 &mdash; move the rear wing, not the front.'
       : '<br><b>3 &middot; Aero tab:</b> nothing to check on this build.')+
@@ -2233,7 +2233,7 @@ function sheet(){
   if(hasARB) N.push('<p><strong>Anti-roll bars</strong> are split proportional to axle load, then trimmed toward rotation. '+
     (oneARB
       ? 'Only the '+(eff('arF')!=null?'front':'rear')+' bar is fitted, so balance here is half-blind &mdash; it is the <strong>difference</strong> between the two that sets it. Fit the other end before chasing balance with anything else.'
-      : 'The ARB tab shows <strong>Mechanical Balance</strong> &mdash; target <strong>0.55&ndash;0.65</strong>, sweet spot 0.60. Below 0.55 understeers, above 0.65 goes unstable. Sort it before leaving the tab: soften the end with the problem rather than stiffening the strong end, roughly &plusmn;0.5 ARB per 1% of shift.')+'</p>');
+      : 'The ARB tab shows <strong>Mechanical Balance</strong> &mdash; target <strong>0.55&ndash;0.65</strong>, sweet spot 0.60. It is the <strong>rear</strong> axle\'s share of roll stiffness, so a stiffer rear bar raises it and a softer front bar or front spring does too. Below 0.55 understeers, above 0.65 goes unstable. Sort it before leaving the tab, and <strong>calibrate the move rather than guessing it</strong>: read the figure, add 10 to the rear bar, read it again, then scale your gap by that difference. Measured on one car, 10 points of bar moved it 0.015 &mdash; so closing 0.51 to 0.55 took +27 bar, far more than it feels like it should.')+'</p>');
   if(hasSpring||hasHeight) N.push('<p>'+
     (hasSpring?'<strong>Spring rates</strong> are absolute values from K = M(2&pi;f)&sup2; at a '+r.f.toFixed(2)+' Hz base &mdash; type them straight in and the game clamps if the car\'s range is narrower. The front/rear ratio is already set by corner mass. ':'')+
     (hasHeight?'<strong>Ride height</strong> is a position in the slider range; if the Springs telemetry bars hit 97%+ repeatedly over bumps or curbs, raise 1&ndash;2 clicks.':'')+'</p>');

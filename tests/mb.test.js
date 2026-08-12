@@ -100,9 +100,12 @@ ok('and rear-biased', FX.MB_MODEL.tR > FX.MB_MODEL.tF,
    'which is why equal bars with a front-stiff spring pair still reads above 0.5');
 
 console.log('\n--- the number the app will print, and the one it got wrong ---');
-/* compute() currently says "+/-0.5 ARB per 1% of shift" in three places. The
-   measured sensitivity is an order of magnitude away from that, and the figure
-   below is what C4 in the plan replaces it with. */
+/* compute() used to say "+/-0.5 ARB per 1% of shift" in three places. The
+   measured sensitivity is an order of magnitude away from that, so C4 replaced
+   the rule with the two-reading calibration and quotes the figures below.
+   Those render paths are asserted in modes.test.js and locked.test.js; this
+   file stays clear of index.html on purpose, since a test that imported the app
+   would be checking the app against itself. */
 const appTune = { arF: 31.30, arR: 30.10, spF: 468.1, spR: 374.9 };
 const per10 = FX.mbOf(Object.assign({}, appTune, { arR: appTune.arR + 10 })) - FX.mbOf(appTune);
 ok('sensitivity is about 0.0153 of MB per 10 points of rear bar',

@@ -163,6 +163,29 @@ ok('mech balance with the band', /0\.55&ndash;0\.65/.test(verify));
 ok('aero balance when aero is fitted', /0\.42&ndash;0\.48/.test(verify));
 ok('ends by pointing at the fine-tune box', /tell the fine-tune box/.test(verify));
 ok('widened car gets the track-width caveat on the ARB note', /Widened car/.test(verify));
+
+console.log('--- C4: the balance move is calibrated, not guessed ---');
+/* "+/-0.5 ARB per 1% of shift" was out by roughly 10x and ambiguous besides —
+   "per 1%" against a 0.xx readout. Measured on the GR86: 10 points of rear bar
+   moved Mechanical Balance 0.015, so the app's own tune reading 0.51 against
+   its own 0.55 floor needed +27 bar, not the ~2 the old rule implied. The
+   replacement carries no per-car constant, so it self-corrects on any car.
+   The model behind it is asserted in mb.test.js, independently of compute(). */
+{
+  const src = require('fs').readFileSync(
+    require('path').join(__dirname, '..', 'index.html'), 'utf8');
+  ok('the old rule is gone from every render path', !/ARB per 1% of shift/.test(src));
+  ok('the verify step says which axle the readout is',
+     /rear<\/em> axle's share/.test(verify));
+  ok('and gives the two-reading procedure',
+     /add 10 to the rear bar, read it again/.test(verify));
+  ok('and warns the move is bigger than it feels',
+     /bigger move than feels right/.test(verify));
+  ok('the ARB note calibrates too, with the worked number',
+     /add 10 to the rear bar, note it again/.test(verify) && /\+27 bar/.test(verify));
+  ok('and states the direction the solve settled',
+     /a stiffer rear bar raises it/.test(verify));
+}
 fill({ twr: '0' });
 els['calc'].onclick();
 ok('stock-width car does not', !/Widened car/.test(els['out'].innerHTML));
