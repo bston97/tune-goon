@@ -9,6 +9,12 @@ attacks them in that order. Do A first — it is short and B inherits its number
 Roughly **four hours standing still** covers Phases 1–4 of Session B. The
 driving work is the last 20% of the value, not the first.
 
+**`TESTS.md` is the master catalogue** — every case across every subsystem,
+including the slider-range and parts groups that sit upstream of both sessions
+here, the photo protocol, and the fine-tune phase that closes the loop. These
+sheets are the fill-in working pages for the sessions in flight; that file is
+the full list and the suggested order.
+
 ---
 
 # Session A — gearing first
