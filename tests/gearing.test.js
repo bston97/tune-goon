@@ -372,3 +372,36 @@ const fs = require('fs'), path = require('path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 ok('gearing has its own step, no disclosure to miss', /<div id="extra">/.test(html) && !/<details id="extra"/.test(html));
 ok('the fit field is inside it', /id="fdfit"/.test(html));
+
+console.log('--- C2: nothing calls SPREAD the game\'s ratios ---');
+/* The claim was withdrawn 2026-08-12 and it had reached the sheet, which is
+   read at the console with no way to check it. The measured game 7-speed is
+   4.17/2.89/2.17/1.66/1.32/1.07/0.85; SPREAD[7] starts at 2.92, out by 43% on
+   1st alone. So the sheet may still print the table — it is the spacing the
+   gear speeds are computed from — but it may not claim whose it is. */
+{
+  ok('no source file calls them the game\'s default ratios',
+     !/game's default ratios/.test(html) && !/game\'s default ratios/.test(html));
+  ok('nor the listed defaults', !/stay at the listed defaults/.test(html));
+  ok('the ratioSet comment records that SPREAD is not the game\'s',
+     /SPREAD IS NOT THE GAME'S/.test(html));
+
+  draw({ fdfit: '4.58', vgraph: '157' });
+  els['save'].onclick();
+  const s = blob.parts[0];
+  ok('the sheet labels its first gear table', /Assumed ratios/.test(s));
+  ok('and says whose it is not', /this app's table, not your car's/.test(s));
+  ok('and that the mph depends on them being fitted',
+     /mph holds only once they are fitted/.test(s));
+  ok('the notes print the measured contradiction',
+     /4\.17\/2\.89\/2\.17\/1\.66\/1\.32\/1\.07\/0\.85/.test(s));
+  ok('sheet still clean', !/undefined|NaN|\{\{/.test(s));
+
+  draw({ fdfit: '4.58', vgraph: '157', topratio: '0.85' });
+  els['save'].onclick();
+  const sr = blob.parts[0];
+  ok('a read top ratio is credited on the sheet',
+     /top gear read off your car, the rest assumed/.test(sr));
+  ok('and the card no longer credits the game with 1st',
+     !/Same 1st as the game/.test(els['out'].innerHTML));
+}

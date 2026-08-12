@@ -862,11 +862,18 @@ function gearsAt(kSpeed,gr,fd,ratios){
 
 /* Ratios that put every gear to work at a given final drive.
 
-   Keeps 1st exactly where the game's own spread puts it — launch is traction
+   Keeps 1st exactly where the passed-in table puts it — launch is traction
    limited and there is nothing to gain by touching it — and pulls TOP gear in
    to just past the speed the car actually reaches, so it engages instead of
    hanging off the end unused. The gears between are spaced geometrically, i.e.
    an equal rpm drop on every shift.
+
+   That table is SPREAD, and SPREAD IS NOT THE GAME'S. Measured 2026-08-12: the
+   GR86's stock race 7-speed is 4.17/2.89/2.17/1.66/1.32/1.07/0.85 where
+   SPREAD[7] is 2.92/2.05/1.60/1.30/1.10/0.95/0.82 — wider at every gear, and
+   1st is out by 43%. So "keeps 1st" means keeps this app's 1st, and holding it
+   is a convention rather than a concession to the game. Nothing downstream may
+   describe either table as the game's defaults.
 
    TOP GEAR IS AIMED AT THE GRAPH MAXIMUM, not at the Performance panel's Top
    Speed. That figure turned out to be the projected maximum for a build tuned
@@ -1359,7 +1366,7 @@ function render(){
         (r.d.vFrac===1
           ? '<b>your fit unchanged</b>, since '+d.n+' gears right at the fit.'
           : 'your fit of '+fmt('fd',r.i.fdfit)+' &divide; '+r.d.vFrac.toFixed(2)+' for '+d.n+'.')+
-        ' Or enter your own under <b>Final drive you run</b> and everything follows it. Either way sweep <b>'+band+'</b> against the Performance panel &mdash; 0&ndash;60, 0&ndash;100 and Top Speed are on the left of that screen, and they beat two decimals from me.',
+        ' Or enter your own under <b>Final drive you run</b> and everything follows it. Either way sweep <b>'+band+'</b> against the Performance panel &mdash; its figures beat two decimals from me.',
       rough:'<b>A guess from power-to-weight. Do not drive off on it.</b> Sweep the final drive until top gear\'s line finishes in the graph\'s top-right corner &mdash; still climbing as it reaches the right edge &mdash; put that setting in the Gearing box on the left, and calculate again.'
      })[r.fdSrc]+'</div>'+
     '<div class="gears">'+r.gears.map((g,n)=>'<div class="g"><span>'+ORDN(n+1)+'</span><span>'+g.toFixed(2)+
@@ -1378,12 +1385,12 @@ function render(){
        whether this spacing is FASTER cannot be known without the power curve. */
     (RS
       ? '<div class="note" style="margin-top:10px"><b>Or set these ratios and keep your own final drive.</b> '+
-        'Same 1st as the game\'s, top gear placed at '+Math.round(RS.gears[i.gr-1].v)+
+        'Same 1st as the table above, top gear placed at '+Math.round(RS.gears[i.gr-1].v)+
         ' mph &mdash; just past the Top Speed you entered, so the car can use its full range whether that figure is what it reaches or what it could reach &mdash; and an equal '+RS.drop+'% rpm drop on every shift.'+
         '<div class="gears" style="margin-top:8px">'+RS.gears.map((x,n)=>
           '<div class="g"><span>'+ORDN(n+1)+'</span><span>'+x.g.toFixed(2)+
           ' <span style="color:var(--dim)">&middot; to '+Math.round(x.v)+' mph</span></span></div>').join('')+'</div>'+
-        '<div style="margin-top:8px"><b>A hypothesis, not an upgrade.</b> The spacing is arithmetic off your fit; whether it is <em>quicker</em> than the game\'s cannot be known without the engine\'s power curve, which no screen shows. Set them, read 0&ndash;60 and 0&ndash;100, compare. If the defaults win, use the defaults.</div></div>'
+        '<div style="margin-top:8px"><b>A hypothesis, not an upgrade.</b> The spacing is arithmetic off your fit; whether it is <em>quicker</em> cannot be known without the engine\'s power curve, which no screen shows. Set them, read 0&ndash;60 and 0&ndash;100, compare against what your car had. If its own ratios win, put them back.</div></div>'
       : '')));
 
   const noAlign=locked('camF','camR','toeF','toeR','cast');
@@ -2232,8 +2239,8 @@ function sheet(){
               :Math.round((1-d.vFrac)*100)+'% shorter than it, so the last line stops short of the edge &mdash; deliberate, for '+d.n+'.')+
     ' Confirm on track by feel: weak drive out of corners &rarr; raise the final drive; running out of gear down the longest straight &rarr; lower it. '+
     (RSx
-      ? '<strong>Two gear tables are printed</strong> &mdash; the game\'s default ratios and a computed set aimed at the chart maximum with an equal rpm drop per shift. The computed set is a hypothesis: A/B them on the Performance panel and keep whichever measured better.</p>'
-      : 'Individual gears stay at the listed defaults &mdash; only the final drive needs adjusting.</p>'));
+      ? '<strong>Two gear tables are printed</strong> &mdash; the assumed set '+(r.topGearSrc==='read'?'(top gear yours, the rest assumed) ':'')+'and a computed set aimed at the chart maximum with an equal rpm drop per shift. The computed set is a hypothesis: A/B them on the Performance panel and keep whichever measured better. <strong>The assumed set is not the game\'s.</strong> On the one car where both have been read, the game\'s 7-speed was 4.17/2.89/2.17/1.66/1.32/1.07/0.85 against this table\'s 2.92/2.05/1.60/1.30/1.10/0.95/0.82 &mdash; so the mph beside each gear holds only once these ratios are actually fitted.</p>'
+      : 'Individual gears are left alone &mdash; only the final drive needs adjusting. The ratios printed are this app\'s assumed table, not the ones your car ships with, so read them as the spacing they describe rather than as numbers to check against.</p>'));
 
   /* The sheet gets read away from the app, so it has to account for its own
      dashes — otherwise a gated row looks like a bug in the generator. */
@@ -2294,6 +2301,13 @@ function sheet(){
 '    <div class="section-body"><div class="gear-box">\n'+
 '      <div class="final-drive-row"><div class="final-drive-label">Final Drive</div>'+
 '        <div class="final-drive-value">'+fmt('fd',eff('fd'))+'</div></div>\n'+
+/* This table used to print unlabelled, which read as "these are your car's
+   ratios". They are this app's assumed set — measured 2026-08-12 to be nowhere
+   near the game's. The sheet is read at the console with no way to check, so
+   it says what it is in the label rather than only in the notes. */
+'      <div class="sub-label">Assumed ratios <span class="dim">&mdash; '+
+   (r.topGearSrc==='read'?'top gear read off your car, the rest assumed':'this app\'s table, not your car\'s')+
+   (GT.tops?'; mph holds only once they are fitted':'')+'</span></div>\n'+
 '      <div class="gear-grid gear-grid-'+i.gr+'">'+gears+'</div>\n'+
 (gearsAlt
   ? '      <div class="sub-label" style="margin-top:10px">Computed ratios <span class="dim">&mdash; alternative aimed at '+Math.round(i.vgraph)+' mph, equal rpm drop per shift</span></div>\n'+
