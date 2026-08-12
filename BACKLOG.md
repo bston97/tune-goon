@@ -184,10 +184,21 @@ in-game readout becomes a *check*, not a discovery.
 
 ### A3 — `SPREAD` tables for every gear count (~20 min, no driving)
 
-`SPREAD[7]` is confirmed against the game's own race box. **4, 5, 6, 8, 9 and
-10 are not** — they are invented, and they feed both the per-gear speeds and
-`ratioSet()`. Fit a race transmission on cars with each gear count and copy the
-default ratios straight off the screen. Six numbers per row, no interpretation.
+~~`SPREAD[7]` is confirmed against the game's own race box.~~ **Corrected
+2026-08-12: it is not, and it is wrong.** With the game's default tune restored
+on a race-transmission GR86 the real defaults are
+**4.17/2.89/2.17/1.66/1.32/1.07/0.85 at final drive 3.63**. The screen that
+"confirmed" `SPREAD[7]` was showing the app's own ratio set read back off a car
+it had been applied to.
+
+So **all seven rows are unmeasured and the seventh is known false**, and this
+case is promoted rather than merely still open. Two changes to the procedure:
+
+- **Restore the default tune before transcribing.** That omission is precisely
+  what caused the original error.
+- **Take one extra 7-speed from a different car first** (`TESTS.md` `G7`). It
+  decides whether default ratios belong to the transmission tier or to the car
+  — and therefore whether a universal table exists to be measured at all.
 
 Deliverable: `tests/data/spread-fh6.json`, `SPREAD` replaced with measured
 rows, `gearing.test.js` extended to assert them.
@@ -199,9 +210,19 @@ gears. It is pure kinematics so it *should* generalise, but "should" is how
 tier-4 constants are born. Repeat on R3 and R5: read the axis maximum, sweep to
 the fit, then check three gear endpoints against `k/(FD·G)`.
 
-Also worth settling in the same sitting: does the axis maximum move when the
+~~Also worth settling in the same sitting: does the axis maximum move when the
 gearing moves (it should not), and does it move when power parts are fitted (it
-probably does — it is described as a property of the car).
+probably does — it is described as a property of the car).~~
+
+**Both settled 2026-08-12, and the framing changed underneath them.** The axis
+does *not* move with the final drive (held at 157 from fd 3.50 to 4.60); it
+*does* move with the tune, cause unidentified after final drive, top gear ratio,
+aero and tire pressure were each eliminated one variable at a time. **It stopped
+mattering**, because `k = axis × fit × topRatio` is the invariant and the fit
+compensates for whatever the axis reads — see E2. What this case still owes is
+the second and third car, and it should now record the **top gear ratio actually
+fitted** alongside the axis and fit, since that is the term the app currently
+gets wrong.
 
 ### A5 — Tire pressure against tire temperature (~30 min, driving, telemetry)
 
@@ -837,7 +858,44 @@ and the file count. Low stakes, one-line fix, but the paragraph is the one that
 tells a new session how much cover it has, so an undercount encourages
 scepticism where it is not warranted.
 
-### E2 — The reference car's axis maximum is recorded as both 157 and 159
+### E2 — The reference car's axis maximum is recorded as both 157 and 159 — **RESOLVED 2026-08-12**
+
+**Both readings were real. The defect was never the axis — it was filing half a
+measurement.**
+
+`k = axis × fit × topRatio` is the invariant, and when the axis moves the fit
+moves to compensate: the axis is the chart's scale, the fit is the final drive
+at which top gear reaches the end of it, so a longer scale needs a shorter final
+drive and the product is conserved.
+
+| reading | `k` |
+|---|---|
+| July build, axis 157, fit 4.575 | **589.0** |
+| 2026-08-12 app's old tune, axis 157, fit 4.570 | **588.3** |
+| 2026-08-12 app's new tune, axis 159, fit 4.510 | **588.1** |
+| " fit 4.520 | **589.4** |
+| " fit 4.530 | **590.7** |
+
+0.44% across two builds, three tunes and both axis values. **The rule that
+replaces the whole question:** read the axis and the fit on the same tune in the
+same sitting; `k` is then right whatever either reads.
+
+Fixture: `tests/data/gearing-gr86-fit-apptune-2026-08-12.json` → `kIsTheInvariant`.
+
+**Why this section is kept rather than deleted.** Its reasoning below is a good
+example of a well-argued dead end: it states as fact that the gap is *"large
+enough that it is definitely one misreading and not two valid numbers"*, and
+builds a careful asymmetry argument about which candidate is better supported.
+Every step was sound and the conclusion was unreachable, because the question
+assumed one reading had to be wrong. **The dry-run note at the end came closest
+— "if the two readings were taken at different build states, both could be
+right and the real defect is that neither records the build."** That was the
+answer, written down and then not pursued because the framing had already
+excluded it.
+
+---
+
+*Original entry follows.*
 
 Same car, same screen, two different readings, and the whole gearing model
 hangs off it via `k = axisMax · fdFit · G_top`:

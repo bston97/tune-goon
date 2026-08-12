@@ -28,12 +28,18 @@ not a deliberate exception.
 node tests/run.js
 ```
 
-**532 assertions across sixteen files**, plus a 684-build structural sweep, a
+**567 assertions across seventeen files**, plus a 684-build structural sweep, a
 2,304-combination render/export sweep over every gated-part combination, and a
 monotonicity sweep. Exits non-zero on any failure or crash — safe to use as a
 gate. See `tests/shim.js` for how a plain-Node DOM shim runs the app's real
 `<script>` block with no browser; see any `tests/*.test.js` for the pattern
 (`ok(label, condition, extraInfoIfFailed)`).
+
+**`mb.test.js` is the odd one out and deliberately so** — it never loads
+`index.html`. It asserts the solved Mechanical Balance model against the
+measurements, which is the middle step of the promotion rule: fixture → a test
+asserting it *independently of `compute()`* → only then `compute()` changes. A
+test that imported the app would be checking the app against itself.
 
 `run.js` only collects `*.test.js`. Two other scripts live in `tests/` and are
 run by hand, never as part of the gate — see the measurement program below.
@@ -183,14 +189,35 @@ figure prefilling a tune would be confidently wrong.
 Comments in `compute()` say where each formula comes from and how confident it
 is. Rough tiers, most to least trustworthy:
 
+0. **Solved against measurement** — a new tier as of 2026-08-12, and it has one
+   member. **Mechanical Balance is a solved function**, fitted to six settings
+   on one car with three parameters and matching every one on the printed
+   digit, plus two rows it was not fitted to:
+
+   ```
+   MB = R / (F + R)     F = arF + 0.150·spF + 50.5     R = arR + 0.150·spR + 72.3
+   ```
+
+   It is the **rear** axle's share of roll stiffness — stiffening the rear bar
+   raises the readout, stiffening the front spring lowers it. One bar point is
+   worth ≈6.7 lb/in of spring, and the two per-axle constants are large and
+   rear-biased (tires, geometry, unsprung mass — which is why tire pressure
+   moves MB). **The coefficients are that car's and do not transfer**; the
+   structure should, because it is roll stiffness. See
+   `tests/data/balance-mb-solved-gr86-2026-08-12.json`.
+
 1. **Confirmed on Boston's own screen** — Mechanical Balance and Aero Balance
    are real in-game readouts (confirmed 2026-07-30); the exact target bands
-   (0.55–0.65 / 0.42–0.48) are still house numbers, not published. The gearing
-   graph (confirmed 2026-07-31). **The `SPREAD` gear tables were listed here
-   too and are demoted to tier 4 as of 2026-08-12** — the screen that
-   "confirmed" them was showing the app's own ratio set read back off a car it
-   had been applied to, and the game's real defaults contradict it. See the
-   gearing section below.
+   (0.55–0.65 / 0.42–0.48) are still house numbers, not published, and **the
+   app's own tune measures 0.51 against its own 0.55–0.65 band**. The gearing
+   graph (confirmed 2026-07-31). ARB range 1–65 and step 0.1, confirmed
+   2026-08-12 when 80 proved unsettable. **Aero Balance is a function of the two
+   downforce figures in pounds plus a large per-axle body term** (≈175 front /
+   215 rear on the GR86) — validated on an out-of-sample point, one car only.
+   **The `SPREAD` gear tables were listed here too and are demoted to tier 4 as
+   of 2026-08-12** — the screen that "confirmed" them was showing the app's own
+   ratio set read back off a car it had been applied to, and the game's real
+   defaults contradict it. See the gearing section below.
 2. **Traceable FH6-specific source** — ForzaTune's guide, Game8, official
    patch notes. Diff accel bands, aero balance range, the drag-tire nerf.
    Re-scanned 2026-08-01: ForzaTune's FH6 guide moved three of our values —
@@ -244,6 +271,57 @@ and everything is self-consistent. So the defect is not "the gearing maths is
 wrong" — it is **"the app assumes its own ratios are fitted and never says
 so."** Only the final drive is solved, but the gear speeds beside it quietly
 assume a gearbox the car may not have.
+
+**Measured in the live workflow 2026-08-12, and it is worse than the ratio
+mismatch suggests.** The form tells the user *"Leave the individual ratios alone
+while you sweep"* (`index.html:440`), so the fit is **always** read on whatever
+gearbox is currently fitted — in practice the game's. On the GR86 that gave
+fit 4.34, which the app duly returned as its recommendation, and then:
+
+```
+what it computed   159 × 4.34 × 0.82  =  565.9
+what it should be  159 × 4.34 × 0.85  =  586.6
+measured on the car's own gearbox     ≈  588.3
+```
+
+**3.8% low, and every per-gear speed with it.** The two gearboxes cross-check
+exactly as the model requires — the fit moved 4.34 → ≈4.52 when the app's
+ratios went on, a ratio of 1.041 against a top-ratio ratio of 1.037 — so the
+model was never wrong, only the constant fed into it. **The fix is to ask for
+the top ratio of the gearbox the fit was read on**, one number off a screen
+already open, which also stops `SPREAD` being load-bearing at all.
+
+### `k` is the invariant — the axis on its own means nothing
+
+The reference car's axis maximum was recorded as both 157 and 159, and the repo
+spent two weeks treating that as one reading being wrong. **Neither was.**
+Measured across two builds and three tunes:
+
+| reading | `axis × fit × topRatio` |
+|---|---|
+| July build | 157 × 4.575 × 0.82 = **589.0** |
+| 2026-08-12, app's old tune | 157 × 4.570 × 0.82 = **588.3** |
+| 2026-08-12, app's new tune | 159 × 4.510 × 0.82 = **588.1** |
+| " | 159 × 4.520 × 0.82 = **589.4** |
+| " | 159 × 4.530 × 0.82 = **590.7** |
+
+0.44% across the lot. **When the axis moves, the fit moves to compensate** — the
+axis is the chart's scale and the fit is the final drive at which top gear
+reaches the end of it, so a longer scale needs a shorter final drive and the
+product is conserved. `k` is the physical constant; the axis alone is chart
+furniture.
+
+**The one rule this leaves:** read the axis and the fit **on the same tune, in
+the same sitting**. Pair them and `k` is right whatever either reads; mix them
+and it is not. The 157/159 confusion was never an axis problem — it was two
+half-measurements filed as though they were one. Every argument this repo has
+had about which value is correct is retired, including the ones made on the day
+it was settled.
+
+The axis does move with the tune, incidentally, and not with the final drive
+(held at 157 from fd 3.50 to 4.60). Final drive, top gear ratio, aero and tire
+pressure have all been eliminated as the cause; it is unexplained and no longer
+matters.
 
 **How this got shipped wrong, because the failure mode will recur.** An earlier
 revision inferred from a photo that the axis *rescaled* with the gearing, so the
@@ -363,6 +441,21 @@ and warning when it sat above the top gear's limiter. Under the correct reading
 the last of those fires on almost every build, which is exactly what Boston
 reported. **All three are withdrawn and the input is gone from the form.** Do
 not reintroduce anything that measures a tune against that number.
+
+> **⚠️ CONTRADICTED 2026-08-12, PENDING CASE `S1` — do not act on this yet.**
+> Across today's rows the readout moved with the **rear wing** (141.1 → 139.1
+> when downforce went up), with the **final drive**, with the **springs**
+> (138.2 → 137.4) and with **tire pressure** (137.4 → 137.1). A figure computed
+> with "the entire build and tune aimed at top speed" should not fall when you
+> add downforce to the tune it is supposedly ignoring.
+>
+> **This is not enough to overturn it, and the section stays as written.** Every
+> one of those observations is incidental — taken while measuring something
+> else, never with top speed as the controlled variable. Three claims were
+> reversed on exactly that kind of evidence today and all three had to be
+> withdrawn again. `TESTS.md` case **`S1`** is the deliberate 20-minute test
+> that settles what the readout responds to, and it is now the most valuable
+> unrun case in the catalogue. Run it before changing a line of this.
 
 What replaced it: the ratio set aims top gear at the **graph maximum** instead.
 That is a fixed reading off the chart with one meaning, it needs no
@@ -491,6 +584,29 @@ from class/event or is optional), but never at the cost of correctness —
 when the tradeoff came up. When a claim can be verified against the actual
 game, that beats any external source, including prior research in this repo's
 history.
+
+**A rounded readout cannot confirm a model to more digits than it prints.**
+Learned expensively on 2026-08-12, when three conclusions were published and
+withdrawn inside one session. Two of them died the same way: a computed value
+matched a two-decimal readout and the match was read as exact. `190/(190+232) =
+0.4502` against a printed `0.45` looks like four-decimal agreement and is
+nothing of the kind — anything in `[0.445, 0.455]` prints as `0.45`, so a single
+point confirms almost nothing. Both times the second point killed the model.
+
+Two habits fall out of that, and they are cheap:
+
+- **One point is a coincidence.** Before believing a fit, ask what the *next*
+  measurement would have to read to falsify it, and take that one.
+- **When a model exists, use it — do not eyeball.** The `+14 rear bar` figure
+  in the MB fixture was estimated by eye off two rows while the solved model
+  sat directly above it; differentiating the model gives `+27`. A user
+  following the wrong number would have stopped short of the band believing
+  they had complied.
+
+The pattern is older than that session — the 3.73 gearing solve and the
+`SPREAD` "confirmation" are the same shape. **The wrong version is consistently
+the tidier one**, because a coincidence that survives one check looks like a
+law.
 
 **Git: commit straight to `main`.** Solo personal project — no branches, no
 PRs, no reviewers for routine work. Branch only if something genuinely gets

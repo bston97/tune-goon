@@ -11,66 +11,80 @@ driving work is the last 20% of the value, not the first.
 
 ---
 
-# Where we are — updated 2026-08-12
+# Where we are — updated end of 2026-08-12
 
-**Measuring has started.** Three fixtures exist in `tests/data/`, all on the
-GR86. This section is maintained so the file never shows a step as pending that
-is already done; if it disagrees with `tests/data/`, the fixtures win.
+**Ten fixtures in `tests/data/`, all on one GR86 at A 700.** `node
+tests/status.js` went from 1 case with data to 15 in a day. This section is
+maintained so the file never shows a step as pending that is already done; if it
+disagrees with `tests/data/`, **the fixtures win**.
 
-| what | result | what it changed |
-|---|---|---|
-| **Axis maximum, read cold** | **157** on the app's tune, **159** on the game's default, same parts | E2's mechanism found — the axis moves with the **tune**, not only with parts. Not yet attributed to *which* part of the tune |
-| **The fit** | **4.57** (July's other build: 4.575) | `k = 588.3`. Two very different builds agreeing to 0.1% is what makes 157 the reading that survives |
-| **Axis vs final drive** | unchanged 3.50 → 4.60 | `G2` answered. The axis is not a function of the final drive |
-| **Panel repeat variance** | six identical reads bar one 0.1 ft blip | `S0` created as a standing control. Small differences are **real** — the 0.4 mph top-speed wobble is signal |
-| **`SPREAD[7]`** | **wrong** — game default is 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at fd 3.63 | Demoted tier 1 → tier 4. The old "confirmation" was the app's own ratios read back off a car they were applied to |
-| **Default vs app tune** | both now exist on one build | the `C1` control row, better than the plan asked for |
+| what | result |
+|---|---|
+| **`k` is the invariant** — `k = axis × fit × topRatio` | ✅ **settled.** 588.1–590.7 across two builds, three tunes, both axis readings. The axis alone is chart furniture |
+| **Mechanical Balance** | ✅ **SOLVED.** `MB = R/(F+R)`, `F = arF + 0.150·spF + 50.5`, `R = arR + 0.150·spR + 72.3`. Rear share, six settings, three parameters, every row on the printed digit |
+| **Aero Balance** | ✅ **model validated out-of-sample.** Pounds of downforce plus a large per-axle body term, ≈175 front / 215 rear |
+| **`SPREAD[7]`** | ❌ **wrong.** Game default is 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at fd 3.63. The old "confirmation" was the app's own ratios read back off a car they were applied to |
+| **The app's `k`** | ❌ **3.8% low**, because the fit is read on the game's gearbox and `k` is built with `SPREAD`'s top ratio |
+| **App tune vs game default** | ❌ the **default wins 5 of 6 panel columns**, braking by 8%. One car — needs a second before it is general |
+| **Panel behaviour** | deterministic within a sitting; acceleration quantised to exactly **1/60 s**. Small differences are therefore *real* |
+| **Slider facts** | ARB range **1–65**, step 0.1, confirmed. Spring rates cannot be hit exactly. MB moves with **tire pressure** |
 
-Still open and now urgent: **which part of the tune moves the axis**, and
-**`SPREAD` for every gear count** — the one row believed measured turned out to
-be ours.
+**Closed today and not worth revisiting:** which part of the tune moves the
+axis (final drive, top ratio, aero and pressure all eliminated — and it stopped
+mattering once `k` turned out to be the invariant); whether `SPREAD[7]` was
+confirmed (it was not); whether the panel needs repeat-averaging (it does not,
+within a sitting).
 
 ---
 
 # The plan — do these in this order
 
-Each step says what to do, what comes back, and why it goes where it does.
-Steps 1 and 2 are the current sitting.
+### Step 1 — **Fix the app.** Measurement has outrun the code
 
-### Step 1 — Capture the default tune, before anything perturbs it *(5 min)*
+Four defects are sitting unfixed while more data arrives. In priority order:
 
-Eight whole-screen screenshots on the build as it stands: **Tires, Alignment,
-Antiroll Bars, Springs, Damping, Aero, Brake, Differential.** Gearing is
-already captured.
+1. **The gearing top ratio.** `index.html:1083` builds `k` from `SPREAD`'s top
+   ratio while the fit is read on the game's gearbox. Add a top-ratio input
+   beside the fit and graph max; fall back to `SPREAD` when blank. Wrong on
+   every build the app generates today, so this one is not optional.
+2. **The sheet's ratio label.** It calls `SPREAD`'s ratios *"the game's default
+   ratios"*. They are not. Relabel honestly and keep printing them.
+3. **Aero.** Stop emitting "% of range" as though it were a settable value —
+   the game takes pounds and the two ends have different ranges.
+4. **The Mechanical Balance instruction.** *"±0.5 ARB per 1% of shift"* is out
+   by roughly 10×: measured sensitivity is ≈0.0015 of MB per rear-bar point, so
+   the app's own 0.51 → 0.55 gap needs **≈+27 rear bar**. Replace with the
+   two-reading calibration below, which needs no per-car constants.
 
-Why first: step 2 deliberately changes this tune, and right now it is pristine.
-It also lands the `C1` control — the game's own baseline for every slider on a
-known build, which is what the app's output finally gets compared against.
+**Promotion rule applies:** the fixture exists, the test asserting it
+independently of `compute()` comes next, and only then does `compute()` change.
 
-### Step 2 — Attribute the axis shift *(5 min, two readings)*
+### Step 2 — Three readings on a second car *(~5 min)*
 
-From the default tune, one variable each, returning to default in between:
+Equal bars, then `20/40`, then `32.5/65`, with springs and pressure held and
+recorded. This is what turns "MB solved on a GR86" into "MB solved" — the
+structure should generalise because it is roll stiffness; the three coefficients
+should not, because they are the car.
 
-1. change **only 7th gear's ratio** (0.85 → 0.75 will do), read the axis
-2. restore it, change **only the rear wing**, read the axis
+### Step 3 — Case `S1`, what Top Speed actually responds to *(~20 min)*
 
-This closes E2 by measurement rather than by argument. **It also decides
-whether a stock GR86 is worth buying:** if either reading moves the axis, the
-mechanism is the tune and a stock car adds nothing; if *neither* moves it, the
-mechanism is parts and a second part state becomes the next thing to get.
+Now the most valuable unrun case in the catalogue. `CLAUDE.md` states the
+readout is a projection independent of the current tune; today it moved with the
+wing, the gearing, the springs and the pressure. All of that was incidental
+rather than controlled, so the claim stands until `S1` is run properly — and
+three whole features are withdrawn on the strength of it.
 
-### Step 3 — `SPREAD` for every gear count *(~20 min)*
+### Step 4 — `SPREAD` for every gear count *(~20 min)*
 
-Now the highest-value gearing work, because the table is known wrong rather
-than merely unconfirmed. Details in Session A step 2 below.
+Reframed: **restore the default tune first**, which is the step whose absence
+caused the original error. And take one extra 7-speed from a *different* car
+before filling in the other rows — it decides whether default ratios belong to
+the transmission tier or to the car, and therefore whether the rest of the
+table is worth measuring at all.
 
-### Step 4 — The screening pass on the candidate cars *(~35 min)*
+### Step 5 — The screening pass on the candidate cars *(~35 min)*
 
 The rig for everything after gearing. Block and rules are in `TESTS.md`.
-
-### Step 5 — Mechanical Balance, the five discriminating readings
-
-Session B Phase 1 below. The platform car, not the GR86.
 
 **`TESTS.md` is the master catalogue** — every case across every subsystem,
 including the slider-range and parts groups that sit upstream of both sessions
@@ -484,6 +498,34 @@ interesting readings are different because aero has a floor the bars do not.
 do not, so the symmetric-slider reading is a measurement of the car's own
 balance rather than a check on symmetry. That is the useful part, not a
 problem.
+
+### ✅ Partly answered 2026-08-12 — the body term is real and large
+
+Three points on the GR86, the third a genuine out-of-sample test of a model
+fitted to the first two:
+
+```
+AB = (F + a) / (F + a + R + b)        a ≈ 175 lb,  b ≈ 215 lb
+```
+
+**`aeF`/`aeR` are pounds of downforce, not a percentage** — that alone kills the
+app's `% of range` output, since a percentage of two *different* pound ranges
+cannot determine their ratio. And the body terms are comparable to the wings
+themselves, which is exactly what this Phase predicted and what a one-point
+"solve" published earlier the same day denied.
+
+| F / R | model | printed |
+|---|---|---|
+| 190 / 232 | 0.4502 | 0.45 ✓ |
+| 190 / 290 | 0.4195 | 0.42 ✓ |
+| **202 / 255** | **0.4451** | **0.45 ✓** ← not fitted to |
+
+**What `A3` now buys is different and better.** The floor-and-ceiling pair was
+designed to *bracket* a reachable range; with the model in hand those four
+readings **pin `a` and `b`** instead. They badly need pinning: the two-decimal
+readout leaves `a` loose anywhere between about 85 and 360 lb, so the structure
+is supported and the coefficients are not. And `a`/`b` are the bodyshell, so
+they are per-car by definition — a second car is owed, not optional.
 
 The two readings that matter most here are the **floor and ceiling**:
 

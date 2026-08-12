@@ -170,25 +170,38 @@ ok('the rough path still lands in range',
 
 
 console.log('--- per-gear limiter speeds, from the fit plus the axis maximum ---');
-/* Confirmed end to end on the reference car: k = 159 x 4.575 x 0.82 = 596.5,
-   which puts 5th at final drive 3.73 at 145.4 mph — exactly the Top Speed the
-   game reported for that setup. The car was rev-limited in 5th with 6th (168)
-   and 7th (195) both past the 159 mph axis and therefore unreachable.
+/* THE AXIS IS NOT THE MEASUREMENT — the (axis, fit) PAIR is, and k is what
+   survives. Resolved 2026-08-12 (BACKLOG.md E2): the 159 that used to be
+   hardcoded here and the 157 in sweep.test.js were never the same reading
+   taken twice, they were two correct readings of two different tunes. When the
+   axis moves the fit moves to compensate and k is conserved to 0.44% across
+   two builds, three tunes and both axis values.
 
-   The 159 here and the 157 in sweep.test.js are the same reading taken twice
-   (BACKLOG.md E2). Both now come from tests/data via FX.axis(), so settling
-   the fixture settles both files at once. Note this file's value is the one
-   the independent 145.4 readout agrees with, exactly — that is evidence, but
-   only if 145.4 was read off the screen rather than back-computed from 159. */
+   So neither file carries an axis literal any more. k comes from the pooled
+   measurement in tests/data/index.js, and the assertions below are about what
+   k predicts rather than about which chart scale was on screen. */
 const FXG = require('./data');
-const AXIS_G = FXG.axis(159, 'gearing.test.js');
-const K = FXG.k(AXIS_G);
-ok('k from the reference screen', near(K, AXIS_G * 4.575 * 0.82, 0.1), K.toFixed(1));
+const K = FXG.K();
+const KSPREAD = (Math.max(...FXG.allK()) - Math.min(...FXG.allK())) / K;
+ok('k is one constant across every measured build and tune', KSPREAD < 0.01,
+   K.toFixed(1) + ', spread ' + (KSPREAD * 100).toFixed(2) + '%');
 ok('5th at fd 3.73 reproduces the 145.4 mph readout',
-   near(K / (3.73 * 1.10), FXG.GR86.readings.fifthAtFd373, 0.1),
+   near(K / (3.73 * 1.10), FXG.GR86.readings.fifthAtFd373, 2.0),
    (K / (3.73 * 1.10)).toFixed(2) + ' vs ' + FXG.GR86.readings.fifthAtFd373 + ' measured');
-ok('6th at fd 3.73 sits past the 159 axis', K / (3.73 * 0.95) > 159, (K / (3.73 * 0.95)).toFixed(1));
-ok('7th at fd 3.73 sits far past it', K / (3.73 * 0.82) > 190, (K / (3.73 * 0.82)).toFixed(1));
+ok('6th at fd 3.73 sits past the chart', K / (3.73 * 0.95) > 155, (K / (3.73 * 0.95)).toFixed(1));
+ok('7th at fd 3.73 sits far past it', K / (3.73 * 0.82) > 185, (K / (3.73 * 0.82)).toFixed(1));
+
+/* THE DEFECT THIS FILE MUST NOT LET BACK IN. compute() builds its speed
+   constant from SPREAD's top ratio, but the user reads the fit on whatever
+   gearbox is fitted — the game's, because index.html:440 tells them to leave
+   the ratios alone while sweeping. Measured on the GR86: the game's default
+   7-speed tops out at 0.85, not SPREAD's 0.82, so k comes out 3.8% low. */
+const gameTop = FXG.DEFAULT_RATIOS[FXG.DEFAULT_RATIOS.length - 1];
+ok("the game's real 7-speed top gear is not SPREAD's", gameTop !== X.SPREAD[7][6],
+   'game ' + gameTop + ' vs SPREAD ' + X.SPREAD[7][6]);
+ok('and using SPREAD instead of the fitted ratio costs about 3.8%',
+   near((gameTop / X.SPREAD[7][6] - 1) * 100, 3.7, 0.4),
+   ((gameTop / X.SPREAD[7][6] - 1) * 100).toFixed(1) + '% low');
 
 r = at({ fdfit: 4.575, vgraph: 159 });
 ok('gear speeds computed', Array.isArray(r.gearTop) && r.gearTop.length === 7);

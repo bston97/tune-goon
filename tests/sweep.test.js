@@ -33,7 +33,10 @@ const ok = (l, c, e) => console.log((c ? 'PASS  ' : 'FAIL  ') + l + (e !== undef
 const FX = require('./data');
 const SWEEP = FX.GR86.rows;
 const FIT = FX.GR86.readings.fit;
-const AXIS = FX.axis(157, 'sweep.test.js');
+/* 157 rather than 159 is not a claim about which reading was right — resolved
+   2026-08-12, both were. It is the axis that pairs with THIS fixture's fit, and
+   the pair is what means anything. See tests/data/index.js. */
+const AXIS = 157;
 const CAR = { name: 'GR86', cls: 'A', disc: 'road', wt: 2900, fw: 53, hp: 350, tq: 260,
   dt: 'RWD', gr: 7, tire: 'sport', aero: 'both', twf: 0, twr: 0, susp: 'race', arb: 'both',
   trans: 'race', diff: 'race', vmax: NaN, fdfit: FIT, vgraph: AXIS };
@@ -71,7 +74,7 @@ ok('specifically, not 4.82 — the worst measured', match !== 4.82,
 
 /* The tie-breaker that settled road at 1.00: at the fit every gear engages. */
 const usesAll = fd => {
-  const K = FX.k(AXIS);
+  const K = FX.K();
   const tops = X.SPREAD[7].map(g => K / (fd * g));
   const top = SWEEP.reduce((a, b) => Math.abs(b.fd - fd) < Math.abs(a.fd - fd) ? b : a).top;
   return tops.findIndex(s => s >= top) + 1 === 7;
@@ -84,11 +87,25 @@ console.log('\n--- the gear-speed model, which IS reverse-engineered and does ho
 /* k/(FD x G) was derived from the fit and checked against the graph and against
    an independent readout. Unlike the performance figures it is pure kinematics,
    so it generalises to any car. */
-const K = FX.k(AXIS);
-ok('k from the fit and the axis', Math.abs(K - AXIS * FIT * X.SPREAD[7][6]) < 0.01, K.toFixed(1));
-/* Tolerance is 2.0 because this file's axis reading (157) misses the measured
-   145.4 by 1.85, while the other candidate (159) hits it exactly. That gap is
-   E2 in one assertion — when the axis is settled, tighten this. */
+/* k IS THE INVARIANT, not the axis. Resolved 2026-08-12: when the axis moves
+   the fit moves to compensate, because the axis is the chart's scale and the
+   fit is the final drive at which the top gear reaches the end of it. The old
+   assertion here compared k against axis * fit * SPREAD[7][6], which was
+   tautological — it recomputed the definition — AND pinned the very defect
+   compute() still has, since SPREAD's top ratio is not the fitted gearbox's. */
+const K = FX.K();
+const KS = FX.allK();
+console.log('   measured k across every build and tune:');
+FX.TRIPLES.forEach((t, i) => console.log('     ' + KS[i].toFixed(1) + '   ' + t.who +
+  '   (axis ' + t.axis + ' x fit ' + t.fit + ' x top ' + t.topRatio + ')'));
+ok('k is invariant across both axis readings, two builds and three tunes',
+   (Math.max(...KS) - Math.min(...KS)) / K < 0.01,
+   'spread ' + ((Math.max(...KS) - Math.min(...KS)) / K * 100).toFixed(2) + '% around ' + K.toFixed(1));
+ok('both axis candidates survive, paired with their own fit',
+   FX.TRIPLES.some(t => t.axis === 157) && FX.TRIPLES.some(t => t.axis === 159),
+   'E2 was resolved by pairing, not by picking');
+/* Tolerance 2.0: the 145.4 was read at a build whose k we know to ~0.4%, and
+   this predicts it from the pooled constant rather than from one reading. */
 ok('predicts the 145.4 mph readout at fd 3.73 in 5th',
    Math.abs(K / (3.73 * 1.10) - FX.GR86.readings.fifthAtFd373) < 2.0,
    (K / (3.73 * 1.10)).toFixed(1) + ' vs ' + FX.GR86.readings.fifthAtFd373 + ' measured');

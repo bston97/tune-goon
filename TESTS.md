@@ -287,23 +287,40 @@ minutes to settle and it sits upstream of Phase 1.
 
 # Group M — Mechanical Balance
 
-Full design, candidate models and the solver are in `MEASURE.md` Phase 1. The
-case list in short:
+## ✅ SOLVED 2026-08-12 on the GR86
 
-| id | question | rows |
-|---|---|---|
-| M1 | Is MB exactly 0.500 at equal bars? | 1 |
-| M2 | Same-ratio pair 20/40 vs 40/80 — pure ratio, or is there an additive term? | 2 |
-| M3 | Do springs enter MB? (bars held, `spF` ±30%) | 2 |
-| M4 | Does ride height enter MB? | 2 |
-| M5 | `arF` sweep at `arR`=30 — shape of the front term | 4 |
-| M6 | `arR` sweep at `arF`=30 — is the rear the mirror of the front? | 4 |
-| M7 | M1–M2 repeated on CORE-2, CORE-3, SAT-F-low — does the car enter? | 9 |
-| M8 | Does MB move when *nothing* is touched but the discipline preset? | 1 |
+```
+MB = R / (F + R)      F = arF + 0.150·spF + 50.5      R = arR + 0.150·spR + 72.3
+```
 
-M1–M3 are five readings and they choose the model on their own. M7 is what
-turns one car's curve into a function of the car, and is where a track-width
-or weight-distribution term would show up as a per-car offset in the residuals.
+**The rear axle's share of roll stiffness**, not the front's — every candidate
+model in `MEASURE.md` Phase 1 was written `F/(F+R)` and the whole list was the
+right shape inverted. Six settings, three free parameters, every row on the
+printed digit, plus two rows it was not fitted to (the app's own tune exact, the
+game's default one rounding step out at a different ride height and pressure).
+
+- **One bar point ≈ 6.7 lb/in of spring** — comparable authority across their
+  ranges, which is why no bars-only or springs-only model could ever have fitted.
+- **The axle constants are large and rear-biased**, ~40% of the total. Tires,
+  geometry, unsprung mass — and they absorb tire pressure, which is why 31.5 →
+  50 psi moved MB a step with nothing else touched.
+- **Sensitivity ≈0.0015 of MB per rear-bar point**, so closing the app's own
+  0.51 → 0.55 gap needs **≈+27 rear bar**.
+
+What survives from the original case list:
+
+| id | question | rows | status |
+|---|---|---|---|
+| M1 | Is MB 0.500 at equal bars? | 1 | done — 0.51, and the constants are why |
+| M2 | Same-ratio pair — pure ratio or additive term? | 2 | done — 0.54 vs 0.56, **additive term proven** |
+| M3 | Do springs enter MB? | 2 | done — yes, and by how much |
+| M4 | Does ride height enter MB? | 2 | **open, and now a prediction rather than an exploration** — it sits inside the axle constants, so the model says by how much it should move |
+| M7 | Repeat on a second car — does the car enter? | 3 | **open and the priority.** Equal bars, then the same-ratio pair. Structure should generalise; the three coefficients should not |
+| M8 | Does MB move on the discipline preset alone? | 1 | open, cheap |
+
+`M5`/`M6` (the shape sweeps) are **retired** — the four-row fit plus the
+same-ratio pair already determined the form, and re-sweeping one bar against a
+solved linear model would measure nothing.
 
 ---
 
@@ -311,19 +328,35 @@ or weight-distribution term would show up as a per-car offset in the residuals.
 
 Full design in `MEASURE.md` Phase 2.
 
-| id | question | rows |
-|---|---|---|
-| A1 | AB at equal sliders — expected *not* 0.5, since the body makes downforce the wings do not | 1 |
-| A2 | Same-ratio pair 25/50 vs 50/100 | 2 |
-| A3 | **Floor and ceiling — 0/0 and 100/100** | 2 |
-| A4 | `aeF` sweep at `aeR`=50 | 4 |
-| A5 | Rake — ride height min/max at wings 50/50 | 2 |
-| A6 | AB with only one end fitted | 1 |
+## Model found 2026-08-12, coefficients still loose
 
-**A3 is the one that matters most.** Those two readings bracket every AB the car
-can produce. The app prints the 0.42–0.48 target on every build with aero
-fitted; on a car whose bracket excludes that range, it is printing a goal the
-user would chase to the end of a slider and never reach.
+```
+AB = (F + a) / (F + a + R + b)        a ≈ 175 lb,  b ≈ 215 lb   (GR86)
+```
+
+`aeF`/`aeR` are **pounds of downforce**, and the body makes a large amount of
+it that the wings do not — `A1` said so from the start and was talked out of it
+on a single point. Validated on a third, out-of-sample reading.
+
+| id | question | rows | status |
+|---|---|---|---|
+| A1 | AB at equal sliders — *not* 0.5 | 1 | done, and the body term is why |
+| A2 | Same-ratio pair 25/50 vs 50/100 | 2 | **retired** — the model already accounts for it |
+| A3 | **Floor and ceiling — 0/0 and 100/100** | 2 | **open, and the priority** |
+| A4 | `aeF` sweep at `aeR`=50 | 4 | open, refines `a` |
+| A5 | Rake — ride height min/max at wings 50/50 | 2 | open, untested term |
+| A6 | AB with only one end fitted | 1 | open |
+
+**`A3` still matters most, for a better reason than before.** It was designed to
+*bracket* the reachable range; with the model in hand those four readings **pin
+`a` and `b`**, which badly need pinning — the two-decimal readout leaves `a`
+loose anywhere between roughly 85 and 360 lb. The reachability question survives
+too: the app prints the 0.42–0.48 target on every build with aero fitted, and on
+a car whose bracket excludes it that is a goal the user would chase to the end
+of a slider and never reach.
+
+`a` and `b` are the bodyshell, so they are **per-car by definition** — a second
+car is owed here, not optional.
 
 ---
 
@@ -333,12 +366,13 @@ Working sheet in `MEASURE.md` Session A.
 
 | id | question | status |
 |---|---|---|
-| G1 | The axis maximum, read cold | **next up** — settles E2, fixture already wired |
-| G2 | Does the axis move with gearing? (should not) | with G1 |
-| G3 | Does the axis move with power? | = P5 |
-| G4 | `SPREAD` default ratios for 4, 5, 6, 8, 9, 10 gears | only 7 is measured; the rest look interpolated off a curve |
-| G5 | `k = axis × fit × topRatio` on a second and third car | "pure kinematics so it should generalise" is how tier-4 constants are born |
-| G6 | Is the fit reading repeatable? Read it, leave the menu, read again | never checked, and everything downstream rests on it |
+| G1 | The axis maximum, read cold | ✅ **done — and the question was wrong.** Both 157 and 159 are real; `k = axis × fit × topRatio` is the invariant, 588.1–590.7 across two builds and three tunes. The axis alone is chart furniture. `BACKLOG` E2 resolved |
+| G2 | Does the axis move with gearing? | ✅ **no.** Held at 157 across fd 3.50 → 4.60 |
+| G3 | Does the axis move with power/parts? | it moves with the **tune**, cause unidentified — final drive, top ratio, aero and pressure all eliminated. **Stopped mattering** once `k` proved invariant |
+| G4 | Default ratios for 4, 5, 6, 8, 9, 10 gears | **open, and reframed.** `SPREAD[7]` is not merely unconfirmed, it is **wrong** — the game's default is 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at fd 3.63. **Restore the default tune before transcribing**; that omission caused the original error |
+| G5 | `k` on a second and third car | open |
+| G6 | Is the fit repeatable? | open |
+| **G7** | **Do default ratios belong to the transmission tier or to the car?** | **open, and it gates G4.** One extra 7-speed from a different car decides whether a universal table exists at all — do it before filling in the other six rows |
 
 ---
 
@@ -395,10 +429,23 @@ are the fragile ones and 0-60 is the solid one — which would tell us which
 columns can carry a fine distinction and which cannot.
 
 ### S1 — What does the Top Speed readout actually respond to? *(20 min)*
-The most important unresolved question in the app. Boston's reading is that it
-is the projected maximum with the whole build aimed at top speed — but it moved
-140.0 → 144.4 across the final-drive sweep, so it is not independent of the
-tune either. Both cannot be true as stated.
+**Now the most valuable unrun case in the catalogue.** Boston's reading is that
+it is the projected maximum with the whole build aimed at top speed — but it
+moved 140.0 → 144.4 across the final-drive sweep, so it is not independent of
+the tune either. Both cannot be true as stated.
+
+**2026-08-12 made that much sharper without settling it.** The readout moved
+with the **rear wing** (141.1 → 139.1 as downforce went up), the **final
+drive**, the **springs** (138.2 → 137.4) and **tire pressure** (137.4 → 137.1).
+A figure computed with the whole tune aimed at top speed should not fall when
+you add downforce to the tune it is supposedly ignoring.
+
+**None of that is a result, and `CLAUDE.md`'s claim stands until this case is
+run properly.** Every one of those readings was incidental — taken while
+measuring something else, never with top speed as the controlled variable.
+Three conclusions were reversed on exactly that kind of evidence that day and
+all three had to be withdrawn again. Three withdrawn app features ride on the
+answer, so run it deliberately.
 - **Vary, one at a time, everything else held:** final drive; aero front; aero
   rear; tire compound; tire pressure; ride height; camber.
 - **Read:** Top Speed after each.
@@ -439,6 +486,19 @@ tune either. Both cannot be true as stated.
   is essentially a tire-compound readout. If it responds to camber and pressure,
   a whole group of currently class-D constants moves up to class B and becomes
   measurable without driving. **High value if it works.**
+
+**Provisionally answered 2026-08-12, and the answer is no.** Five separate tune
+changes left lateral G completely unmoved — bars 30/30 → 40/65, front spring
+328 → 608, tire pressure 31.5 → 50, the whole final-drive sweep, and every row
+of two balance sweeps. It read 1.26 and 1.42 throughout. **The one thing that
+did move it was aero** (1.25/1.41 → 1.26/1.43 on the rear wing).
+
+So lateral G looks like a compound-and-aero readout, not a tune readout, and the
+hoped-for promotion of grip-side constants to panel-measurable **does not
+happen** — camber is the one untested lever and is the only reason to still run
+this. The consolation is real though: lateral G is now a **clean control**. It
+is known not to respond to gearing, bars, springs or pressure, so if it moves in
+some later row, whatever moved it is worth looking at.
 
 ### S7 — Caster: 5.0, 6.5 or 7? *(10 min, then driving)*
 
