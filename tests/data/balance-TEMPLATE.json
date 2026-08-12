@@ -36,8 +36,9 @@
   },
 
   "baseline": {
-    "spF": null, "spR": null, "rhF": null, "rhR": null,
-    "note": "the app's own values for this car, used as the hold-point for the bar sweeps"
+    "spF": null, "spR": null, "rhF": null, "rhR": null, "pF": null, "pR": null,
+    "note": "the app's own values for this car, used as the hold-point for the bar sweeps",
+    "pressureNote": "TIRE PRESSURE IS IN HERE BECAUSE IT MOVES MB. Measured 2026-08-12: 31.5 -> 50.0 psi shifted Mechanical Balance 0.51 -> 0.50 with bars, springs and ride height all untouched. No candidate model M1-M5 has a tire term, and tire stiffness sits in series with the spring and the bar in the roll-stiffness chain. Hold it and record it on every row, or the sweep will blame the bars for a tire effect."
   },
 
   "varied": "arF/arR",

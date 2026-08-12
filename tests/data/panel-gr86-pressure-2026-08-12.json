@@ -1,0 +1,127 @@
+{
+  "_README": [
+    "One variable: tire pressure, 31.5 -> 50.0 psi both ends, on the app's tune.",
+    "Everything else held. Taken to test the last remaining candidate for the",
+    "gearing axis; it eliminated that candidate and produced three findings",
+    "about other things, which is the usual return on a clean single-variable",
+    "row."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — TIRES and GEARING tabs",
+  "tune": "the app's tune, pressure varied",
+  "varied": "pF/pR",
+
+  "build": {
+    "tires": "semi-slick", "susp": "race", "arb": "both", "diff": "race",
+    "trans": "race", "aero": "both", "twf": 3, "twr": 3, "gears": 7,
+    "wt": 2428, "fw": 54, "hp": 290, "tq": 303, "dt": "AWD"
+  },
+
+  "held": {
+    "arF": 31.30, "arR": 30.10, "spF": 468.1, "spR": 374.9,
+    "rhF": 4.2, "rhR": 4.4, "aeF": 202, "aeR": 255,
+    "fd": 4.34, "ratios": [2.92, 2.05, 1.60, 1.30, 1.10, 0.95, 0.82]
+  },
+
+  "rows": [
+    { "pF": 31.5, "pR": 31.5, "axisMax": 159, "mb": 0.51, "ab": 0.45, "aeroEff": 0.743,
+      "s60": 3.333, "s100": 8.883, "top": 137.4, "brake60_0": 68.4, "brake100_0": 153.1,
+      "lateralG60": 1.26, "lateralG120": 1.42 },
+    { "pF": 50.0, "pR": 50.0, "axisMax": 159, "mb": 0.50, "ab": 0.45, "aeroEff": 0.743,
+      "s60": 3.333, "s100": 8.933, "top": 137.1, "brake60_0": 65.7, "brake100_0": 150.6,
+      "lateralG60": 1.26, "lateralG120": 1.42 }
+  ],
+
+  "axisEliminated": [
+    "TIRE PRESSURE DOES NOT MOVE THE AXIS. 31.5 -> 50.0 psi, a 59% change and",
+    "the most plausible remaining lever on rolling radius, and the axis held at",
+    "159 with the midpoint label at 79.",
+    "",
+    "EVERY TUNE-SIDE CANDIDATE IS NOW DEAD:",
+    "  final drive       held 157 across 3.50-4.60",
+    "  top gear ratio    0.85 -> 0.75 -> 0.85, no change",
+    "  aero              0.743 reads 159 while 0.741 read 157",
+    "  tire pressure     31.5 -> 50.0, no change",
+    "",
+    "And every tune we can reproduce — the game's default, the default with a",
+    "moved 7th, a freshly generated app tune, and that tune at 50 psi — reads",
+    "159. The only 157 ever recorded on this car came from the tune that was",
+    "already on it this morning, which was replaced before its settings were",
+    "captured and cannot be reconstructed.",
+    "",
+    "THE HONEST POSITION: the axis is 159 for this build, and the single 157 is",
+    "unreproducible. It is not being called a misreading — Boston's standing",
+    "observation is that PARTS move it, and no part has changed all day, so",
+    "there is no mechanism on the table that explains it either. It is recorded",
+    "as unexplained.",
+    "",
+    "THIS INVERTS THIS MORNING'S E2 ARGUMENT, and that is worth stating",
+    "plainly. The k = 588.3 that made 157 'the reading that survives' was built",
+    "from a fit of 4.57 read on the tune that showed 157. Internally consistent,",
+    "but it is one tune's pair, and the axis on every reproducible tune of this",
+    "build is the value gearing.test.js uses, not the one sweep.test.js uses.",
+    "",
+    "WHAT SETTLES IT CHEAPLY: re-read the fit NOW, on this tune. The app's",
+    "ratios are applied, so the top gear really is 0.82 and for the first time",
+    "the axis, the fit and the gearbox all belong to the same setup. That gives",
+    "a k that is not assembled from two different tunes, and it can be compared",
+    "against 588.3 directly."
+  ],
+
+  "mbRespondsToPressure": [
+    "MECHANICAL BALANCE MOVED WITH NOTHING BUT TIRE PRESSURE: 0.51 -> 0.50.",
+    "",
+    "Bars, springs and ride height were all untouched. No candidate model in",
+    "MEASURE.md Phase 1 — M1 through M5 — contains a tire term at all.",
+    "",
+    "Physically it is reasonable: tire vertical stiffness sits in series with",
+    "the spring and the bar in the roll-stiffness chain, and pressure changes",
+    "it. What is odd is that pressure moved EQUALLY at both ends and the",
+    "balance still shifted, which means the two axles are not contributing",
+    "symmetrically — different loads, or different effective rates.",
+    "",
+    "SIZE AND CAVEAT: 0.01 on a 2-decimal readout, so it could be as little as",
+    "a rounding boundary crossing (0.505 -> 0.504). It is one step, in a",
+    "sitting where the panel has been shown deterministic, so it is real — but",
+    "it is one step, and the pressure change was enormous. The effect is small.",
+    "",
+    "WHAT IT MEANS FOR THE MB SWEEP: pressure must be HELD and RECORDED on",
+    "every row of Phase 1, which the balance template does not currently ask",
+    "for. A sweep that let pressure drift would blame the bars for a tire",
+    "effect."
+  ],
+
+  "brakingAndGrip": [
+    "TWO RESULTS THAT HAVE NOTHING TO DO WITH WHY THE ROW WAS TAKEN.",
+    "",
+    "1. BRAKING IMPROVED SHARPLY WITH PRESSURE. 60-0 went 68.4 -> 65.7 ft and",
+    "   100-0 went 153.1 -> 150.6 ft, so 2.7 ft and 2.5 ft better at 50 psi.",
+    "   That is half the gap to the game's default tune (63.2 ft) recovered by",
+    "   one slider the app sets from a fixed table: PSI.semi = 31 in",
+    "   index.html:523, which is where the app's 31.5 came from.",
+    "",
+    "   The app's pressures are a per-compound constant with no per-car or",
+    "   per-discipline term, and on this car the panel says higher is better for",
+    "   stopping. Not actionable yet — panel braking is straight-line only and",
+    "   cannot see what pressure does to tire temperature over a stint, which is",
+    "   the whole reason a pressure target exists (case T1). But it is a",
+    "   measurable column where the app's constant is not the optimum.",
+    "",
+    "2. LATERAL G DID NOT MOVE AT ALL. 1.26 and 1.42 at both speeds, across a",
+    "   59% pressure change. Case S5 asks whether lateral G responds to the tune",
+    "   or is essentially a compound readout; this is the first evidence and it",
+    "   points at compound. If camber and bars also leave it flat, S5's hoped-for",
+    "   promotion of grip constants from lap-times-only to panel-measurable does",
+    "   not happen, and that is worth knowing before designing an hour of it.",
+    "",
+    "   It also makes lateral G a clean CONTROL: it is now known not to respond",
+    "   to gearing or to pressure, so if it moves in some later row, whatever",
+    "   moved is worth looking at."
+  ],
+
+  "notes": "0-100 got slightly worse with pressure (8.883 -> 8.933, three frames) and top speed fell 0.3 mph, both consistent with less grip on launch and marginally more rolling resistance or a smaller contact patch. 0-60 did not move at all, which is the frame-quantised column being too coarse to show a small effect: at 1/60 s resolution a change under 0.017 s is invisible, so 0-60 flat does not mean 0-60 unaffected."
+}
