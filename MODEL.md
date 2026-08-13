@@ -128,11 +128,16 @@ shape.
 ranges.** — MEASURED
 
 ```
-AB = (F + a) / (F + a + R + b)        a ≈ 175 lb front, b ≈ 215 lb rear  [ONE CAR]
+AB = (F + a) / (F + a + R + b)
 ```
 
 `a` and `b` are the **bodyshell's own downforce**, which no slider touches, and
-they are comparable in size to the wings. Validated out-of-sample on the GR86.
+they are comparable in size to the wings. The shape is validated out-of-sample
+on the GR86; **the coefficients are barely pinned at all.** Every (a, b) that
+reproduces the measured rows spans `a ∈ [95, 345]` and `b ∈ [110, 435]` — a
+three-fold window, because a two-decimal readout cannot do better on three
+points. The "≈175 / ≈215" pair quoted here and in the app until 2026-08-12 was
+a point estimate the data does not support, and `ab.test.js` now forbids one.
 
 **Consequences:**
 
