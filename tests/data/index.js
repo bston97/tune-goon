@@ -134,11 +134,46 @@ const MB_ROWS = [
     who: "the game's default tune (different ride height and pressure)" }
 ];
 
+/* ---------------------------------------------------------------------------
+   The second car. Springs are held on every row, so the spring term and the
+   axle constant cannot be separated — they lump into one per-axle constant:
+
+       F = arF + A       R = arR + B       MB = R/(F+R)
+
+   Which means this car gets `lumpedMb`, not `mbOf`. Keeping them as different
+   functions is deliberate: reaching for mbOf here would silently import the
+   GR86's coefficients into a car they are known not to fit.
+   ------------------------------------------------------------------------ */
+const CIVIC = load('balance-civic-default-2026-08-12');
+
+const lumpedMb = ({ arF, arR }, { A, B }) => (arR + B) / (arF + A + arR + B);
+
+const CIVIC_ROWS = CIVIC.rows.filter(r => r.mb != null).map(r => ({
+  arF: r.arF, arR: r.arR, mb: r.mb, panel: r.panel,
+  /* Row 0 is the game's default bars, read before the sweep and fitted to
+     nothing. It is the only row here capable of falsifying a solve. */
+  fitted: r.n !== 0,
+  who: r.n === 0 ? "the game's default bars" : 'bar row ' + r.n
+}));
+
+/* Every (A,B) on a 0.5 grid that reproduces all four printed readouts. The
+   region is a narrow diagonal band: the SCALE is loose, the SHARE is pinned.
+   Computed rather than stored so the bound moves if a row is ever corrected. */
+function civicRegion(rows = CIVIC_ROWS, step = 0.5) {
+  const out = [];
+  for (let A = 100; A <= 900; A += step)
+    for (let B = 100; B <= 900; B += step)
+      if (rows.every(r => Math.round(lumpedMb(r, { A, B }) * 100) / 100 === r.mb))
+        out.push({ A, B, sum: A + B, share: A / (A + B) });
+  return out;
+}
+
 module.exports = {
   JULY, AUG, AUG_DEF, AUG_FIT, MB, MB_PAIR, DEFTUNE,
   TRIPLES, kOf, allK, K,
   DEFAULT_RATIOS, DEFAULT_FD,
   MB_MODEL, mbOf, MB_ROWS,
+  CIVIC, CIVIC_ROWS, lumpedMb, civicRegion,
   /* Back-compat shim: GR86 was the only export two test files used. */
   GR86: JULY
 };

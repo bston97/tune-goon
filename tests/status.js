@@ -35,6 +35,7 @@ const CASES = [
   ['M3', 'Do springs enter MB?',                              'balance'],
   ['M5', 'arF sweep — shape of the front term',               'balance'],
   ['M7', 'MB on three more cars — does the car enter?',       'balance'],
+  ['M9', 'Split the Civic\'s lumped constants (2 spring rows)', 'balance'],
   ['A1', 'AB at equal sliders',                               'balance'],
   ['A3', 'Aero floor and ceiling — is the target reachable?', 'balance'],
   ['S0', 'The repeat check — this session\'s own noise floor', 'panel'],

@@ -375,7 +375,8 @@ What survives from the original case list:
 | M2 | Same-ratio pair — pure ratio or additive term? | 2 | done — 0.54 vs 0.56, **additive term proven** |
 | M3 | Do springs enter MB? | 2 | done — yes, and by how much |
 | M4 | Does ride height enter MB? | 2 | **open, and now a prediction rather than an exploration** — it sits inside the axle constants, so the model says by how much it should move |
-| M7 | Repeat on a second car — does the car enter? | 3 | **open and the priority.** Equal bars, then the same-ratio pair. Structure should generalise; the three coefficients should not |
+| M7 | Repeat on a second car — does the car enter? | 3 | ✅ **structure confirmed 2026-08-12** on a 2023 Civic Type R. All three predictions held: equal bars read 0.49 not 0.500, the same-ratio pair split 0.51 vs 0.52, and a front-stiffer car read below 0.5 as a rear-share model requires. Coefficients do not transfer — the GR86's predict 0.50 where the Civic reads 0.47. **Still owed: a third car**, and the spring rows below |
+| M9 | Split the Civic's lumped constants — 2 spring rows | 2 | **now the priority.** The Civic sweep held springs, so its spring term and axle constant lump into one number per axle. Front spring ±30% at bars 30/30 separates them and gives that car's spring-to-bar exchange rate. **If it comes back at the GR86's 0.150, that number is a game constant rather than a car constant** — which would drop the model from three per-car unknowns to two and make the two-reading calibration exact instead of approximate. Cheapest high-value reading in the catalogue |
 | M8 | Does MB move on the discipline preset alone? | 1 | open, cheap |
 
 `M5`/`M6` (the shape sweeps) are **retired** — the four-row fit plus the
