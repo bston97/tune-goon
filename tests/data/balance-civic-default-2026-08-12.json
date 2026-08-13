@@ -516,6 +516,81 @@
     ]
   },
 
+  "m10Answered": {
+    "_note": [
+      "Case M10, settled 2026-08-12 with one screenshot. Three states of the",
+      "same car from the upgrade-screen preview, one width step at each end:",
+      "",
+      "    front upgraded, rear upgraded   MB 0.46   (the car as it stands)",
+      "    front STOCK,    rear upgraded   MB 0.44",
+      "    front upgraded, rear STOCK      MB 0.48",
+      "",
+      "so widening the FRONT raises MB and widening the REAR lowers it."
+    ],
+    "states": {
+      "bothUpgraded": 0.46,
+      "stockFront": 0.44,
+      "stockRear": 0.48
+    },
+    "MECHANICAL_BALANCE_IS_LOAD_TRANSFER": [
+      "MB IS THE REAR AXLE'S SHARE OF LATERAL LOAD TRANSFER, NOT OF ROLL",
+      "STIFFNESS. Track enters as a DIVISOR.",
+      "",
+      "Three candidate forms, and only one survives:",
+      "",
+      "  roll stiffness   MB ~ (Kr*tr^2)/(Kf*tf^2 + Kr*tr^2)",
+      "                   widening the front raises the front term -> MB DOWN",
+      "                   WRONG SIGN, on both axles",
+      "",
+      "  track linear     MB ~ (Kr*tr)/(Kf*tf + Kr*tr)",
+      "                   same sign as above.  WRONG, on both axles",
+      "",
+      "  load transfer    MB ~ (Kr/tr)/(Kf/tf + Kr/tr)",
+      "                   widening the front CUTS the front term -> MB UP",
+      "                   RIGHT on both axles",
+      "",
+      "This matters beyond bookkeeping. At fixed geometry the three forms differ",
+      "only by constants, which is exactly why every bar and spring row fitted",
+      "all of them and why the solved model works without knowing which. It also",
+      "explains the app's own long-standing note that 'the readout sees the",
+      "wider track and the formula does not': now the DIRECTION is known.",
+      "Widening the front raises MB; widening the rear lowers it."
+    ],
+    "theQuantitativeCheckAndItsLIMIT": [
+      "The three states carry one free number per axle — the proportion by which",
+      "the step widens that track — and the same part on opposite axles should",
+      "give the same proportion. It does:",
+      "",
+      "    front step   +8.42%       rear step   +8.36%",
+      "",
+      "*** AND THAT AGREEMENT IS NOT REAL. *** Every input is a two-decimal",
+      "readout. Propagating the rounding windows:",
+      "",
+      "    front step   [4.1%, 12.9%]",
+      "    rear  step   [4.1%, 12.8%]",
+      "",
+      "The two ranges overlap almost entirely, which IS a genuine consistency",
+      "check and is worth having. But the data supports 'both ends widen by the",
+      "same 4-13%'. It does not support 8.4%, and the three-digit agreement of",
+      "the point estimates is a coincidence of where three roundings happened to",
+      "fall. Quoting 8.42 against 8.36 would have been the fourth instance of",
+      "this exact error in two days.",
+      "",
+      "The DIRECTIONS are what settles M10 and they are not rounding-dependent:",
+      "0.44 -> 0.46 and 0.48 -> 0.46 are two and four printing steps apart, and",
+      "the rejected models get the sign wrong rather than the magnitude."
+    ],
+    "stillOwed": [
+      "One car, one step at each end, and the preview's own tune state is still",
+      "unidentified (it reads 0.46 where the tuning menu reads 0.47 at default",
+      "bars). None of that touches the direction result.",
+      "",
+      "A second car repeats it in one screenshot. Until then nothing about track",
+      "width goes into compute() — but the app's existing advice to trust the",
+      "readout over the formula was right, and now it can say which way."
+    ]
+  },
+
   "widebodyAB": {
     "_note": [
       "Case P7, from the same upgrade-screen A/B. PREVIEW ONLY — the kit was not",

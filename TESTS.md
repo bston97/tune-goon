@@ -315,7 +315,34 @@ single PI point is a good trade the build plan never mentions.
 **Still owed:** rear track width (that is `M10`), and the same A/B on a second
 car before any of it reaches `compute()`.
 
-### M10 — Is Mechanical Balance roll stiffness, or load transfer? *(1 screenshot)*
+### M10 — ✅ **ANSWERED 2026-08-12: it is LOAD TRANSFER**
+
+Three states of the Civic, one width step at each end:
+
+| | Mech. Balance |
+|---|---|
+| front upgraded, rear upgraded | 0.46 |
+| front **stock**, rear upgraded | 0.44 |
+| front upgraded, rear **stock** | 0.48 |
+
+**Widening the front raises MB; widening the rear lowers it.** Roll stiffness
+(track squared) and a track-linear form both get *both* signs wrong. Only
+`K/track` — lateral load transfer — gets both right. At fixed geometry the
+three differ by constants, which is why every bar and spring row fitted all of
+them and the solved model works without knowing which.
+
+The implied widening factor per step agrees between the two axles (4–13% on
+each, overlapping), which is a real consistency check — but **the point
+estimates, 8.42% and 8.36%, are a coincidence of three roundings and are
+refused.** The directions are what settle it and they are not
+rounding-dependent.
+
+**What it changes:** the app's standing note that *"the readout sees the wider
+track and the formula does not, so trust the readout"* was right, and now it
+can say **which way**. Nothing reaches `compute()` until a second car repeats
+it — one screenshot.
+
+### M10 (original framing, kept for the reasoning) *(1 screenshot)*
 - **The prediction that failed:** roll stiffness goes as track **squared**, so
   widening the front should stiffen the front and *lower* MB. It rose.
 - **What has that sign:** lateral load transfer goes as roll stiffness

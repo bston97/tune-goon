@@ -411,3 +411,59 @@ console.log('\n--- S5 sharpened: lateral G answers to parts, never to the tune -
      /responds to PARTS and refuses to respond to the TUNE/.test(
        FX.CIVIC.widebodyAB.lateralGRespondsToPARTSButNotToTUNE.join(' ')));
 }
+
+console.log('\n--- M10 ANSWERED: Mechanical Balance is load transfer ---');
+/* Three states of one car, one width step at each end. The direction alone
+   settles it, and the direction is not rounding-dependent. */
+{
+  const S = FX.CIVIC.m10Answered.states;
+  ok('widening the FRONT raises MB', S.bothUpgraded > S.stockFront,
+     S.stockFront + ' -> ' + S.bothUpgraded);
+  ok('widening the REAR lowers it', S.bothUpgraded < S.stockRear,
+     S.stockRear + ' -> ' + S.bothUpgraded);
+
+  /* Score the three candidate forms on sign alone. K is unknown but positive,
+     so only the exponent on track matters for the direction. */
+  const mb = (Kf, Kr, tf, tr, e) => (Kr * Math.pow(tr, e)) /
+    (Kf * Math.pow(tf, e) + Kr * Math.pow(tr, e));
+  const check = e => {
+    const Kf = 1, Kr = 1, w = 1.084;
+    const both = mb(Kf, Kr, w, w, e);
+    return mb(Kf, Kr, 1, w, e) < both && mb(Kf, Kr, w, 1, e) > both;
+  };
+  ok('roll stiffness (track squared) gets both signs wrong', !check(2));
+  ok('track linear also gets both signs wrong', !check(1));
+  ok('load transfer (track divides) gets both right', check(-1),
+     'MB is the rear share of lateral LOAD TRANSFER');
+
+  ok('the fixture states which form survived',
+     /REAR AXLE'S SHARE OF LATERAL LOAD TRANSFER/.test(
+       FX.CIVIC.m10Answered.MECHANICAL_BALANCE_IS_LOAD_TRANSFER.join(' ')));
+}
+
+console.log('\n--- and the tidy 8.42-vs-8.36 agreement is refused ---');
+/* One free number per axle — how much the step widens that track — and the two
+   came out 8.42% and 8.36%. That is a coincidence of three roundings, and the
+   repo has now made this exact error often enough to test against it. */
+{
+  const f = m => 1 / m - 1;
+  const rng = m => [f(m + 0.005), f(m - 0.005)];
+  const S = FX.CIVIC.m10Answered.states;
+  const [bLo, bHi] = rng(S.bothUpgraded);
+  const [sLo, sHi] = rng(S.stockFront);
+  const [rLo, rHi] = rng(S.stockRear);
+  const alpha = [sLo / bHi, sHi / bLo], beta = [bLo / rHi, bHi / rLo];
+
+  ok('the two implied widening factors overlap, which is the real check',
+     Math.min(alpha[1], beta[1]) > Math.max(alpha[0], beta[0]),
+     'front [' + ((alpha[0] - 1) * 100).toFixed(1) + '%, ' + ((alpha[1] - 1) * 100).toFixed(1) +
+     '%], rear [' + ((beta[0] - 1) * 100).toFixed(1) + '%, ' + ((beta[1] - 1) * 100).toFixed(1) + '%]');
+  ok('but the window is far too wide to quote a figure', alpha[1] / alpha[0] > 1.05,
+     'the data says 4-13%, not 8.4%');
+  ok('so the fixture refuses the point estimate rather than printing it',
+     /AND THAT AGREEMENT IS NOT REAL/.test(
+       FX.CIVIC.m10Answered.theQuantitativeCheckAndItsLIMIT.join(' ')));
+  ok('and says why the DIRECTIONS are safe when the magnitudes are not',
+     /not rounding-dependent/.test(
+       FX.CIVIC.m10Answered.theQuantitativeCheckAndItsLIMIT.join(' ')));
+}
