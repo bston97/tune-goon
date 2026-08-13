@@ -249,3 +249,64 @@ console.log('\n--- bars move braking; they do not move grip ---');
      new Set(P.map(p => p.lateralG120)).size === 1,
      P[0].lateralG60 + ' / ' + P[0].lateralG120 + ' on every row');
 }
+
+console.log('\n--- M9: does the spring-to-bar exchange rate transfer? ---');
+/* Two spring rows on the Civic at bars held 30/30, so ws, tF and tR can all
+   float. The question is whether ws is a GAME constant — if it is, the model
+   has two per-car unknowns instead of three and the app's two-reading
+   calibration becomes exact rather than approximate. */
+{
+  const pred = FX.CIVIC.springRows.prediction.join(' ');
+  ok('the prediction was written down before the reading',
+     /STATED BEFORE THE READING/.test(pred));
+
+  const S = FX.CIVIC.springRows.rows;
+  const soft = S.find(r => r.spF < 600), stiff = S.find(r => r.spF > 800);
+  ok('a softer front spring RAISES MB', soft.mb > 0.49, soft.spF + ' -> ' + soft.mb);
+  ok('a stiffer front spring LOWERS it', stiff.mb < 0.49, stiff.spF + ' -> ' + stiff.mb);
+  ok('both landed inside the predicted window',
+     soft.mb >= 0.52 && soft.mb <= 0.53 && stiff.mb >= 0.45 && stiff.mb <= 0.46,
+     soft.mb + ' and ' + stiff.mb);
+  /* The spring slider moves in 0.5 steps, so the targets were not hit exactly
+     and do not need to be — only recorded exactly. */
+  ok('the recorded rates are what the screen showed, not what was asked for',
+     soft.spF === 492.0 && stiff.spF === 914.0, soft.spF + ' / ' + stiff.spF);
+
+  const W = FX.wsWindow();
+  const lo = Math.min(...W), hi = Math.max(...W);
+  ok('all six rows admit a joint solve', W.length > 0,
+     'ws in [' + lo.toFixed(3) + ', ' + hi.toFixed(3) + ']');
+  ok("the GR86's 0.150 is INSIDE that window", lo <= 0.150 && hi >= 0.150,
+     'so the exchange rate is consistent with transferring');
+  /* And the half of the answer that matters just as much. */
+  ok('but the window is too wide to call it settled', (hi - lo) / 0.150 > 0.15,
+     'spans ' + ((hi - lo) / 0.150 * 100).toFixed(0) + '% of the value — consistent with, not shown');
+  ok('so the fixture says not settled rather than claiming a result',
+     /NOT SHOWN/.test(FX.CIVIC.exchangeRateNotSettled.join(' ')));
+}
+
+console.log('\n--- the false rejection that a coarse grid nearly produced ---');
+/* An integer grid on tF/tR reported ws in [0.106, 0.148] and excluded 0.150.
+   That was the grid stepping over a 7-point window, not a measurement. This
+   asserts the exact method disagrees with the coarse one, so nobody
+   reintroduces the shortcut. */
+{
+  const coarse = [];
+  for (let ws = 0.02; ws <= 0.40; ws += 0.001) {
+    let hit = false;
+    for (let tF = -100; tF <= 400 && !hit; tF += 1)
+      for (let tR = -100; tR <= 400 && !hit; tR += 1)
+        if (FX.CIVIC_ALL.every(r => Math.round(
+          ((r.arR + ws * r.spR + tR) /
+           (r.arF + ws * r.spF + tF + r.arR + ws * r.spR + tR)) * 100) / 100 === r.mb)) hit = true;
+    if (hit) coarse.push(ws);
+  }
+  ok('the coarse grid really does exclude 0.150',
+     !coarse.some(w => Math.abs(w - 0.150) < 0.0005),
+     'top of its range ' + Math.max(...coarse).toFixed(3));
+  ok('and the exact method does not', FX.tRwindow(FX.CIVIC_ALL, 0.150, 113) !== null);
+  ok('the near-miss is recorded rather than quietly corrected',
+     /grid artifact/.test(FX.CIVIC.theFalseRejectionIAlmostPublished.join(' ')));
+  ok('with the tell that should have caught it sooner',
+     /resolution limit/.test(FX.CIVIC.theFalseRejectionIAlmostPublished.join(' ')));
+}

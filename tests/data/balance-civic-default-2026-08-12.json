@@ -280,6 +280,99 @@
     "not move at all. S5 keeps its provisional 'no'."
   ],
 
+  "springRows": {
+    "_note": "M9, taken 2026-08-12 with bars held at 30/30 and everything else at baseline. The spring slider moves in 0.5 steps, so the targets 492.1 and 913.9 landed on 492.0 and 914.0.",
+    "prediction": [
+      "STATED BEFORE THE READING, which is the only way a prediction counts.",
+      "Assuming the GR86's exchange rate of 0.150 transfers, and using the",
+      "lumped (A,B) region from the bar rows:",
+      "",
+      "    front spring 492  ->  0.52 .. 0.53",
+      "    front spring 914  ->  0.45 .. 0.46",
+      "",
+      "Measured 0.52 and 0.46. Both inside, both AT THE EDGE nearest baseline —",
+      "and the fact that both sit on the edge in the same direction is itself",
+      "information: it points to slightly LESS spring sensitivity than 0.150."
+    ],
+    "rows": [
+      { "n": "A", "arF": 30, "arR": 30, "spF": 492.0, "spR": 596.6, "rhF": 6.0, "rhR": 6.1, "pF": 32.0, "pR": 29.0, "mb": 0.52,
+        "panel": { "sixtyZero": 72.0, "hundredZero": 158.6, "topSpeed": 166.3, "lateralG60": 1.20, "lateralG120": 1.36 } },
+      { "n": "B", "arF": 30, "arR": 30, "spF": 914.0, "spR": 596.6, "rhF": 6.0, "rhR": 6.1, "pF": 32.0, "pR": 29.0, "mb": 0.46,
+        "panel": { "sixtyZero": 70.6, "hundredZero": 157.4, "topSpeed": 166.5, "lateralG60": 1.20, "lateralG120": 1.36 } }
+    ]
+  },
+
+  "exchangeRateNotSettled": [
+    "M9 ASKED WHETHER THE SPRING-TO-BAR EXCHANGE RATE IS A GAME CONSTANT.",
+    "THE ANSWER IS 'CONSISTENT WITH IT, BUT NOT SHOWN' — AND THAT IS THE",
+    "ANSWER, NOT A FAILURE TO GET ONE.",
+    "",
+    "All six Civic rows solved together with ws, tF and tR all free:",
+    "",
+    "    ws  in [0.104, 0.152]        GR86 measured 0.150",
+    "",
+    "0.150 is inside, near the top edge. So the data cannot reject the",
+    "hypothesis and cannot confirm it either: the band is +/-20% wide because",
+    "MB prints to two decimals and a +/-30% spring lever only moves it three",
+    "printing steps.",
+    "",
+    "Holding ws at exactly 0.150, the axle constants land at:",
+    "",
+    "    tF  109.5 .. 116.3           GR86 tF = 50.5",
+    "    tR  111.4 .. 117.6           GR86 tR = 72.3",
+    "",
+    "Roughly double the GR86's, on a car 571 lb heavier — and NEARLY EQUAL to",
+    "each other, where the GR86's were clearly rear-biased. Those numbers are",
+    "conditional on ws=0.150 and move if it is not; quoted to show the shape,",
+    "not as a measurement.",
+    "",
+    "WHAT WOULD SETTLE IT: the same two rows at the spring slider's actual",
+    "MINIMUM and MAXIMUM rather than +/-30%. The screenshots show plenty of",
+    "travel left at both ends. A wider lever is the only thing that narrows a",
+    "band set by rounding — more rows at the same spread will not."
+  ],
+
+  "theFalseRejectionIAlmostPublished": [
+    "RECORDED BECAUSE THE NEAR-MISS IS THE LESSON, AND IT IS A NEW FAILURE MODE",
+    "FOR THIS REPO — not a rounded readout this time, but a coarse search grid.",
+    "",
+    "The first solve stepped tF and tR by 1 and reported ws in [0.106, 0.148],",
+    "excluding 0.150, and the write-up 'the exchange rate does NOT transfer'",
+    "was one keystroke from being committed.",
+    "",
+    "It was a grid artifact. Re-run with tR solved as an exact interval instead",
+    "of sampled, ws=0.150 fits all six rows comfortably, with tF in a 7-point",
+    "window the integer grid stepped straight over.",
+    "",
+    "The tell was there and was nearly ignored: an exclusion whose boundary",
+    "(0.148) sits 1.3% from the value being excluded is not an exclusion, it is",
+    "a resolution limit. Any bound that lands that close to the number in",
+    "question is a prompt to re-derive it a different way before believing it."
+  ],
+
+  "springsMoveBrakingToo": [
+    "Front spring rate, bars held at 30/30, everything else baseline:",
+    "",
+    "    spF 492.0   60-0 72.0 ft   100-0 158.6   top speed 166.3",
+    "    spF 703.0   60-0 72.7 ft   100-0 159.5   top speed  --",
+    "    spF 914.0   60-0 70.6 ft   100-0 157.4   top speed 166.5",
+    "",
+    "2.9% across 60-0, which dwarfs the 1.5% the bars produced. But it is NOT",
+    "monotonic — the baseline 703 is the worst of the three, with both softer",
+    "and stiffer braking shorter. Three points cannot tell a real optimum from",
+    "a misreading, and nothing is concluded here.",
+    "",
+    "It does mean S4 has a second confound: brake distance responds to springs",
+    "AND bars, so a brake sweep has to hold both.",
+    "",
+    "Top speed moved with the spring again (166.3 vs 166.5), which is the same",
+    "contradiction of the Top Speed claim seen on the GR86 and is still",
+    "incidental rather than controlled. S1 remains the case that settles it.",
+    "",
+    "Lateral G was 1.20/1.36 on all six rows of this car. S5's 'no' now rests",
+    "on bar changes, spring changes, pressure, gearing and aero across two cars."
+  ],
+
   "whatIsStillLumped": [
     "A and B each contain a spring term plus an axle constant, and bar-only rows",
     "cannot separate them. Two more readings would:",

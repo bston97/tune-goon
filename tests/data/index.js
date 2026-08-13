@@ -168,12 +168,53 @@ function civicRegion(rows = CIVIC_ROWS, step = 0.5) {
   return out;
 }
 
+/* Every Civic row, bar sweep and spring sweep together — the set that lets ws,
+   tF and tR all float. */
+const CIVIC_ALL = [
+  ...CIVIC_ROWS.map(r => Object.assign({}, r,
+    { spF: CIVIC.defaultTune.spF, spR: CIVIC.defaultTune.spR })),
+  ...CIVIC.springRows.rows.map(r => ({
+    arF: r.arF, arR: r.arR, spF: r.spF, spR: r.spR, mb: r.mb, panel: r.panel,
+    fitted: true, who: 'spring row ' + r.n
+  }))
+];
+
+/* Which (ws, tF, tR) reproduce every printed row.
+
+   tR is solved as an EXACT INTERVAL rather than sampled, and that is not a
+   micro-optimisation: an earlier version stepped tR by 1 and reported ws=0.150
+   excluded, which was a grid artifact and nearly shipped as a finding. Given
+   ws and tF, MB = R/(F+R) inverts to R = m·F/(1−m), so each row pins R — and
+   therefore tR — to a closed interval. Intersect across rows and the answer is
+   exact for that (ws, tF). See CIVIC.theFalseRejectionIAlmostPublished. */
+function tRwindow(rows, ws, tF) {
+  let lo = -Infinity, hi = Infinity;
+  for (const r of rows) {
+    const F = r.arF + ws * r.spF + tF;
+    if (F <= 0) return null;
+    const mlo = r.mb - 0.005, mhi = r.mb + 0.005;
+    lo = Math.max(lo, mlo * F / (1 - mlo) - (r.arR + ws * r.spR));
+    hi = Math.min(hi, mhi * F / (1 - mhi) - (r.arR + ws * r.spR));
+    if (lo > hi) return null;
+  }
+  return [lo, hi];
+}
+
+/* The ws values that admit some (tF, tR) fitting every row. */
+function wsWindow(rows = CIVIC_ALL, step = 0.0005) {
+  const out = [];
+  for (let ws = 0; ws <= 0.5; ws += step)
+    for (let tF = -200; tF <= 600; tF += 0.25)
+      if (tRwindow(rows, ws, tF)) { out.push(+ws.toFixed(4)); break; }
+  return out;
+}
+
 module.exports = {
   JULY, AUG, AUG_DEF, AUG_FIT, MB, MB_PAIR, DEFTUNE,
   TRIPLES, kOf, allK, K,
   DEFAULT_RATIOS, DEFAULT_FD,
   MB_MODEL, mbOf, MB_ROWS,
-  CIVIC, CIVIC_ROWS, lumpedMb, civicRegion,
+  CIVIC, CIVIC_ROWS, CIVIC_ALL, lumpedMb, civicRegion, tRwindow, wsWindow,
   /* Back-compat shim: GR86 was the only export two test files used. */
   GR86: JULY
 };
