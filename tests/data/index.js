@@ -209,8 +209,45 @@ function wsWindow(rows = CIVIC_ALL, step = 0.0005) {
   return out;
 }
 
+/* The subset of Civic rows inside the +/-30% spring window — the ones that
+   admitted a linear solve before the extremes were taken. Kept so the
+   local-linearisation claim can be asserted rather than asserted about. */
+const CIVIC_NARROW = CIVIC_ALL.filter(r => r.spF >= 400 && r.spF <= 1000);
+
+/* At bars held and the rear spring fixed, MB = R/(F+R) with F linear in spF
+   requires (1-MB)/MB to be a straight line in spF. This returns the exponents p
+   for which it is a straight line in spF^p, given the two-decimal rounding.
+   p = 1 present means a linear spring term survives; absent means it is dead. */
+function springExponents(rows, lo = 0.30, hi = 1.05, step = 0.01) {
+  const win = m => [(1 - (m + 0.005)) / (m + 0.005), (1 - (m - 0.005)) / (m - 0.005)];
+  /* The intercept never needs searching. For a fixed slope b, every row
+     constrains a to [loI - b*x, hiI - b*x]; the line exists iff those overlap.
+     So scan b only and intersect analytically — a 2-D grid search over (a, b)
+     was 40 million probes per exponent and timed the suite out. */
+  const feasible = (rows, p) => {
+    for (let b = 0; b <= 0.05; b += 0.000002) {
+      let aLo = -Infinity, aHi = Infinity;
+      for (const r of rows) {
+        const x = Math.pow(r.spF, p), w = win(r.mb);
+        if (w[0] - b * x > aLo) aLo = w[0] - b * x;
+        if (w[1] - b * x < aHi) aHi = w[1] - b * x;
+        if (aLo > aHi) break;
+      }
+      if (aLo <= aHi) return true;
+    }
+    return false;
+  };
+  const out = [];
+  for (let p = lo; p <= hi + 1e-9; p += step) {
+    const q = +p.toFixed(2);
+    if (feasible(rows, q)) out.push(q);
+  }
+  return out;
+}
+
 module.exports = {
   JULY, AUG, AUG_DEF, AUG_FIT, MB, MB_PAIR, DEFTUNE,
+  CIVIC_NARROW, springExponents,
   TRIPLES, kOf, allK, K,
   DEFAULT_RATIOS, DEFAULT_FD,
   MB_MODEL, mbOf, MB_ROWS,

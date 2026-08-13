@@ -272,18 +272,69 @@ console.log('\n--- M9: does the spring-to-bar exchange rate transfer? ---');
   ok('the recorded rates are what the screen showed, not what was asked for',
      soft.spF === 492.0 && stiff.spF === 914.0, soft.spF + ' / ' + stiff.spF);
 
-  const W = FX.wsWindow();
+  /* Over the +/-30% window the linear model still solves, and 0.150 is inside
+     the resulting band. That was the answer until the extremes were taken. */
+  const W = FX.wsWindow(FX.CIVIC_NARROW);
   const lo = Math.min(...W), hi = Math.max(...W);
-  ok('all six rows admit a joint solve', W.length > 0,
+  ok('inside a +/-30% spring window the linear model still solves', W.length > 0,
      'ws in [' + lo.toFixed(3) + ', ' + hi.toFixed(3) + ']');
-  ok("the GR86's 0.150 is INSIDE that window", lo <= 0.150 && hi >= 0.150,
-     'so the exchange rate is consistent with transferring');
-  /* And the half of the answer that matters just as much. */
-  ok('but the window is too wide to call it settled', (hi - lo) / 0.150 > 0.15,
-     'spans ' + ((hi - lo) / 0.150 * 100).toFixed(0) + '% of the value — consistent with, not shown');
-  ok('so the fixture says not settled rather than claiming a result',
-     /NOT SHOWN/.test(FX.CIVIC.exchangeRateNotSettled.join(' ')));
+  ok("and the GR86's 0.150 sits inside it", lo <= 0.150 && hi >= 0.150);
+  ok('but never tightly enough to call settled', (hi - lo) / 0.150 > 0.15,
+     'spans ' + ((hi - lo) / 0.150 * 100).toFixed(0) + '% of the value');
 }
+
+console.log('\n--- and then the extremes killed the linear spring term ---');
+/* The wide sweep was taken to narrow the exchange rate and instead falsified
+   the term it was measuring. At bars held 30/30 with the rear spring fixed,
+   MB = R/(F+R) with F linear in spF REQUIRES (1-MB)/MB to be a straight line
+   in spF — a test needing no knowledge of ws, tF or tR. */
+{
+  const all = FX.CIVIC_ALL.filter(r => r.arF === 30 && r.arR === 30);
+  ok('there are five spring points at bars 30/30', all.length === 5, all.length);
+  ok('spanning 5x rather than the 1.9x that fitted',
+     Math.max(...all.map(r => r.spF)) / Math.min(...all.map(r => r.spF)) > 4.5,
+     (Math.max(...all.map(r => r.spF)) / Math.min(...all.map(r => r.spF))).toFixed(2) + 'x');
+
+  ok('no joint solve exists across the full span at all',
+     FX.wsWindow(FX.CIVIC_ALL).length === 0);
+
+  const P = FX.springExponents(all);
+  ok('a sub-linear spring term does fit', P.length > 0,
+     'p in [' + Math.min(...P).toFixed(2) + ', ' + Math.max(...P).toFixed(2) + ']');
+  ok('and LINEAR is excluded outright', !P.includes(1),
+     'p = 1 is not in the feasible set');
+  ok('square root is allowed', P.includes(0.5),
+     'suspension frequency goes as sqrt(k), which is the obvious reading');
+  ok('but two-thirds is not, so it is not a free-for-all',
+     !P.some(v => Math.abs(v - 0.67) < 0.005));
+
+  /* Why nobody caught it: neither earlier data set had the lever to see it. */
+  /* The comparison has to use the GR86's own bars-held rows, or it is not the
+     same test — springExponents assumes the bars are constant down the column. */
+  const grHeld = FX.MB_ROWS.filter(r => r.fitted && r.arF === 30 && r.arR === 30);
+  const gr = grHeld.map(r => r.spF);
+  ok("the GR86's bars-held springs only spanned 1.85x",
+     Math.max(...gr) / Math.min(...gr) < 2,
+     gr.slice().sort((a, b) => a - b).join(' / ') + '  = ' +
+     (Math.max(...gr) / Math.min(...gr)).toFixed(2) + 'x');
+  const grP = FX.springExponents(grHeld);
+  ok('over which EVERY exponent fits, so it could not discriminate',
+     grP.includes(1) && grP.includes(0.5) && grP.length > 10,
+     grP.length + ' exponents from ' + Math.min(...grP) + ' to ' + Math.max(...grP));
+
+  ok('so the solved model is a LOCAL linearisation, not a wrong one',
+     /LOCAL LINEARISATION/.test(FX.CIVIC.theLinearSpringTermIsFALSIFIED.join(' ')));
+  ok('and the fixture says so where tier 0 can find it',
+     /FALSIFIED/.test(Object.keys(FX.CIVIC).join(' ')));
+}
+
+console.log('\n--- which is why the two-reading calibration was the right call ---');
+/* C4 shipped a local-slope measurement rather than a per-car constant, for the
+   wrong reason (coefficients vary by car). It survives for a better one: a
+   local slope is what you measure on a curve. A shipped sensitivity NUMBER
+   would have been invalidated by this sweep. */
+ok('the app measures a local slope rather than quoting a constant',
+   /two-reading calibration/.test(FX.CIVIC.whichVindicatesTheAppsGUIDANCE.join(' ')));
 
 console.log('\n--- the false rejection that a coarse grid nearly produced ---');
 /* An integer grid on tF/tR reported ws in [0.106, 0.148] and excluded 0.150.
@@ -296,7 +347,7 @@ console.log('\n--- the false rejection that a coarse grid nearly produced ---');
     let hit = false;
     for (let tF = -100; tF <= 400 && !hit; tF += 1)
       for (let tR = -100; tR <= 400 && !hit; tR += 1)
-        if (FX.CIVIC_ALL.every(r => Math.round(
+        if (FX.CIVIC_NARROW.every(r => Math.round(
           ((r.arR + ws * r.spR + tR) /
            (r.arF + ws * r.spF + tF + r.arR + ws * r.spR + tR)) * 100) / 100 === r.mb)) hit = true;
     if (hit) coarse.push(ws);
@@ -304,7 +355,7 @@ console.log('\n--- the false rejection that a coarse grid nearly produced ---');
   ok('the coarse grid really does exclude 0.150',
      !coarse.some(w => Math.abs(w - 0.150) < 0.0005),
      'top of its range ' + Math.max(...coarse).toFixed(3));
-  ok('and the exact method does not', FX.tRwindow(FX.CIVIC_ALL, 0.150, 113) !== null);
+  ok('and the exact method does not', FX.tRwindow(FX.CIVIC_NARROW, 0.150, 113) !== null);
   ok('the near-miss is recorded rather than quietly corrected',
      /grid artifact/.test(FX.CIVIC.theFalseRejectionIAlmostPublished.join(' ')));
   ok('with the tell that should have caught it sooner',

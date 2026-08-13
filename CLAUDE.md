@@ -207,13 +207,50 @@ is. Rough tiers, most to least trustworthy:
    MB = R / (F + R)     F = arF + 0.150·spF + 50.5     R = arR + 0.150·spR + 72.3
    ```
 
-   It is the **rear** axle's share of roll stiffness — stiffening the rear bar
-   raises the readout, stiffening the front spring lowers it. One bar point is
-   worth ≈6.7 lb/in of spring, and the two per-axle constants are large and
+   It is the **rear** axle's share — stiffening the rear bar raises the
+   readout, stiffening the front spring lowers it. One bar point is worth
+   ≈6.7 lb/in of spring, and the two per-axle constants are large and
    rear-biased (tires, geometry, unsprung mass — which is why tire pressure
-   moves MB). **The coefficients are that car's and do not transfer**; the
-   structure should, because it is roll stiffness. See
+   moves MB). **The coefficients are that car's and do not transfer.** See
    `tests/data/balance-mb-solved-gr86-2026-08-12.json`.
+
+   **⚠️ The linear spring term is FALSIFIED, and this is a local
+   linearisation.** Measured on the Civic 2026-08-12 over the front spring
+   slider's *full* range (310.7–1553.7 lb/in, 5.0×): the model requires
+   `(1−MB)/MB` to be a straight line in spring rate, and it is not — the slope
+   varies more than 2× and no line fits inside the rounding windows.
+   `(1−MB)/MB` is linear in `spF^p` for **p ∈ [0.45, 0.61]**; p = 1 is excluded
+   outright, p = 0.5 is allowed, p = 2/3 is not.
+
+   **p = 0.5 is a hypothesis worth naming and not a finding**: suspension
+   frequency goes as √(k/m), so a square-root spring term is what you get if
+   the game builds this readout from *frequencies* rather than rates.
+
+   **Why it survived this long is the transferable lesson.** The GR86 was
+   fitted over 328–608 lb/in (1.85×) and the Civic's first-pass rows over
+   492–914 (1.86×). Over a ~1.9× window a concave curve is indistinguishable
+   from a line at two-decimal resolution — re-run on the GR86's own bars-held
+   rows, *every* exponent from 0.3 to 1.0 fits. **The linear model was never
+   confirmed; it was never stressed.** If a model is fitted inside a narrow
+   window, say so, and go to the slider stops before believing the shape.
+
+   What still holds: the rear-share direction, the additive per-axle terms, the
+   bar term, and the whole structure — all confirmed on two cars. And the
+   model is accurate *near the tune it was measured at*, which is what it is
+   used for. **`C4`'s two-reading calibration is vindicated by this**, for a
+   better reason than it was chosen for: measuring a local slope is exactly
+   what you do with a curve, and a shipped sensitivity *number* would have been
+   invalidated here.
+
+   **And `MB` may not be roll stiffness at all.** Widening the *front* track
+   on the Civic moved MB **up** (0.44 → 0.46). Roll stiffness goes as track
+   *squared*, so a wider front should have stiffened the front and pushed MB
+   *down*. Lateral load transfer goes as roll stiffness *divided* by track,
+   which has the observed sign — so MB may be the rear share of **load
+   transfer**. At fixed geometry the two differ only by a constant, which is
+   why every bar and spring row fits either reading. **Rear track width is the
+   one-screenshot discriminator** (load transfer → wider rear lowers MB; roll
+   stiffness → raises it), and it is unrun.
 
    **What shipped from it (C4, 2026-08-12):** the app no longer quotes a
    sensitivity at all. Because the coefficients are per-car, the guidance is the

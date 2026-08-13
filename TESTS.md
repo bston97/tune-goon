@@ -287,7 +287,49 @@ minutes to settle and it sits upstream of Phase 1.
 - **Means:** gives the `PSI` table's compounds an objective grip ordering and
   tests whether the app's compound advice per discipline matches it.
 
-### P4 — What does tire width actually buy? *(10 min)* — **promoted 2026-08-12**
+### P4 — What does tire width actually buy? — ✅ **FRONT ANSWERED 2026-08-12**
+
+**The upgrade screen is a controlled A/B and nobody noticed.** It shows every
+readout for the installed part *and* the alternative, side by side, with no
+tune drift between the two halves. That is better than installing and
+re-reading. Front track width on the Civic, for **one point of PI**:
+
+| | stock | upgraded |
+|---|---|---|
+| 60-0 | 72.5 ft | **71.5 ft** |
+| 100-0 | 159.3 ft | **158.3 ft** |
+| 0-60 | 3.483 s | **3.467 s** (one frame) |
+| 0-100 | 8.533 s | **8.500 s** (two frames) |
+| top speed | 165.8 | **166.5** |
+| Mech. Balance | 0.44 | **0.46** |
+| weight, front %, power, torque | — | **all unchanged** |
+| lateral G 60 / 120 | 1.20 / 1.36 | **unchanged** |
+
+So the app is right that width does not move the stat block and right that it
+is not a grip upgrade in the lateral-G sense. It is **wrong that width does
+nothing but shift brake bias** — 1.4% of braking and two frames of 0-100 for a
+single PI point is a good trade the build plan never mentions.
+
+**And MB went the wrong way, which is the important part.** See `M10`.
+
+**Still owed:** rear track width (that is `M10`), and the same A/B on a second
+car before any of it reaches `compute()`.
+
+### M10 — Is Mechanical Balance roll stiffness, or load transfer? *(1 screenshot)*
+- **The prediction that failed:** roll stiffness goes as track **squared**, so
+  widening the front should stiffen the front and *lower* MB. It rose.
+- **What has that sign:** lateral load transfer goes as roll stiffness
+  **divided** by track. Widening the front reduces the front's share and raises
+  the rear's — which is what happened.
+- **Why nothing earlier could tell:** at fixed geometry the two readings differ
+  only by a constant, so every bar and spring row fits both equally well.
+- **The discriminator, and it is one part swap:** rear track width.
+  **Load transfer → wider rear LOWERS MB. Roll stiffness → raises it.** If it
+  rises, both readings are wrong and the term is something else again.
+- **Read:** the upgrade screen's Chassis page for stock and upgraded rear track
+  width. Nothing else needs to move.
+
+### P4 (original framing, kept for the reasoning) — *(10 min)*
 - **Vary:** width front and rear independently, 0→3.
 - **Read:** **Mechanical Balance first**, then lateral G, 60-0, weight, PI.
 - **Means:** the app moves **only brake balance** on width, via `wStep = twr −
