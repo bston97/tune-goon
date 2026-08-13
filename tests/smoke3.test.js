@@ -15,7 +15,7 @@ const fill = o => Object.keys(o).forEach(k => set(k, o[k]));
 
 const EVO = { name: 'Lancer Evolution VIII MR', cls: 'A', disc: 'sprint', wt: '3241', fw: '57',
   hp: '612', tq: '480', dt: 'AWD', gr: '6', tire: 'semi', aero: 'both',
-  twf: '265', twr: '285' };
+  twf: '0', twr: '0' };
 
 console.log('--- build plan renders per discipline ---');
 const DISCS = ['road','sprint','touge','drift','drag','rally','cc'];

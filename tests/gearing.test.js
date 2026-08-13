@@ -16,9 +16,14 @@
    speed at redline goes as 1/FD, the setting is FD = fdFit / vFrac.
 
    The edge is NOT a speed the car can reach — measured, it tops out ~13 mph
-   short of it — so vFrac above 1.0 (gearing past the edge) is normal and the
-   road value is 1.14, measured off the Performance panel rather than guessed.
-   See CLAUDE.md for the sweep table that produced it. */
+   short of it. Road vFrac is 1.00: gear AT the fit, because there every gear
+   engages while shorter settings leave the top ratio doing nothing.
+
+   1.14 appeared here for a while and was the SECOND wrong answer, fitted to
+   whichever final drive won 0-100 across a spread of 0.12 s. Nothing dominated
+   that sweep. Fitting a constant to the winner of one metric across noise that
+   small is overfitting, and the header is where it survived longest. See
+   CLAUDE.md for the sweep table and both wrong answers. */
 const { readScript, makeShim } = require('./shim');
 const { els, document, window, localStorage } = makeShim();
 const js = readScript();
@@ -185,18 +190,31 @@ console.log('--- per-gear limiter speeds, from the fit plus the axis maximum ---
    axis moves the fit moves to compensate and k is conserved to 0.44% across
    two builds, three tunes and both axis values.
 
-   So neither file carries an axis literal any more. k comes from the pooled
-   measurement in tests/data/index.js, and the assertions below are about what
-   k predicts rather than about which chart scale was on screen. */
+   k comes from the pooled measurement in tests/data/index.js and the
+   assertions below are about what k PREDICTS, not about which chart scale was
+   on screen. Axis numbers still appear in draw() calls as form input — that is
+   fine, they are inputs. What must never appear is an axis paired with a fit
+   from a different sitting: k is only conserved when the three readings come
+   off the same tune. */
 const K = FXG.K();
 const KSPREAD = (Math.max(...FXG.allK()) - Math.min(...FXG.allK())) / K;
 ok('k is one constant across every measured build and tune', KSPREAD < 0.01,
    K.toFixed(1) + ', spread ' + (KSPREAD * 100).toFixed(2) + '%');
-ok('5th at fd 3.73 reproduces the 145.4 mph readout',
-   near(K / (3.73 * 1.10), FXG.GR86.readings.fifthAtFd373, 2.0),
-   (K / (3.73 * 1.10)).toFixed(2) + ' vs ' + FXG.GR86.readings.fifthAtFd373 + ' measured');
-ok('6th at fd 3.73 sits past the chart', K / (3.73 * 0.95) > 155, (K / (3.73 * 0.95)).toFixed(1));
-ok('7th at fd 3.73 sits far past it', K / (3.73 * 0.82) > 185, (K / (3.73 * 0.82)).toFixed(1));
+/* NOT an agreement. k/(3.73 x 1.10) = 143.57 against a 145.4 readout — 1.8 mph
+   out, and the old label said "reproduces" with a 2.0 tolerance, i.e. 8%
+   headroom over a miss. A test whose label claims agreement while the number
+   disagrees retires a live question by wording. Assert the GAP instead, so it
+   fails if anyone quietly moves k. Ratios come from the fixture's record of
+   what was fitted, never from SPREAD. */
+const JULY_5TH = FXG.JULY.held.ratios[4];
+ok('5th at fd 3.73 sits about 1.8 mph UNDER the 145.4 readout, unresolved',
+   near(FXG.GR86.readings.fifthAtFd373 - K / (3.73 * JULY_5TH), 1.8, 0.4),
+   (K / (3.73 * JULY_5TH)).toFixed(2) + ' predicted vs ' +
+   FXG.GR86.readings.fifthAtFd373 + ' measured');
+ok('6th at fd 3.73 sits past the chart', K / (3.73 * FXG.JULY.held.ratios[5]) > 155,
+   (K / (3.73 * FXG.JULY.held.ratios[5])).toFixed(1));
+ok('7th at fd 3.73 sits far past it', K / (3.73 * FXG.JULY.held.ratios[6]) > 185,
+   (K / (3.73 * FXG.JULY.held.ratios[6])).toFixed(1));
 
 /* THE DEFECT THIS FILE MUST NOT LET BACK IN. compute() builds its speed
    constant from SPREAD's top ratio, but the user reads the fit on whatever
@@ -245,8 +263,12 @@ console.log('--- and the fix: the top ratio is read, not assumed ---');
   ok('so every gear speed moves with it',
      read.gearTop.every((v, n) => v < assumed.gearTop[n]));
   /* Blank must keep working: every saved build predates this field. */
-  ok('a blank top ratio still falls back to SPREAD',
-     assumed.kSpeed === 159 * 4.34 * X.SPREAD[7][6]);
+  /* Against the MEASURED box, not against SPREAD. Comparing SPREAD to SPREAD
+     re-evaluates compute()'s own definition and passes with the table 30%
+     wrong — verified by corrupting it. */
+  ok('a blank top ratio falls back to the measured game box',
+     near(assumed.kSpeed, 159 * 4.34 * FXG.DEFAULT_RATIOS[6], 0.01),
+     assumed.kSpeed.toFixed(1));
   ok('and a junk one does too', at({ fdfit: 4.34, vgraph: 159, topratio: 0 }).kSpeed
      === assumed.kSpeed);
   ok('the source is reported either way',
@@ -259,8 +281,11 @@ console.log('--- and the fix: the top ratio is read, not assumed ---');
      near(read.gearTop[6], 159, 0.1), read.gearTop[6].toFixed(1));
   ok('the read ratio is in the printed list', read.gears[6] === APP_TOP,
      read.gears.join('/'));
-  ok('and the gears below it are still SPREAD, unmeasured',
-     read.gears.slice(0, 6).join() === X.SPREAD[7].slice(0, 6).join());
+  /* For a 7-speed the lower gears ARE measured — SPREAD[7] is the game's box.
+     What stays assumed is every OTHER gear count, covered separately above. */
+  ok('and the gears below it are the measured game box',
+     read.gears.slice(0, 6).join() === FXG.DEFAULT_RATIOS.slice(0, 6).join(),
+     read.gears.slice(0, 6).join('/'));
   /* Found by hand-checking four real cars rather than by any test: on a car
      whose top ratio is far from SPREAD's, replacing only the top slot leaves a
      visible step into last gear — 130 to 180 mph on a 6-speed at 0.72. That
@@ -292,6 +317,12 @@ r = at({ fdfit: 4.575, vgraph: 159 });
 ok('gear speeds computed', Array.isArray(r.gearTop) && r.gearTop.length === 7);
 ok('top gear finishes on the axis maximum',
    near(r.gearTop[6], 159, 1), r.gearTop[6].toFixed(1));
+/* That one is an identity at vFrac 1.00 (kSpeed/(fd*Gtop) reduces to vgraph),
+   so it cannot see the gearbox. This one can: a discipline geared away from
+   the fit has to land somewhere else entirely. */
+ok('and a discipline geared off the fit does NOT',
+   Math.abs(at({ disc: 'touge', fdfit: 4.575, vgraph: 159 }).gearTop[6] - 159) > 5,
+   at({ disc: 'touge', fdfit: 4.575, vgraph: 159 }).gearTop[6].toFixed(1) + ' mph on touge');
 /* Deliberately past the end of the chart now — the car cannot reach the axis
    maximum anyway, so gearing to it throws away the top of the box. */
 ok('top gear lands on the chart edge, not past it', Math.abs(r.gearTop[6] - 159) < 1,
@@ -349,7 +380,7 @@ console.log('--- your final drive, my ratios ---');
   const mine = [...sets[1].matchAll(/<span>(\d\.\d\d)/g)].map(m => +m[1]);
   ok('seven ratios', mine.length === 7, mine.join('/'));
   ok('strictly descending', mine.every((g, n) => n === 0 || g < mine[n - 1]), mine.join('/'));
-  ok('keeps the game\'s 1st', mine[0] === X.SPREAD[7][0], mine[0]);
+  ok('keeps the game\'s 1st', mine[0] === FXG.DEFAULT_RATIOS[0], mine[0]);
   ok('equal rpm drop on every shift',
      mine.slice(1).every((g, n) => Math.abs(g / mine[n] - mine[1] / mine[0]) < 0.02),
      mine.slice(1).map((g, n) => Math.round(g / mine[n] * 100) + '%').join(' '));
@@ -357,8 +388,14 @@ console.log('--- your final drive, my ratios ---');
   ok('top gear placed at the graph maximum', speeds[6] === 157, speeds[6]);
   ok('called a hypothesis, not an upgrade', /A hypothesis, not an upgrade/.test(page));
   ok('says why it cannot be known', /without the engine's power curve/.test(page));
-  ok('survives the ambiguity about what Top Speed means',
-     /whether that figure is what it reaches or what it could reach/.test(page));
+  /* The old assertion pinned "just past the Top Speed you entered" — a
+     reference to an input REMOVED in July, and the exact Performance-panel
+     framing this file withdrew twice. It survived in the one place a user
+     reads. Assert the withdrawal instead. */
+  ok('the ratio set cites the graph maximum, not a top speed',
+     /the graph maximum, a fixed reading off the chart/.test(page));
+  ok('and no longer cites an input that does not exist',
+     !/Top Speed you entered/.test(page));
 }
 
 console.log('--- your final drive is an input, not a suggestion ---');
@@ -431,8 +468,12 @@ console.log('--- C2: nothing calls SPREAD the game\'s ratios ---');
   ok('and says whose it is not', /this app's table, not your car's/.test(s));
   ok('and that the mph depends on them being fitted',
      /mph holds only once they are fitted/.test(s));
-  ok('the notes print the measured contradiction',
-     /4\.17\/2\.89\/2\.17\/1\.66\/1\.32\/1\.07\/0\.85/.test(s));
+  /* The sheet used to print "the game's 7-speed was 4.17/... against this
+     table's 2.92/..." beside a table that now reads 4.17 — self-contradicting
+     from the moment SPREAD[7] was corrected. */
+  ok('a 7-speed sheet says the assumed set IS the game\'s',
+     /is<\/strong> the game's own race 7-speed, measured on two cars/.test(s));
+  ok('and does not claim the printed table is 2.92', !/2\.92\/2\.05/.test(s));
   ok('sheet still clean', !/undefined|NaN|\{\{/.test(s));
 
   draw({ fdfit: '4.58', vgraph: '157', topratio: '0.85' });

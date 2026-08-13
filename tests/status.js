@@ -29,6 +29,7 @@ const CASES = [
   ['P7', 'What does a full widebody conversion change?',      'parts'],
   ['G1', 'Axis maximum, read cold (settles E2)',              'gearing'],
   ['G4', 'SPREAD ratios for 4,5,6,8,9,10 gears',              null],
+  ['G7', 'Do default ratios belong to the tier or the car?',   'gearing'],
   ['G5', 'Speed constant on a second car',                    null],
   ['M1', 'Is MB 0.500 at equal bars?',                        'balance'],
   ['M2', 'Same-ratio pair — pure ratio or additive term?',    'balance'],
@@ -80,8 +81,13 @@ function count(node, out) {
     }
     return out;
   }
-  if (typeof node === 'string' && node.trim() === '') out.empty++;
-  else out.filled++;
+  if (typeof node === 'string' && node.trim() === '') { out.empty++; return out; }
+  /* PROSE IS NOT A READING. Fixtures carry long explanatory arrays — the
+     reasoning, the withdrawals, the limits — and counting those as data
+     inflated this report about 3x. A reading is a number, or a short string
+     naming a setting. Anything sentence-length is commentary. */
+  if (typeof node === 'string' && node.trim().length > 40) return out;
+  out.filled++;
   return out;
 }
 
@@ -122,6 +128,12 @@ for (const [id, q, stem] of CASES) {
 console.log('\n  ' + '-'.repeat(76));
 console.log('  ' + measured + ' case(s) with data · ' + landing +
   ' with somewhere to type · ' + designed + ' still design only');
+/* Said out loud rather than silently overstated: the mapping is per FILE STEM,
+   so every case sharing a stem reports the same number. A case with no data of
+   its own reads as covered whenever a sibling case shares its file — P1 is the
+   live example, reporting data from a parts fixture holding no gating matrix. */
+console.log('  Counts are per FILE STEM, not per case: cases sharing a stem share');
+console.log('  a number, so "has data" means "its fixture family has data".');
 console.log('\n  templates: ' + (templates.length ? templates.join(', ') : 'none'));
 console.log('  measured:  ' + (real.length ? real.join(', ') : 'none') + '\n');
 

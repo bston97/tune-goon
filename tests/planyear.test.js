@@ -8,7 +8,7 @@ eval(js+';globalThis.__X={get BASE(){return BASE}};');
 const ok=(l,c,e)=>console.log((c?'PASS  ':'FAIL  ')+l+(e!==undefined?'   '+e:''));
 const set=(id,v)=>{document.getElementById(id).value=v};
 const CAR={name:'Lancer Evolution VIII MR',year:'2004',cls:'A',disc:'sprint',wt:'3241',fw:'57',
-  hp:'612',tq:'480',dt:'AWD',gr:'6',tire:'semi',aero:'both',twf:'265',twr:'285'};
+  hp:'612',tq:'480',dt:'AWD',gr:'6',tire:'semi',aero:'both',twf:'0',twr:'0'};
 Object.keys(CAR).forEach(k=>set(k,CAR[k]));
 
 els['calc'].onclick();

@@ -3,7 +3,10 @@
 This is the repo's to-do list. It is tracked and pushed like everything else
 (it was briefly gitignored on 2026-08-08 and that was reversed the same day —
 a to-do list that only exists on one machine is not a to-do list). Seven items,
-each with a plan detailed enough to start from cold. Nothing here has been
+each with a plan detailed enough to start from cold. *(2026-08-12: E1, E2 and
+E3 are since DONE and the measurement programme has overtaken parts of the rest.
+Treat undated statements here as of their writing; `MODEL.md` is current.)*
+Nothing here had been
 implemented.
 
 Baseline as of 2026-08-08: `node tests/run.js` → **532 passed, 0 failed**
@@ -173,6 +176,15 @@ Do springs enter it, or bars only? Does ride height? Does the car's weight
 distribution enter, or is it purely the sliders? Is it linear in the slider
 value or in some derived rate?
 
+> **✅ Answered 2026-08-12 — every question above except ride height.** It is
+> the **rear** share (the question was posed upside down), of lateral **load
+> transfer** rather than roll stiffness (`M10`, two cars, track divides).
+> Springs *and* bars both enter, with one bar point worth ≈6.7 lb/in on the
+> GR86. It is **not** linear in the slider value — linear in the bar,
+> sub-linear in the spring with `p ∈ [0.45, 0.61]`. Ride height remains
+> untested. Current state lives in `MODEL.md` §1; the plan below is kept
+> because its shape was right and it is what produced the answers.
+
 Same shape for Aero Balance: sweep `aeF` at fixed `aeR` and vice versa, 5
 points each, on R1 and R5. Confirms whether AB is simply front downforce share
 and whether the 0.42–0.48 house band is even expressible as a slider pair.
@@ -191,7 +203,9 @@ on a race-transmission GR86 the real defaults are
 "confirmed" `SPREAD[7]` was showing the app's own ratio set read back off a car
 it had been applied to.
 
-So **all seven rows are unmeasured and the seventh is known false**, and this
+So **all seven rows are unmeasured and the seventh is known false** *(corrected
+2026-08-12: the seventh has since been measured on two cars and shipped into
+`SPREAD[7]`; the other six are still unmeasured)*, and this
 case is promoted rather than merely still open. Two changes to the procedure:
 
 - **Restore the default tune before transcribing.** That omission is precisely

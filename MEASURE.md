@@ -13,8 +13,8 @@ driving work is the last 20% of the value, not the first.
 
 # Where we are — updated end of 2026-08-12
 
-**Ten fixtures in `tests/data/`, all on one GR86 at A 700.** `node
-tests/status.js` went from 1 case with data to 17 in a day, and all four app
+**Sixteen fixtures in `tests/data/`, on two cars** — a 2022 GR86 and a 2023 Civic
+Type R, both at A 700. `node tests/status.js` went from 1 case with data to 24, and all four app
 defects those measurements exposed are fixed (see step 1). This section is
 maintained so the file never shows a step as pending that is already done; if it
 disagrees with `tests/data/`, **the fixtures win**.
@@ -22,11 +22,11 @@ disagrees with `tests/data/`, **the fixtures win**.
 | what | result |
 |---|---|
 | **`k` is the invariant** — `k = axis × fit × topRatio` | ✅ **settled.** 588.1–590.7 across two builds, three tunes, both axis readings. The axis alone is chart furniture |
-| **Mechanical Balance** | ✅ **SOLVED.** `MB = R/(F+R)`, `F = arF + 0.150·spF + 50.5`, `R = arR + 0.150·spR + 72.3`. Rear share, six settings, three parameters, every row on the printed digit |
-| **Aero Balance** | ✅ **model validated out-of-sample.** Pounds of downforce plus a large per-axle body term, ≈175 front / 215 rear |
-| **`SPREAD[7]`** | ❌ **wrong.** Game default is 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at fd 3.63. The old "confirmation" was the app's own ratios read back off a car they were applied to |
+| **Mechanical Balance** | ✅ **structure solved, two cars.** Rear share of lateral **load transfer** (`M10`). `MB = R/(F+R)`; linear in the bar, **sub-linear in the spring** (`p ∈ [0.45, 0.61]`, p=1 excluded). The GR86 coefficients `0.150 / 50.5 / 72.3` are a **local linearisation** over the 1.85× they were fitted in — see `MODEL.md` §1 |
+| **Aero Balance** | ✅ **model validated out-of-sample.** Pounds of downforce plus a large per-axle body term. The ≈175/215 pair is a POINT ESTIMATE the data does not support — the front term is only pinned to roughly 85–360 lb |
+| **`SPREAD[7]`** | ✅ **measured and shipped.** 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at fd 3.63, identical on two cars; `SPREAD[7]` is now this. The old "confirmation" was the app's own ratios read back off a car they were applied to. The other six gear counts are still invented |
 | **The app's `k`** | ✅ **fixed 2026-08-12 (`C1`).** It was 3.8% low, because the fit is read on the game's gearbox while `k` was built with `SPREAD`'s top ratio. The app now asks for the top ratio and says when it is assuming one |
-| **App tune vs game default** | ❌ the **default wins 5 of 6 panel columns**, braking by 8%. One car — needs a second before it is general |
+| **App tune vs game default** | ❌ the **default wins 5 of 6 panel columns**, braking by 8% (5.2 ft on 60-0). One car — needs a second before it is general. **The most important unresolved result in the programme**, and it points at the app |
 | **Panel behaviour** | deterministic within a sitting; acceleration quantised to exactly **1/60 s**. Small differences are therefore *real* |
 | **Slider facts** | ARB range **1–65**, step 0.1, confirmed. Spring rates cannot be hit exactly. MB moves with **tire pressure** |
 
@@ -43,7 +43,7 @@ within a sitting).
 ### Step 1 — **Fix the app** ✅ DONE 2026-08-12
 
 All four defects are fixed and pushed, one commit each, suite green throughout
-(**612 assertions**, from 567):
+(**741 assertions**, from 567):
 
 1. **The gearing top ratio** (`C1`). `#topratio` is now the third gearing
    reading, off the same screen as the other two; it feeds `k` and the top slot
@@ -71,7 +71,7 @@ All four defects are fixed and pushed, one commit each, suite green throughout
 
 Equal bars, then `20/40`, then `32.5/65`, with springs and pressure held and
 recorded. This is what turns "MB solved on a GR86" into "MB solved" — the
-structure should generalise because it is roll stiffness; the three coefficients
+structure should generalise because it is load transfer; the three coefficients
 should not, because they are the car.
 
 ### Step 3 — Case `S1`, what Top Speed actually responds to *(~20 min)*
@@ -194,7 +194,7 @@ at final drive 3.63** — wider at every gear than the table claims.
 
 The old "confirmation" was the app's own ratio set read back off a car it had
 been applied to. The numbers matched exactly because they were the same
-numbers. So every row in this table is now unconfirmed, and the 7-speed row is
+numbers. So every row in this table was unconfirmed, and the 7-speed row was
 worse than unconfirmed — it is known false.
 
 Fit a **race transmission**, restore the **default tune** (this is the step
@@ -210,6 +210,10 @@ ratios straight off the screen. Transcription, no interpretation.
 | 8 | | | | | | | | | | | | |
 | 9 | | | | | | | | | | | | |
 | 10 | | | | | | | | | | | | |
+
+> **✅ Answered 2026-08-12 (`G7`).** The Civic returned an identical box at an
+> identical final drive, so the ratios belong to the transmission tier, not the
+> car — with one confound: both cars were AWD-swapped. Original reasoning kept.
 
 **The open question this table cannot answer on its own:** whether the default
 ratios are a property of the *transmission tier* or of the *car*. If a second

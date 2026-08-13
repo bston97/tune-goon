@@ -58,7 +58,13 @@ console.log('--- C3: the aero percentage is a slider position, not downforce ---
   ok('the card calls them slider positions', /slider positions, not downforce/.test(p));
   ok('and says why a matching percentage is not matching downforce',
      /different ranges/.test(p));
-  ok('and names the body term that no slider touches', /~175 lb front, ~215 rear/.test(p));
+  /* The old assertion locked "~175 lb front, ~215 rear" as though measured.
+     The fixture that produced those says the front term is only pinned to
+     roughly [85, 360] lb — a 4x window. Printing a point estimate off it is
+     the rounding-window error this repo has documented four times. */
+  ok('and names the body term as a RANGE, not a point estimate',
+     /between roughly 85 and 360 lb per end/.test(p));
+  ok('the withdrawn point estimate is gone', !/~175 lb front/.test(p));
   ok('the readout is still the only target', /Aero Balance, on this same tab, reads 0\.42&ndash;0\.48/.test(p));
   ok('nothing is labelled "% of range" any more',
      !/% of range/.test(p.slice(p.indexOf('>Aero</h3>'), p.indexOf('>Braking</h3>'))));

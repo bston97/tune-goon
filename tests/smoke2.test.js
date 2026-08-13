@@ -28,7 +28,7 @@ ok('dropdown grouped', (els['sym'].innerHTML.match(/<optgroup/g) || []).length =
 
 console.log('\n--- AWD sprint baseline ---');
 build({ name: 'Evo', cls: 'A', disc: 'sprint', wt: '3241', fw: '57', hp: '612', tq: '480',
-        dt: 'AWD', gr: '6', tire: 'semi', aero: 'both', twf: '265', twr: '285' });
+        dt: 'AWD', gr: '6', tire: 'semi', aero: 'both', twf: '0', twr: '0' });
 ok('adjust panel shown', els['adjust'].style.display === '');
 ok('outputs are editable inputs', (els['out'].innerHTML.match(/class="vi/g) || []).length >= 20,
   (els['out'].innerHTML.match(/class="vi/g) || []).length + ' inputs');

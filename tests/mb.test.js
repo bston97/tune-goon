@@ -136,7 +136,7 @@ ok('and the error is recorded rather than quietly fixed',
 console.log('\n--- what is still owed ---');
 ok('the coefficients are one car and the fixture says so',
    /stillOwed/.test(src) && /second car/.test(src),
-   'structure should generalise because it is roll stiffness; the three ' +
+   'structure should generalise because it is load transfer; the three ' +
    'coefficients should not, because they are the car');
 
 console.log('\n--- the second car: does the STRUCTURE hold? ---');
@@ -362,7 +362,7 @@ console.log('\n--- the false rejection that a coarse grid nearly produced ---');
      /resolution limit/.test(FX.CIVIC.theFalseRejectionIAlmostPublished.join(' ')));
 }
 
-console.log('\n--- P7: the widebody is an aero part, and lateral G proves it ---');
+console.log('\n--- P7: the CIVIC\'S kit is an aero part (see the withdrawal below) ---');
 /* Preview only, from the same upgrade-screen A/B. The point of this block is
    the SHAPE of the change, not the magnitudes: grip that appears at 120 mph
    and barely at 60, paid for in straight-line speed, is downforce. */

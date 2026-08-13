@@ -28,7 +28,7 @@ not a deliberate exception.
 node tests/run.js
 ```
 
-**656 assertions across seventeen files**, plus a 684-build structural sweep, a
+**741 assertions across eighteen files**, plus a 684-build structural sweep, a
 2,304-combination render/export sweep over every gated-part combination, and a
 monotonicity sweep. Exits non-zero on any failure or crash — safe to use as a
 gate. See `tests/shim.js` for how a plain-Node DOM shim runs the app's real
@@ -55,7 +55,7 @@ the output against a few real cars by hand, not just the test suite.
 ## The measurement program — read this before touching any constant
 
 Started 2026-08-12, and it is no longer true that nothing has been measured.
-`node tests/status.js` reports **18 cases with data** from twelve fixtures on
+`node tests/status.js` reports **24 cases with data** from sixteen fixtures on
 two cars. What has actually landed: Mechanical Balance solved and its structure
 confirmed on a second car, the Aero Balance model, `k` as the gearing
 invariant, the game's real race 7-speed, and the four `compute()` defects those
@@ -65,10 +65,11 @@ found — all fixed.
 tier list further down), and the green suite still proves *structure*, not
 calibration — it would pass just as happily with every ARB off by 10×.
 
-Three documents and three tools:
+Four documents and three tools:
 
 | file | what it is |
 |---|---|
+| **`MODEL.md`** | **what the game has been measured to do, and what follows for how we tune.** Start here. Every claim carries a confidence rung (MEASURED / ONE CAR / INFERRED / HYPOTHESIS / ASSUMED) and section 7 is the honest list of what is still guessed |
 | **`TESTS.md`** | the master catalogue — every case across every subsystem, the car-selection reasoning, the photo protocol, and the suggested order |
 | **`MEASURE.md`** | fill-in working sheets for the sessions in flight (Session A gearing, Session B the reverse-engineering plan) |
 | `tests/data/*.json` | measured fixtures, one per car per session, plus `*-TEMPLATE.json` scaffolds to copy |
@@ -242,15 +243,17 @@ is. Rough tiers, most to least trustworthy:
    what you do with a curve, and a shipped sensitivity *number* would have been
    invalidated here.
 
-   **And `MB` may not be roll stiffness at all.** Widening the *front* track
-   on the Civic moved MB **up** (0.44 → 0.46). Roll stiffness goes as track
-   *squared*, so a wider front should have stiffened the front and pushed MB
-   *down*. Lateral load transfer goes as roll stiffness *divided* by track,
-   which has the observed sign — so MB may be the rear share of **load
-   transfer**. At fixed geometry the two differ only by a constant, which is
-   why every bar and spring row fits either reading. **Rear track width is the
-   one-screenshot discriminator** (load transfer → wider rear lowers MB; roll
-   stiffness → raises it), and it is unrun.
+   **And `MB` is not roll stiffness — it is LOAD TRANSFER.** Settled by `M10`
+   on two cars, both directions. Widening the front raises MB (GR86 0.48→0.50,
+   Civic 0.44→0.46); widening the rear lowers it (0.52→0.50, 0.48→0.46). Roll
+   stiffness goes as track *squared* and would predict the opposite on all four
+   — four chances, four misses. Only `K ÷ track`, which is lateral load
+   transfer, has the observed signs. At fixed geometry the two readings differ
+   only by a constant, which is why every bar and spring row fits both and why
+   nothing before `M10` could separate them. Aero balance and efficiency did
+   not move on any width row on either car, which is the control. **The
+   magnitudes are not quotable**: all four rows imply 8.3–8.4% of widening, and
+   propagating the two-decimal rounding gives [4.1%, 12.8%] on every one.
 
    **What shipped from it (C4, 2026-08-12):** the app no longer quotes a
    sensitivity at all. Because the coefficients are per-car, the guidance is the
@@ -269,6 +272,8 @@ is. Rough tiers, most to least trustworthy:
    2026-08-12 when 80 proved unsettable. **Aero Balance is a function of the two
    downforce figures in pounds plus a large per-axle body term** (≈175 front /
    215 rear on the GR86) — validated on an out-of-sample point, one car only.
+   **Those two numbers are a point estimate the data does not support:** a
+   two-decimal readout pins the front term only to roughly 85–360 lb.
    **The sliders are in pounds and the two ends have different ranges**, so the
    app's percentages are slider *positions* and can never target the readout;
    C3 relabelled them "% of travel" and says so on both the card and the sheet.
@@ -292,8 +297,11 @@ is. Rough tiers, most to least trustworthy:
    against them (RWD decel stays low per Boston; aero balance 0.42-0.48 is
    confirmed on his own screen; bump=0.63×rebound they corroborate).
 3. **Community-standard but FH4/FH5-era** (carried forward, not FH6-confirmed)
-   — HokiHoshi's axle-share ARB/damper method, the bump=0.63×rebound
-   convention, the spring frequency-vs-PI curve.
+   — HokiHoshi's axle-share ARB/damper method and the spring frequency-vs-PI
+   curve. **`bump = 0.63 × rebound` graduated out of this tier 2026-08-12**:
+   the game's own default tune uses 0.628/0.628 on the GR86 and 0.622/0.620 on
+   the Civic — four instances, two cars. The *ratio* is confirmed; the absolute
+   damping values are not.
 4. **House heuristics with no external source** — the final-drive fallbacks
    (see gearing below), brake-bias-per-width-step, the `vFrac` per-discipline
    targets, most of the `carNotes()` discipline-fit thresholds.
@@ -503,7 +511,9 @@ Three things came out of it:
    was already there; **only road is measured.**
 
    Note this is a **PI** argument, not a shift-quality one. The rpm drop per
-   shift is fixed by the ratio steps (70/78/81/85/86/86% on the GR86 7-speed)
+   shift is fixed by the ratio steps (**69/75/77/80/81/79%** on the game's real
+   race 7-speed; the 70/78/81/85/86/86% quoted here until 2026-08-12 was the
+   app's own invented set, one more survival of the SPREAD circularity)
    and final drive scales all gears together, so it cannot change shift quality
    — only where in the speed range the gears sit.
 2. **The surface is flat.** 0.12s across the whole 0-100 range and 4.4 mph of

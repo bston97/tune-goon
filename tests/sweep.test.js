@@ -26,7 +26,9 @@ eval(readScript() + ';globalThis.__X={compute,SPREAD};');
 const X = globalThis.__X;
 const ok = (l, c, e) => console.log((c ? 'PASS  ' : 'FAIL  ') + l + (e !== undefined ? '   ' + e : ''));
 
-/* 2022 Toyota GR86, A 700, 7-speed race box, ratios at the game's defaults,
+/* 2022 Toyota GR86, A 700, 7-speed race box, ratios at THIS APP'S set — not
+   the game's, which is the whole point of the SPREAD correction; see FITTED
+   below —
    final drive the only variable. Read off the Performance panel 2026-07-31.
    The rows now live in tests/data/gearing-gr86-2026-07-31.json rather than
    here, so gearing.test.js reads the same numbers from the same place. */

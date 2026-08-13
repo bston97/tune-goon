@@ -317,7 +317,9 @@ car before any of it reaches `compute()`.
 
 ### M10 — ✅ **ANSWERED 2026-08-12: it is LOAD TRANSFER**
 
-Three states of the Civic, one width step at each end:
+Three states of the Civic. **Both cars run MAX track width**, so each row is
+stock-against-max, not one step — any per-step figure is this divided by however
+many steps exist, and nothing shows the steps are equal:
 
 | | Mech. Balance |
 |---|---|
@@ -331,7 +333,7 @@ Three states of the Civic, one width step at each end:
 three differ by constants, which is why every bar and spring row fitted all of
 them and the solved model works without knowing which.
 
-The implied widening factor per step agrees between the two axles (4–13% on
+The implied stock-to-max widening agrees between the two axles (4–13% on
 each, overlapping), which is a real consistency check — but **the point
 estimates, 8.42% and 8.36%, are a coincidence of three roundings and are
 refused.** The directions are what settle it and they are not
@@ -422,11 +424,23 @@ it — one screenshot.
 MB = R / (F + R)      F = arF + 0.150·spF + 50.5      R = arR + 0.150·spR + 72.3
 ```
 
-**The rear axle's share of roll stiffness**, not the front's — every candidate
-model in `MEASURE.md` Phase 1 was written `F/(F+R)` and the whole list was the
-right shape inverted. Six settings, three free parameters, every row on the
-printed digit, plus two rows it was not fitted to (the app's own tune exact, the
-game's default one rounding step out at a different ride height and pressure).
+**The rear axle's share**, not the front's — every candidate model in
+`MEASURE.md` Phase 1 was written `F/(F+R)` and the whole list was the right
+shape inverted. Six settings, three free parameters, every row on the printed
+digit, plus two rows it was not fitted to (the app's own tune exact, the game's
+default one rounding step out at a different ride height and pressure).
+
+**Share of *what*, corrected 2026-08-12 by `M10`:** of lateral **load
+transfer**, not of roll stiffness. Track width enters as a divisor — widening
+the front raises MB, widening the rear lowers it, on both cars. At fixed
+geometry the two readings differ only by a constant, which is why the fit above
+is unaffected and why nothing before `M10` could tell them apart.
+
+**And the spring term above is a LOCAL linearisation.** Falsified over a 5×
+spring range; feasible exponents are `p ∈ [0.45, 0.61]` and `p = 1` is
+excluded. It was fitted inside a 1.85× window, where a concave curve and a
+straight line are indistinguishable at two decimals. Accurate near the tune it
+was measured at, and not beyond. See `MODEL.md` §1.
 
 - **One bar point ≈ 6.7 lb/in of spring** — comparable authority across their
   ranges, which is why no bars-only or springs-only model could ever have fitted.

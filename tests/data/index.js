@@ -101,7 +101,9 @@ const DEFAULT_FD = AUG_DEF.held.fd;
    Mechanical Balance: the solved model and every row it was tested against.
 
    Coefficients are the GR86's and do not transfer; the structure should,
-   because it is roll stiffness. Both facts are asserted in mb.test.js.
+   because it is load transfer (M10, two cars — track divides). Both facts are
+   asserted in mb.test.js. NOTE the spring term below is a LOCAL linearisation:
+   falsified over a 5x range, accurate over the ~1.9x it was fitted in.
    ------------------------------------------------------------------------ */
 const MB_MODEL = { ws: 0.150, tF: 50.5, tR: 72.3 };
 

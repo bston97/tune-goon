@@ -425,8 +425,8 @@
           <br><b>3.</b> Read your <b>top gear's ratio</b> off the same screen &mdash; the last
           number in the ratio list, the one you left alone while sweeping. The fit is only
           meaningful against the gearbox it was read on, and gearboxes differ: the GR86's stock
-          race 7-speed tops out at 0.85 where this app's own set ends at 0.82, which is 3.8% on
-          every speed below.
+          race 7-speed tops out at 0.85, and only the 7-speed is measured &mdash; every other
+          gear count is a house guess here, worth several per cent on every speed below.
           <br><b>4.</b> Optional: if you want to run your own final drive rather than the app's,
           enter it too &mdash; every gear figure is then worked out at <em>your</em> setting, with
           ratios to match.</div>
@@ -679,7 +679,12 @@ const TIRE_BY_CLASS={
 };
 
 const SWAP_NOTE='<b>Engine swap:</b> don\'t swap by default — plenty of stock engines have good character and a swap is expensive in PI. On Buy &amp; Install compare power-to-weight before and after: a swap that raises PWR is usually worth it, one that holds it flat or drops it for a PI cost rarely is. Watch the weight delta too — a heavy V12 or big V8 pushes mass forward and can ruin a light chassis. Match character to the job: high-revving screamers for road and touge, torque-rich V8s for drag, drift and cross-country, small turbo fours for dirt.';
-const WIDEBODY_NOTE='<b>Widebody:</b> only if you actually need the wider tires. It adds weight and PI, and sometimes unlocks front aero. Skip it otherwise.';
+/* Rewritten 2026-08-12. The old note said a widebody "adds weight and PI".
+   Measured on two cars it FREES PI — 700 to 683 on a Civic, 700 to 660 on a
+   GR86 — and added 2 lb on the one legible weight reading. And the two kits do
+   opposite things: one gained 0.09 g of cornering at 120 mph, the other lost
+   0.10. So there is no rule to give, only a screen to read. */
+const WIDEBODY_NOTE='<b>Widebody:</b> read the preview before deciding &mdash; kits differ wildly and none of this is modelled here. Measured on two cars, a widebody <b>frees</b> PI rather than costing it (700&rarr;683 and 700&rarr;660) because it trades straight-line speed away. One gained 0.09g of cornering at 120 mph; the other lost 0.10g and 5.8 ft of braking. Toggle through the upgrade screen and judge it on the numbers.';
 
 function tarmacPath(i){
   const aPlus=['A','S1','S2','R','X'].includes(i.cls);
@@ -1413,7 +1418,7 @@ function render(){
          the other, so the note says which kind of assumption it is. */
       ? '<div class="note" style="margin-top:8px"><b>Top ratio assumed at '+r.topGear.toFixed(2)+'</b> &mdash; '+
         (i.gr===7
-          ? 'the game\'s own race 7-speed, read off two cars. Right unless you changed your ratios &mdash; if you applied the set below, enter 0.82.'
+          ? 'the game\'s own race 7-speed, read off two cars, so this is right unless you have changed your ratios. If you have, read the top one off the Gearing tab and enter it.'
           : 'a house figure for a '+i.gr+'-speed, never seen on an FH6 screen. Read yours off the Gearing tab.')+'</div>'
       : '')+
     /* Only the TOP ratio is known, so a top gear far from SPREAD's leaves a big
@@ -1439,7 +1444,7 @@ function render(){
     (RS
       ? '<div class="note" style="margin-top:10px"><b>Or set these ratios and keep your own final drive.</b> '+
         'Same 1st as the table above, top gear placed at '+Math.round(RS.gears[i.gr-1].v)+
-        ' mph &mdash; just past the Top Speed you entered, so the car can use its full range whether that figure is what it reaches or what it could reach &mdash; and an equal '+RS.drop+'% rpm drop on every shift.'+
+        ' mph &mdash; the graph maximum, a fixed reading off the chart rather than a speed anything predicts &mdash; and an equal '+RS.drop+'% rpm drop on every shift.'+
         '<div class="gears" style="margin-top:8px">'+RS.gears.map((x,n)=>
           '<div class="g"><span>'+ORDN(n+1)+'</span><span>'+x.g.toFixed(2)+
           ' <span style="color:var(--dim)">&middot; to '+Math.round(x.v)+' mph</span></span></div>').join('')+'</div>'+
@@ -1462,9 +1467,15 @@ function render(){
       ? 'Race anti-roll bars are what expose these sliders. They are cheap in PI and are the main tool for setting balance, so this is usually the first thing to fix.'
       : 'Split proportional to axle load (stiffer bar on the heavier axle = neutral roll stiffness), then trimmed toward rotation.'+
         (eff('arF')==null||eff('arR')==null ? ' <b>Only one bar is fitted</b>, so balance here is half-blind &mdash; the difference between the two is what actually sets it.' :
-        ' <b>Check Mechanical Balance on this same tab &mdash; target 0.55&ndash;0.65, sweet spot 0.60.</b> It is the rear axle\'s share of roll stiffness, so a stiffer rear bar raises it. Below 0.55 understeers, above 0.65 goes unstable. <b>Do not guess the size of the move &mdash; calibrate it:</b> note the reading, add 10 to the rear bar, note it again. That difference is this car\'s per-10-points, and the rest is division. On the car this was measured on it came to 0.015, so a 0.04 gap wanted <b>+27 bar</b> &mdash; not the couple of points that feels right.'+
-        ((i.twf>0||i.twr>0)
-          ? ' <b>Widened car:</b> a wider track stiffens roll beyond what these numbers assume &mdash; the readout sees that, the formula does not, so if it lands outside the band that gap is the width. Trust the readout.'
+        ' <b>Check Mechanical Balance on this same tab &mdash; target 0.55&ndash;0.65, sweet spot 0.60.</b> It is the rear axle\'s share of lateral load transfer, so a stiffer rear bar raises it. Below 0.55 understeers, above 0.65 goes unstable. <b>Do not guess the size of the move &mdash; calibrate it:</b> note the reading, add 10 to the rear bar, note it again. That difference is this car\'s per-10-points, and the rest is division. On the car this was measured on it came to 0.015, so a 0.04 gap wanted <b>+27 bar</b> &mdash; not the couple of points that feels right.'+
+        /* Rewritten 2026-08-12 after M10. The old note said "a wider track
+           stiffens roll", which is the roll-stiffness reading the measurement
+           killed — the readout behaves as though a wider axle is SOFTER,
+           because lateral load transfer goes as stiffness divided by track.
+           It also fired on +3/+3, where the effect cancels, so the common case
+           was being warned about a gap the data says is zero. */
+        (i.twf!==i.twr
+          ? ' <b>Uneven track width.</b> The readout sees track and these numbers do not: widening an axle <em>lowers</em> its share of load transfer, so your wider '+(i.twf>i.twr?'front pushes the reading UP':'rear pulls the reading DOWN')+'. Measured on two cars at about &plusmn;0.02 for a full-width step. Trust the readout over the figures above.'
           : ''))));
 
   const noSpring=locked('spF','spR','rhF','rhR');
@@ -1491,7 +1502,7 @@ function render(){
     const bothAero=eff('aeF')!=null&&eff('aeR')!=null, frontOnly=eff('aeR')==null;
     R.push(sec('var(--aero)','Aero',[['Front',vin('aeF')],['Rear',vin('aeR')]],
       bothAero
-        ? '<b>These are slider positions, not downforce.</b> The game\'s sliders are in pounds and the two ends have different ranges, so a matching percentage is not matching downforce &mdash; and the bodyshell makes a comparable amount on its own (measured ~175 lb front, ~215 rear) that no slider touches. Start the front there, then move the rear until <b>Aero Balance, on this same tab, reads 0.42&ndash;0.48</b>, sweet spot 0.45. That readout is the only target here. More front = rotation, more rear = stability.'
+        ? '<b>These are slider positions, not downforce.</b> The game\'s sliders are in pounds and the two ends have different ranges, so a matching percentage is not matching downforce &mdash; and the bodyshell makes a comparable amount on its own &mdash; measured on one car as somewhere between roughly 85 and 360 lb per end, rear-biased &mdash; that no slider touches. Start the front there, then move the rear until <b>Aero Balance, on this same tab, reads 0.42&ndash;0.48</b>, sweet spot 0.45. That readout is the only target here. More front = rotation, more rear = stability.'
         : '<b>'+(frontOnly?'Front':'Rear')+' aero only.</b> With a fixed '+(frontOnly?'rear':'front')+
           ', the in-game balance figure is not a reliable target &mdash; trust mechanical balance from diff, ARB and springs instead.'));
   } else {
@@ -2259,7 +2270,7 @@ function sheet(){
       (eff('aeR')!=null?row('Rear Aero',sv('aeR'),'val-teal')
                        :row('Rear Aero','Not adjustable','dim'))+
       '<div class="aero-note">'+(aeroBoth
-        ? '<strong>Percentages are slider positions, not downforce.</strong> The sliders are calibrated in pounds with a different range at each end, and the body makes a comparable amount by itself, so no pair of percentages can be aimed at the balance figure. Start the front there, then move the rear until <strong>Aero Balance</strong> on the same tab reads <strong>0.42&ndash;0.48</strong>, sweet spot 0.45. That readout is the target.'
+        ? '<strong>Percentages are slider positions, not downforce.</strong> The sliders are calibrated in pounds with a different range at each end, and the bodyshell makes a comparable amount by itself, so no pair of percentages can be aimed at the balance figure. Start the front there, then move the rear until <strong>Aero Balance</strong> on the same tab reads <strong>0.42&ndash;0.48</strong>, sweet spot 0.45. That readout is the target.'
         : fixedEnd+' is fixed, so the in-game balance figure is <strong>not a reliable target</strong> here &mdash; trust mechanical balance from the diff, ARBs and springs instead.')+'</div>';
   } else {
     aeroBody=row('Downforce', i.disc==='drag'?'None &mdash; drag build':'No adjustable aero')+
@@ -2276,7 +2287,7 @@ function sheet(){
   if(hasARB) N.push('<p><strong>Anti-roll bars</strong> are split proportional to axle load, then trimmed toward rotation. '+
     (oneARB
       ? 'Only the '+(eff('arF')!=null?'front':'rear')+' bar is fitted, so balance here is half-blind &mdash; it is the <strong>difference</strong> between the two that sets it. Fit the other end before chasing balance with anything else.'
-      : 'The ARB tab shows <strong>Mechanical Balance</strong> &mdash; target <strong>0.55&ndash;0.65</strong>, sweet spot 0.60. It is the <strong>rear</strong> axle\'s share of roll stiffness, so a stiffer rear bar raises it and a softer front bar or front spring does too. Below 0.55 understeers, above 0.65 goes unstable. Sort it before leaving the tab, and <strong>calibrate the move rather than guessing it</strong>: read the figure, add 10 to the rear bar, read it again, then scale your gap by that difference. Measured on one car, 10 points of bar moved it 0.015 &mdash; so closing 0.51 to 0.55 took +27 bar, far more than it feels like it should.')+'</p>');
+      : 'The ARB tab shows <strong>Mechanical Balance</strong> &mdash; target <strong>0.55&ndash;0.65</strong>, sweet spot 0.60. It is the <strong>rear</strong> axle\'s share of lateral load transfer, so a stiffer rear bar raises it and a softer front bar or front spring does too. Below 0.55 understeers, above 0.65 goes unstable. Sort it before leaving the tab, and <strong>calibrate the move rather than guessing it</strong>: read the figure, add 10 to the rear bar, read it again, then scale your gap by that difference. Measured on one car, 10 points of bar moved it 0.015 &mdash; so closing 0.51 to 0.55 took +27 bar, far more than it feels like it should.')+'</p>');
   if(hasSpring||hasHeight) N.push('<p>'+
     (hasSpring?'<strong>Spring rates</strong> are absolute values from K = M(2&pi;f)&sup2; at a '+r.f.toFixed(2)+' Hz base &mdash; type them straight in and the game clamps if the car\'s range is narrower. The front/rear ratio is already set by corner mass. ':'')+
     (hasHeight?'<strong>Ride height</strong> is a position in the slider range; if the Springs telemetry bars hit 97%+ repeatedly over bumps or curbs, raise 1&ndash;2 clicks.':'')+'</p>');
@@ -2292,8 +2303,8 @@ function sheet(){
               :Math.round((1-d.vFrac)*100)+'% shorter than it, so the last line stops short of the edge &mdash; deliberate, for '+d.n+'.')+
     ' Confirm on track by feel: weak drive out of corners &rarr; raise the final drive; running out of gear down the longest straight &rarr; lower it. '+
     (RSx
-      ? '<strong>Two gear tables are printed</strong> &mdash; the assumed set '+(r.topGearSrc==='read'?'(top gear yours, the rest assumed) ':'')+'and a computed set aimed at the chart maximum with an equal rpm drop per shift. The computed set is a hypothesis: A/B them on the Performance panel and keep whichever measured better. <strong>The assumed set is not the game\'s.</strong> On the one car where both have been read, the game\'s 7-speed was 4.17/2.89/2.17/1.66/1.32/1.07/0.85 against this table\'s 2.92/2.05/1.60/1.30/1.10/0.95/0.82 &mdash; so the mph beside each gear holds only once these ratios are actually fitted.</p>'
-      : 'Individual gears are left alone &mdash; only the final drive needs adjusting. The ratios printed are this app\'s assumed table, not the ones your car ships with, so read them as the spacing they describe rather than as numbers to check against.</p>'));
+      ? '<strong>Two gear tables are printed</strong> &mdash; the assumed set '+(r.topGearSrc==='read'?'(top gear yours, the rest assumed) ':'')+'and a computed set aimed at the chart maximum with an equal rpm drop per shift. The computed set is a hypothesis: A/B them on the Performance panel and keep whichever measured better. '+(i.gr===7?'The assumed set here <strong>is</strong> the game\'s own race 7-speed, measured on two cars, so it is what your car has unless you changed it. ':'<strong>The assumed set has never been seen on an FH6 screen</strong> for a '+i.gr+'-speed &mdash; only the 7-speed row is measured &mdash; so the mph beside each gear holds only if these ratios are actually fitted. ')+'</p>'
+      : 'Individual gears are left alone &mdash; only the final drive needs adjusting. '+(i.gr===7?'The ratios printed are the game\'s own race 7-speed, measured on two cars.':'The ratios printed are this app\'s assumed table for a '+i.gr+'-speed and have never been seen on an FH6 screen, so read them as the spacing they describe rather than as numbers to check against.')+'</p>'));
 
   /* The sheet gets read away from the app, so it has to account for its own
      dashes — otherwise a gated row looks like a bug in the generator. */
@@ -2721,7 +2732,7 @@ function preflight(){
      is the reading whose absence is invisible on the finished sheet. */
   row('Top gear ratio', has(g('topratio'))?g('topratio'):'assumed',
       has(g('topratio'))?'ok':'warn2',
-      has(g('topratio'))?'':'the gear speeds will assume this app\'s own ratios are fitted, which is a few per cent out on the game\'s gearbox');
+      has(g('topratio'))?'':(g('gr')==='7'?'the 7-speed fallback is the game\'s own measured box, so this is only wrong if you changed your ratios':'no FH6 screen has ever confirmed the ratios assumed for this gear count'));
   row('Final drive', BASE?fmt('fd',eff('fd')):'&mdash;',
       BASE?(BASE.fdSrc==='rough'?'no':'ok'):'no',
       !BASE?'nothing calculated yet':BASE.fdSrc==='rough'?'a guess &mdash; verify it on the graph first':'');

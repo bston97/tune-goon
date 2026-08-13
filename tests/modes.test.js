@@ -165,7 +165,16 @@ ok('five ordered checks', /5 checks, in order/.test(verify));
 ok('mech balance with the band', /0\.55&ndash;0\.65/.test(verify));
 ok('aero balance when aero is fitted', /0\.42&ndash;0\.48/.test(verify));
 ok('ends by pointing at the fine-tune box', /tell the fine-tune box/.test(verify));
-ok('widened car gets the track-width caveat on the ARB note', /Widened car/.test(verify));
+/* Rewritten after M10. The old note said "a wider track stiffens roll",
+   which is the roll-stiffness reading the measurement killed, and it fired on
+   +3/+3 where the effect CANCELS — so the commonest build was warned about a
+   gap the data says is zero. It now fires only on uneven width and names the
+   direction. */
+ok('uneven track width gets the caveat', /Uneven track width/.test(verify));
+ok('and it names which way the readout moves',
+   /rear pulls the reading DOWN|front pushes the reading UP/.test(verify));
+ok('and no longer claims a wider track stiffens roll',
+   !/wider track stiffens roll/.test(verify));
 
 console.log('--- C4: the balance move is calibrated, not guessed ---');
 /* "+/-0.5 ARB per 1% of shift" was out by roughly 10x and ambiguous besides —
@@ -191,7 +200,7 @@ console.log('--- C4: the balance move is calibrated, not guessed ---');
 }
 fill({ twr: '0' });
 els['calc'].onclick();
-ok('stock-width car does not', !/Widened car/.test(els['out'].innerHTML));
+ok('stock-width car does not', !/Uneven track width/.test(els['out'].innerHTML));
 fill({ aero: 'none' });
 els['calc'].onclick();
 ok('no aero, no aero check', /nothing to check on this build/.test(els['out'].innerHTML));
