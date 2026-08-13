@@ -10,7 +10,12 @@ Nothing here had been
 implemented.
 
 Baseline as of 2026-08-08: `node tests/run.js` → **532 passed, 0 failed**
-across sixteen files.
+across sixteen files. *(Current as of 2026-08-12: **771 across nineteen**.)*
+
+> **Where to start after 2026-08-12:** `MEASURE.md` opens with a START HERE
+> block — the measurement queue and the known doc/test debt. `MODEL.md` is what
+> the game has been measured to do. This file is plans and decisions, and parts
+> of it predate the measurement programme.
 
 **Every section was checked against the code on 2026-08-08** and each now ends
 with a "Checked against the code" block: corrections where the plan described

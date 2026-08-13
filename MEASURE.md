@@ -38,6 +38,45 @@ within a sitting).
 
 ---
 
+# ▶ START HERE — where 2026-08-12 left off
+
+Everything measured that day is in **`MODEL.md`**; read that first and this
+second. Suite at **771 assertions across nineteen files, 0 failed**, tree clean,
+everything pushed. No fixture in `tests/data/` is unreferenced.
+
+**Nothing is half-finished.** Every finding taken that day is in a fixture, a
+test and a document. What is below is new work, not cleanup of old work.
+
+## The measurement queue, cheapest and highest-value first
+
+| # | what | cost | why it is where it is |
+|---|---|---|---|
+| 1 | **Re-read the GR86 Rocket Bunny's Weight and Front %** on the upgrade preview | 30 s | Both were flagged red and illegible, so both are recorded `null`. It is the ONE number that separates "the kit is heavy" from "the GR86 already had the downforce" as the reason its widebody loses grip where the Civic's gains it |
+| 2 | **`P1` — the gating matrix** | 30 s per tier, while upgrading | **The highest-risk unmeasured thing in the app.** It decides which sliders get shown at all: every other constant being wrong is a number off, this is a control invented or hidden. Needs the TUNING menu after installing, *not* the upgrade preview. Two claims most likely wrong: street/sport suspension gives spring rate and ride height but **no** damping or alignment; street/sport diff gives accel lock only, **no** decel |
+| 3 | **`S1` — what Top Speed responds to** | ~20 min | Three withdrawn app features ride on the current reading. Four incidental rows now contradict it, and `CLAUDE.md` deliberately refuses to act until this runs controlled |
+| 4 | **A race 7-speed on a car that was never drivetrain-swapped** | 1 screenshot | The one confound under `SPREAD[7]`, which is already shipped into the app |
+| 5 | **A third car for Mechanical Balance** | 3 readings | Turns "two cars" into a rule, and tests whether the per-axle terms sitting ~5.5 points below front weight distribution is a pattern or a coincidence |
+| 6 | **`G4`** — default ratios for 4/5/6/8/9/10 gears | ~20 min | The gate (`G7`) is open now, so these generalise. Restore the default tune first |
+
+## Known debt, deliberately not fixed
+
+Recorded so it is not rediscovered. None of it changes a number the app prints:
+
+- **File:line citations across all four docs are stale** — `index.html` grew
+  ~110 lines on 2026-08-12, so references are off by +29 to +105. The durable
+  fix is to cite identifiers rather than line numbers.
+- **`status.js` counts per file stem, not per case.** It now says so in its own
+  output, but `P1` still reports data from a parts fixture holding no gating
+  matrix.
+- **`TESTS.md` retires `M5`/`M6` on the premise the model is linear**, which
+  is now false. The BAR term has never been stressed the way the spring term
+  was — that is a real open question wearing a "retired" label.
+- `stress.test.js` still sweeps a `+4` tire width that shipped and was withdrawn.
+- The roster lists `SAT-F-high` as a 2018 Civic at ~62% front; the car actually
+  measured is a 2023 at 57%, which lands in the CORE-1 band instead.
+
+---
+
 # The plan — do these in this order
 
 ### Step 1 — **Fix the app** ✅ DONE 2026-08-12
