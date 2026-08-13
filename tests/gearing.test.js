@@ -43,17 +43,25 @@ const draw = o => {
   return els['out'].innerHTML;
 };
 
-console.log('--- SPREAD is the app\'s own table, not the game\'s ---');
-/* Boston asked whether the fit is measured with the app's ratios or the game's
-   defaults, and the answer this file used to give was "they are the same
-   table". They are not — see the k block below — so the fit is read on the
-   game's box and only the TOP ratio matters, since that is the line whose
-   endpoint lands in the corner. That is the one ratio the app now asks for. */
+const FXG = require('./data');
+
+console.log('--- SPREAD[7] is the game\'s box; the other six rows are not ---');
+/* The history in one paragraph. This file once asserted that SPREAD[7]
+   "matched the screen", which was circular: the screen was showing the app's
+   own set read back off a car it had been applied to. The game's real box was
+   then measured on 2026-08-12 and again the same day on a second car, so
+   SPREAD[7] is now that measurement. The other six rows have still never been
+   seen on an FH6 screen, which is what the Top gear ratio input is for. */
 ok('the app asks for the top ratio only, never the full set',
    /id="topratio"/.test(HTML) && !/id="g[1-9]"|id="gear[1-9]"/.test(HTML));
-ok('SPREAD[7] is unchanged, as the fallback it now is',
-   JSON.stringify(X.SPREAD[7]) === JSON.stringify([2.92, 2.05, 1.60, 1.30, 1.10, 0.95, 0.82]),
+ok('SPREAD[7] is the measured game box',
+   JSON.stringify(X.SPREAD[7]) === JSON.stringify(FXG.DEFAULT_RATIOS),
    X.SPREAD[7].join(' / '));
+ok('the invented 7-speed this app used to ship is gone',
+   X.SPREAD[7][0] !== 2.92 && X.SPREAD[7][6] !== 0.82);
+ok('and the other gear counts are still house tables, unmeasured',
+   [4, 5, 6, 8, 9, 10].every(g => X.SPREAD[g][0] < 3.1),
+   'every non-7 row opens below 3.1 where the measured box opens at 4.17');
 
 console.log('--- the fit solve ---');
 /* Road is 1.00 — gear at the fit. The GR86 sweep spread 0-60 by 0.113s, 0-100
@@ -180,7 +188,6 @@ console.log('--- per-gear limiter speeds, from the fit plus the axis maximum ---
    So neither file carries an axis literal any more. k comes from the pooled
    measurement in tests/data/index.js, and the assertions below are about what
    k predicts rather than about which chart scale was on screen. */
-const FXG = require('./data');
 const K = FXG.K();
 const KSPREAD = (Math.max(...FXG.allK()) - Math.min(...FXG.allK())) / K;
 ok('k is one constant across every measured build and tune', KSPREAD < 0.01,
@@ -197,35 +204,46 @@ ok('7th at fd 3.73 sits far past it', K / (3.73 * 0.82) > 185, (K / (3.73 * 0.82
    the ratios alone while sweeping. Measured on the GR86: the game's default
    7-speed tops out at 0.85, not SPREAD's 0.82, so k comes out 3.8% low. */
 const gameTop = FXG.DEFAULT_RATIOS[FXG.DEFAULT_RATIOS.length - 1];
-ok("the game's real 7-speed top gear is not SPREAD's", gameTop !== X.SPREAD[7][6],
-   'game ' + gameTop + ' vs SPREAD ' + X.SPREAD[7][6]);
-ok('and using SPREAD instead of the fitted ratio costs about 3.8%',
-   near((gameTop / X.SPREAD[7][6] - 1) * 100, 3.7, 0.4),
-   ((gameTop / X.SPREAD[7][6] - 1) * 100).toFixed(1) + '% low');
+const APP_TOP = 0.82;   // what SPREAD[7] used to end at, and what the app still emits
+ok('the correction closed the 7-speed gap entirely', gameTop === X.SPREAD[7][6],
+   'both ' + gameTop);
+ok('and the gap it closed was about 3.8% of every gear speed',
+   near((gameTop / APP_TOP - 1) * 100, 3.7, 0.4),
+   ((gameTop / APP_TOP - 1) * 100).toFixed(1) + ' per cent');
 
 console.log('--- and the fix: the top ratio is read, not assumed ---');
 /* C1, 2026-08-12. The measured sitting: axis 159, fit 4.34 read on the game's
    own gearbox, whose top gear is 0.85. The app used to build k from SPREAD's
    0.82 and land at 565.9 against a k measured on that same car of ~588.3. */
 {
-  const read = at({ fdfit: 4.34, vgraph: 159, topratio: gameTop });
+  /* Now that SPREAD[7] IS the game's box, the fallback is right for anyone on
+     it — so the demonstration uses the app's OLD top ratio, 0.82, which is what
+     a car running this app's emitted ratio set actually has. Not a contrivance:
+     it is the July reference build, whose graph endpoints match 0.82, not 0.85. */
+  const read = at({ fdfit: 4.34, vgraph: 159, topratio: APP_TOP });
   const assumed = at({ fdfit: 4.34, vgraph: 159 });
   ok('the entered top ratio builds k, not SPREAD',
-     near(read.kSpeed, 159 * 4.34 * gameTop, 0.01), read.kSpeed.toFixed(1));
-  ok('which is the k measured on that car', near(read.kSpeed, FXG.K(), 4),
-     read.kSpeed.toFixed(1) + ' vs ' + FXG.K().toFixed(1) + ' measured');
+     near(read.kSpeed, 159 * 4.34 * APP_TOP, 0.01), read.kSpeed.toFixed(1));
+  ok('the fallback is now the measured box',
+     near(assumed.kSpeed, 159 * 4.34 * gameTop, 0.01), assumed.kSpeed.toFixed(1));
+  ok('which is the k measured on that car', near(assumed.kSpeed, FXG.K(), 4),
+     assumed.kSpeed.toFixed(1) + ' vs ' + FXG.K().toFixed(1) + ' measured');
   /* Not tighter than that, and deliberately not asserted tighter: the fit was
      recorded as "about 4.34", and 4.34 against 4.35 is already 0.23%. What the
      fix has to clear is the gap it closes, so the test is comparative — the
      read ratio inside the k spread, the assumed one an order of magnitude out. */
   const err = m => Math.abs(m / FXG.K() - 1);
-  ok('read lands inside the measured k spread, assumed nowhere near',
-     err(read.kSpeed) < 0.01 && err(assumed.kSpeed) > 0.03,
-     (err(read.kSpeed) * 100).toFixed(2) + '% vs ' + (err(assumed.kSpeed) * 100).toFixed(2) + '%');
-  ok('the old assumed value is the 565.9 that was wrong',
-     near(assumed.kSpeed, 565.9, 0.5), assumed.kSpeed.toFixed(1));
+  ok('the fallback now lands inside the measured k spread', err(assumed.kSpeed) < 0.01,
+     (err(assumed.kSpeed) * 100).toFixed(2) + '%');
+  /* And the entered value must still win, or the input is decorative on exactly
+     the cars that need it most. */
+  ok('a fitted 0.82 box still overrides the 0.85 assumption',
+     read.kSpeed < assumed.kSpeed * 0.99,
+     read.kSpeed.toFixed(1) + ' vs ' + assumed.kSpeed.toFixed(1));
+  ok('and it reproduces the 565.9 the app used to compute for everyone',
+     near(read.kSpeed, 565.9, 0.5), read.kSpeed.toFixed(1));
   ok('so every gear speed moves with it',
-     read.gearTop.every((v, n) => v > assumed.gearTop[n]));
+     read.gearTop.every((v, n) => v < assumed.gearTop[n]));
   /* Blank must keep working: every saved build predates this field. */
   ok('a blank top ratio still falls back to SPREAD',
      assumed.kSpeed === 159 * 4.34 * X.SPREAD[7][6]);
@@ -239,7 +257,7 @@ console.log('--- and the fix: the top ratio is read, not assumed ---');
      reading. Only the top ratio is known, so only the top one is replaced. */
   ok('top gear lands exactly on the graph max at the fit',
      near(read.gearTop[6], 159, 0.1), read.gearTop[6].toFixed(1));
-  ok('the read ratio is in the printed list', read.gears[6] === gameTop,
+  ok('the read ratio is in the printed list', read.gears[6] === APP_TOP,
      read.gears.join('/'));
   ok('and the gears below it are still SPREAD, unmeasured',
      read.gears.slice(0, 6).join() === X.SPREAD[7].slice(0, 6).join());
@@ -258,7 +276,14 @@ console.log('--- and the fix: the top ratio is read, not assumed ---');
      !/Top gear is yours/.test(draw({ fdfit: '4.34', vgraph: '159', topratio: '0.85' })));
   /* The defect was silence, not arithmetic — an assumed ratio must say so. */
   const quiet = draw({ fdfit: '4.34', vgraph: '159', topratio: '' });
-  ok('an assumed ratio is disclosed on the card', /Top ratio assumed at 0\.82/.test(quiet));
+  ok('an assumed ratio is disclosed on the card', /Top ratio assumed at 0\.85/.test(quiet));
+  /* A 7-speed assumption is a measurement; any other gear count is a house
+     table. The card must not describe them in the same words. */
+  ok('and a 7-speed says the assumption is measured',
+     /the game's own race 7-speed, read off two cars/.test(quiet));
+  ok('while another gear count admits it is a house figure',
+     /a house figure for a 6-speed, never seen on an FH6 screen/.test(
+       draw({ gr: '6', fdfit: '4.34', vgraph: '159', topratio: '' })));
   ok('and a read one is not', !/Top ratio assumed/.test(
      draw({ fdfit: '4.34', vgraph: '159', topratio: '0.85' })));
 }
@@ -292,7 +317,7 @@ ok('offers the sweep band', /sweep <b>3\.\d\d&ndash;4\.\d\d<\/b>/.test(full),
    (full.match(/sweep <b>[\d.]+&ndash;[\d.]+<\/b>/) || [])[0]);
 ok('hands the decision to the Performance panel',
    /sweep <b>[^<]*<\/b> against the Performance panel/.test(full));
-ok('gear list carries limiter speeds', /to 44 mph/.test(gearBlock(full)));
+ok('gear list carries limiter speeds', /to 32 mph/.test(gearBlock(full)));
 ok('every gear annotated', (gearBlock(full).match(/to \d+ mph/g) || []).length === 7);
 ok('the whole section stays short', words(full) < 320, words(full) + ' words');
 
@@ -314,7 +339,7 @@ console.log('--- your final drive, my ratios ---');
   els['out'].fire('change', { target: { dataset: { k: 'fd' }, value: '3.00' } });
   const atMine = (els['out'].innerHTML.match(/to \d+ mph/g) || []).join(' ');
   ok('gear speeds follow a hand-set final drive', atRec !== atMine);
-  ok('and they are right at the new one', /to 67 mph/.test(atMine), atMine.slice(0, 40));
+  ok('and they are right at the new one', /to 49 mph/.test(atMine), atMine.slice(0, 40));
 
   // 2. ratios that cover the range at whatever final drive is set
   const page = els['out'].innerHTML;

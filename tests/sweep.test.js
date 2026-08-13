@@ -73,9 +73,15 @@ ok('specifically, not 4.82 — the worst measured', match !== 4.82,
    '4.82 scored ' + score(4.82) + ', the worst of the six');
 
 /* The tie-breaker that settled road at 1.00: at the fit every gear engages. */
+/* FITTED, not assumed. The reference car ran the app's own ratio set, which is
+   what JULY.held.ratios records — and since 2026-08-12 that is NOT SPREAD[7],
+   because SPREAD[7] is now the game's measured box. Reading the gearbox off
+   SPREAD here would repeat, inside the test suite, the exact defect the suite
+   exists to pin. */
+const FITTED = FX.JULY.held.ratios;
 const usesAll = fd => {
   const K = FX.K();
-  const tops = X.SPREAD[7].map(g => K / (fd * g));
+  const tops = FITTED.map(g => K / (fd * g));
   const top = SWEEP.reduce((a, b) => Math.abs(b.fd - fd) < Math.abs(a.fd - fd) ? b : a).top;
   return tops.findIndex(s => s >= top) + 1 === 7;
 };
@@ -110,7 +116,7 @@ ok('predicts the 145.4 mph readout at fd 3.73 in 5th',
    Math.abs(K / (3.73 * 1.10) - FX.GR86.readings.fifthAtFd373) < 2.0,
    (K / (3.73 * 1.10)).toFixed(1) + ' vs ' + FX.GR86.readings.fifthAtFd373 + ' measured');
 FX.GR86.readings.gearEndpointsAtFd482.map((measured, ix) =>
-  [ix + 1, X.SPREAD[7][ix], measured]).forEach(([n, g, measured]) => {
+  [ix + 1, FITTED[ix], measured]).forEach(([n, g, measured]) => {
   const pred = K / (4.82 * g);
   ok('gear ' + n + ' matches the graph within 2%', Math.abs(pred / measured - 1) < 0.02,
      'predicted ' + pred.toFixed(1) + ' vs ' + measured + ' measured off the chart');

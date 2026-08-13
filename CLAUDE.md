@@ -28,7 +28,7 @@ not a deliberate exception.
 node tests/run.js
 ```
 
-**612 assertions across seventeen files**, plus a 684-build structural sweep, a
+**656 assertions across seventeen files**, plus a 684-build structural sweep, a
 2,304-combination render/export sweep over every gated-part combination, and a
 monotonicity sweep. Exits non-zero on any failure or crash — safe to use as a
 gate. See `tests/shim.js` for how a plain-Node DOM shim runs the app's real
@@ -54,10 +54,16 @@ the output against a few real cars by hand, not just the test suite.
 
 ## The measurement program — read this before touching any constant
 
-Started 2026-08-12. **Nothing has been measured yet.** Every constant in
-`compute()` is still a house heuristic or FH4/FH5 carry-over (see the tier list
-further down), and the green suite proves *structure*, not calibration — it
-would pass just as happily with every ARB off by 10×.
+Started 2026-08-12, and it is no longer true that nothing has been measured.
+`node tests/status.js` reports **18 cases with data** from twelve fixtures on
+two cars. What has actually landed: Mechanical Balance solved and its structure
+confirmed on a second car, the Aero Balance model, `k` as the gearing
+invariant, the game's real race 7-speed, and the four `compute()` defects those
+found — all fixed.
+
+**Most constants are still house heuristics or FH4/FH5 carry-over** (see the
+tier list further down), and the green suite still proves *structure*, not
+calibration — it would pass just as happily with every ARB off by 10×.
 
 Three documents and three tools:
 
@@ -84,11 +90,14 @@ before a constant is treated as general — that is the lesson `vFrac` taught
 twice. And a green suite after new measurements means the measurements were
 not wired to anything.
 
-**The fixtures are built to fail informatively.** `tests/data/index.js` returns
-a caller's historical literal while a reading is unresolved and prints an
-`[UNRESOLVED]` line; filling the number in switches every consumer at once and
-fails whichever assertion was tuned to the other value. That failure is the
-mechanism, not a problem.
+**The fixtures are built to fail informatively, and the fixture is the gearbox.**
+The `[UNRESOLVED]` placeholder mechanism is gone — it existed to paper over the
+157-vs-159 axis split, which is settled. What replaced it matters more: each
+gearing fixture records the ratios that were **actually fitted** when it was
+read, and every test takes the gearbox from there rather than from `SPREAD`.
+A test that reads ratios out of `SPREAD` is repeating, inside the suite, the
+exact defect the suite exists to catch — and one did, silently, until
+`SPREAD[7]` was corrected and it failed by 30%.
 
 ## Three modes, chosen before anything is typed
 
@@ -226,10 +235,17 @@ is. Rough tiers, most to least trustworthy:
    **The sliders are in pounds and the two ends have different ranges**, so the
    app's percentages are slider *positions* and can never target the readout;
    C3 relabelled them "% of travel" and says so on both the card and the sheet.
-   **The `SPREAD` gear tables were listed here too and are demoted to tier 4 as
-   of 2026-08-12** — the screen that "confirmed" them was showing the app's own
-   ratio set read back off a car it had been applied to, and the game's real
-   defaults contradict it. See the gearing section below.
+   **`SPREAD[7]` is measured and the other six rows are tier 4.** The whole
+   table was listed here on a circular reading (the screen showed the app's own
+   set read back off a car it had been applied to) and was demoted 2026-08-12.
+   Later the same day the game's real race 7-speed was read off **two** cars —
+   a 2022 GR86 and a 2023 Civic Type R, 571 lb apart, opposite original layouts
+   — and came back identical to every digit at the same final drive:
+   **4.17/2.89/2.17/1.66/1.32/1.07/0.85 at 3.63**. `SPREAD[7]` is now that.
+   The other gear counts have never been on an FH6 screen. **Unresolved
+   confound: both cars were AWD-swapped**, so "the race 7-speed has fixed
+   ratios" and "the AWD swap installs a standard gearbox" fit equally well —
+   one screenshot of a non-swapped race 7-speed settles it.
 2. **Traceable FH6-specific source** — ForzaTune's guide, Game8, official
    patch notes. Diff accel bands, aero balance range, the drag-tire nerf.
    Re-scanned 2026-08-01: ForzaTune's FH6 guide moved three of our values —
@@ -317,6 +333,22 @@ the right-hand edge" is the entire reading the fit is. Only the top ratio is
 known, so only the top slot is replaced; the gears below stay `SPREAD`'s, and
 **both the card and the sheet now have to say so** (C2). If you ever learn the
 full ratio set, that is the assumption to retire.
+
+**And for 7-speeds it has since been retired.** `SPREAD[7]` was replaced with
+the measured box on 2026-08-12 after a second car returned it identically. That
+closes the fallback gap for 7-speeds only — the other six rows are still house
+tables, so the mechanism is alive for them and `#topratio` is still the fix.
+
+**One thing this change surfaced, and it is worth keeping.** Replacing
+`SPREAD[7]` broke `sweep.test.js`'s gear-speed check hard: predicted
+29/42/56/74/93/114/144 against the July graph's measured 42/59/76/94/111/129/148.
+Those endpoints match the app's **old** ratios to within 1 mph and the game's
+box not at all — so **the July reference car was physically running the app's
+emitted ratio set**, which is independent confirmation of the circularity story
+from the graph itself rather than from an argument about it. The tests now read
+each fixture's own `held.ratios` instead of `SPREAD`; a test that takes the
+gearbox from `SPREAD` is repeating, inside the suite, the defect the suite
+exists to catch.
 
 ### `k` is the invariant — the axis on its own means nothing
 

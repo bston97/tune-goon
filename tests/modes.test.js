@@ -142,8 +142,11 @@ els['out'].fire('change', { target: { dataset: { k: 'fd' }, value: '3.60' } });
 els['save'].onclick();
 const sh = blob.parts[0];
 ok('sheet shows the edited final drive', /final-drive-value">3\.60</.test(sh));
-ok('default-ratio speeds recomputed at it', /gear-mph">56</.test(sh) && /gear-mph">200</.test(sh));
-ok('not the stale speeds from the old fd', !/gear-mph">44</.test(sh));
+/* Literals moved 2026-08-12 when SPREAD[7] became the game's measured box
+   rather than this app's invented one. The old numbers described a gearbox no
+   car has. */
+ok('assumed-ratio speeds recomputed at it', /gear-mph">41</.test(sh) && /gear-mph">200</.test(sh));
+ok('not the stale speeds from the old fd', !/gear-mph">32</.test(sh));
 ok('computed ratio set printed too', /Computed ratios/.test(sh));
 ok('its top gear lands on the chart maximum', /gear-mph">157</.test(sh));
 ok('note explains the A/B', /Two gear tables are printed/.test(sh));

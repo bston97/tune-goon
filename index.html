@@ -533,11 +533,35 @@ const PSI={stock:27,street:27,sport:27.5,semi:31,slick:31.5,rally:25,offroad:24,
 const TIRE_N={stock:'Stock',street:'Street',sport:'Sport',semi:'Semi-Slick',
               slick:'Race Slick',rally:'Rally',offroad:'Off-Road',dragt:'Drag'};
 
+/* Ratio sets assumed when the car's own are unknown. ONE ROW IS MEASURED AND
+   SIX ARE HOUSE TABLES, which is not tidy but is the truth, and mixing them
+   silently is what caused the original defect.
+
+   7 is the game's own race box, read off two cars on 2026-08-12 and identical
+   to every printed digit: a 2022 GR86 and a 2023 Civic Type R, 571 lb apart,
+   opposite original layouts, both at final drive 3.63. It replaces
+   2.92/2.05/1.60/1.30/1.10/0.95/0.82, which was this app's invention and was
+   once "confirmed" by reading it back off a car it had been applied to.
+
+   The game's box is wider at the bottom and almost identical at the top — 69%
+   rpm drop on the 1-2 shift against the old table's 70%, but 79% on 6-7
+   against 86%. So it is a progressively-spaced box, not a rescale, and no
+   amount of scaling the other six rows would produce it.
+
+   THE CONFOUND, UNRESOLVED: both cars were AWD-swapped. "The race 7-speed has
+   fixed ratios" and "the AWD swap installs a standard gearbox" fit this
+   equally well. Replacing anyway, because the old row was right for nobody
+   while this one is right for at least every AWD-swapped race 7-speed — but
+   one screenshot of a race 7-speed on a car that was never drivetrain-swapped
+   settles it, and is the cheapest open reading in the catalogue.
+
+   The other six rows have never been seen on an FH6 screen. That is what the
+   Top gear ratio input is for: enter it and none of this is load-bearing. */
 const SPREAD={
  4:[2.90,1.85,1.30,1.00],
  5:[2.90,1.95,1.45,1.15,0.92],
  6:[2.89,1.99,1.50,1.20,1.00,0.85],
- 7:[2.92,2.05,1.60,1.30,1.10,0.95,0.82],
+ 7:[4.17,2.89,2.17,1.66,1.32,1.07,0.85],   // measured 2026-08-12, two cars
  8:[2.95,2.15,1.72,1.42,1.20,1.03,0.90,0.79],
  9:[3.00,2.25,1.82,1.53,1.31,1.14,1.00,0.88,0.78],
  10:[3.05,2.35,1.92,1.63,1.41,1.24,1.10,0.98,0.87,0.78]
@@ -1384,7 +1408,13 @@ function render(){
     /* The defect this closes was never bad arithmetic — it was silence. The app
        assumed its own top ratio and printed the speeds as though measured. */
     (G.tops&&r.topGearSrc==='assumed'
-      ? '<div class="note" style="margin-top:8px"><b>Top ratio assumed at '+r.topGear.toFixed(2)+'</b> &mdash; these speeds hold only if this app\'s ratios are fitted. Read yours off the Gearing tab; the game\'s own box was 0.85, worth 3.8% here.</div>'
+      /* The 7-speed row is measured; the other six are house tables. Saying
+         "assumed" in the same tone for both would understate one and overstate
+         the other, so the note says which kind of assumption it is. */
+      ? '<div class="note" style="margin-top:8px"><b>Top ratio assumed at '+r.topGear.toFixed(2)+'</b> &mdash; '+
+        (i.gr===7
+          ? 'the game\'s own race 7-speed, read off two cars. Right unless you changed your ratios &mdash; if you applied the set below, enter 0.82.'
+          : 'a house figure for a '+i.gr+'-speed, never seen on an FH6 screen. Read yours off the Gearing tab.')+'</div>'
       : '')+
     /* Only the TOP ratio is known, so a top gear far from SPREAD's leaves a big
        step into it — and that step is an artifact of the assumed table, not a
