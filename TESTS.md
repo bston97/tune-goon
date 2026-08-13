@@ -252,6 +252,27 @@ minutes to settle and it sits upstream of Phase 1.
   Stock and Street collapsed, and offers no street/sport ARB tier at all. If
   the screen shows those tiers behaving differently, the form needs new options,
   not just a gate change.
+- **"What does the tier actually change?" is three questions, not one**, and
+  they are split across three cases on purpose. Answer them in this order,
+  because each one makes the next cheaper:
+  1. **Which sliders exist** — this case. Cheapest, and the one the app bets
+     the most on.
+  2. **Whether the tier moves the slider's range or only unlocks it** — `R2`.
+     A sport diff that offers 0–100% acceleration lock is a different part from
+     one that offers 20–80%, and the app assumes the former everywhere.
+  3. **Whether the tier moves the stat block** — `P2`. Suspension especially:
+     if a race suspension changes weight or front %, then every formula
+     downstream of those two is reading a different car than the one being
+     planned.
+- **Do it during a build, not as a special trip.** Every one of these is a
+  look at a screen you are already on while upgrading. Fitting a sport diff and
+  glancing at whether a decel slider appeared costs nothing; making a separate
+  session of it is what has kept it unmeasured since the project started.
+- **Why this outranks almost everything else in the catalogue.** The gating
+  matrix decides *which sliders the app prints at all*. Every other constant is
+  a number being slightly wrong; this one is the app either showing you a
+  control the car does not have, or hiding one it does. And it is FH5
+  carry-over that no FH6 screen has ever confirmed.
 
 ### P2 — Does a part change the stat block? *(15 min)*
 - **Vary:** one part at a time on CORE-1 — each aero end, each tire compound,
@@ -266,12 +287,51 @@ minutes to settle and it sits upstream of Phase 1.
 - **Means:** gives the `PSI` table's compounds an objective grip ordering and
   tests whether the app's compound advice per discipline matches it.
 
-### P4 — What does tire width actually buy? *(10 min)*
+### P4 — What does tire width actually buy? *(10 min)* — **promoted 2026-08-12**
 - **Vary:** width front and rear independently, 0→3.
-- **Read:** lateral G, 60-0, weight, PI.
+- **Read:** **Mechanical Balance first**, then lateral G, 60-0, weight, PI.
 - **Means:** the app moves **only brake balance** on width, via `wStep = twr −
   twf`, so 0/0 and 3/3 produce an identical tune. If width measurably changes
   grip or braking, that is a formula the app does not have.
+- **Why this got cheap.** Written as a panel case, it is now partly a class-A
+  one: **Mechanical Balance is a solved function**, and track width is exactly
+  the thing it should respond to — roll stiffness goes with the square of the
+  track, so widening one axle should stiffen it and move the readout. Change
+  front width alone at fixed 30/30 bars and read MB. That is a *number with a
+  model behind it*, not an impression.
+- **And the app already admits the gap.** `CLAUDE.md` has it: a widened car
+  gets a line on the ARB note saying *the readout sees the wider track and the
+  formula does not, so trust the readout.* That sentence is the app conceding
+  it cannot model this. P4 is what turns the concession into a coefficient.
+- **What the answer looks like.** If width shifts MB with bars and springs
+  held, it lives in the axle constants `tF`/`tR` — so the constants are partly
+  *build*, not purely car, and every future MB fixture has to record width.
+  Note the GR86 was measured at **+3/+3**, so its 50.5/72.3 are already
+  width-3 numbers; a stock-width car is not directly comparable until this is
+  known.
+- **The confound to control:** width changes PI, so an A700 car stops being
+  A700. Do the width rows **last**, after everything that needs the class held.
+
+### P7 — What does a full widebody conversion change? *(15 min)*
+- **Vary:** widebody kit fitted vs not, on a car that offers one, everything
+  else held. **Read:** weight, front %, PI, **Mechanical Balance**, **Aero
+  Balance**, lateral G, 60-0, 100-0, top speed.
+- **Means:** a widebody is the largest single track-width change available, and
+  it usually unlocks wider tires on top — so it is P4's effect at a magnitude
+  that cannot hide in a rounded readout. It may also move weight, downforce and
+  drag at the same time, which is exactly why it needs one controlled sitting
+  rather than an impression formed across builds.
+- **The app models none of it.** Widebody is not an input at all: there is no
+  field for it, and the only width the app reads is the tire-step *difference*
+  `twr − twf`, which a symmetric widebody does not change. So today a widebody
+  car and a stock-body car of the same stat block get an identical tune.
+- **Order the readings by what they settle.** Weight/front %/PI come free off
+  the upgrade screen. MB and AB are live readouts and take a minute. The panel
+  figures answer the question underneath all of it — **is the PI worth it** —
+  since a widebody that buys 0.02 g for 40 PI is a build mistake no tune fixes.
+- **Watch for the trap:** if the kit forces wider tires rather than merely
+  allowing them, width and body are not separable on that car. Fit the kit at
+  the *same* tire width first if the game lets you, and only then widen.
 
 ### P5 — Does the gearing graph's axis move with power? *(5 min)*
 - **Read:** axis maximum before and after a power upgrade on CORE-1.

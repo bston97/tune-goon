@@ -26,6 +26,7 @@ const CASES = [
   ['P2', 'Does a part change the stat block?',                'parts'],
   ['P3', 'What does tire compound buy?',                      'parts'],
   ['P4', 'What does tire width buy?',                         'parts'],
+  ['P7', 'What does a full widebody conversion change?',      'parts'],
   ['G1', 'Axis maximum, read cold (settles E2)',              'gearing'],
   ['G4', 'SPREAD ratios for 4,5,6,8,9,10 gears',              null],
   ['G5', 'Speed constant on a second car',                    null],
