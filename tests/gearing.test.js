@@ -484,3 +484,35 @@ console.log('--- C2: nothing calls SPREAD the game\'s ratios ---');
   ok('and the card no longer credits the game with 1st',
      !/Same 1st as the game/.test(els['out'].innerHTML));
 }
+
+console.log('--- the July axis is INFERRED, and the inference is a result ---');
+/* Caught by audit 2026-08-12: the loader supplied a literal 157 for a sitting
+   whose fixture records axisMax as null with an UNRESOLVED note, so
+   k-invariance was resting on an input the fixture declares unknown.
+
+   The number is defensible — but as a CONSEQUENCE of invariance, not evidence
+   for it. These assertions make that explicit, and exclude the inferred row
+   from any claim about invariance so the reasoning cannot go circular. */
+{
+  const J = FXG.TRIPLES[0];
+  ok('the July triple is flagged inferred', J.inferred === true, J.who);
+  ok('and it is the only one', FXG.TRIPLES.filter(t => t.inferred).length === 1);
+
+  const read = FXG.TRIPLES.filter(t => !t.inferred).map(FXG.kOf);
+  const pooled = read.reduce((a, b) => a + b, 0) / read.length;
+  ok('the FULLY READ triples alone establish k', read.length >= 3,
+     read.length + ' triples, pooled ' + pooled.toFixed(1));
+  ok('and they agree among themselves without the inferred row',
+     (Math.max(...read) - Math.min(...read)) / pooled < 0.01,
+     ((Math.max(...read) - Math.min(...read)) / pooled * 100).toFixed(2) + '%');
+
+  /* Now the inference: given that k, which axis could the July sitting have had? */
+  const kAt = a => a * J.fit * J.topRatio;
+  ok('157 is what that k implies for the July fit',
+     Math.abs(kAt(157) / pooled - 1) < 0.005,
+     kAt(157).toFixed(1) + ' vs ' + pooled.toFixed(1));
+  ok('and 159 would land outside it', Math.abs(kAt(159) / pooled - 1) > 0.01,
+     kAt(159).toFixed(1) + ', ' + ((kAt(159) / pooled - 1) * 100).toFixed(1) + '% out');
+  ok('so the fixture may stay null and the loader must say inferred',
+     FXG.JULY.readings.axisMax === null && /INFERRED|inferred/.test(J.who + J.note));
+}

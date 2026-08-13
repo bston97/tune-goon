@@ -28,7 +28,7 @@ not a deliberate exception.
 node tests/run.js
 ```
 
-**741 assertions across eighteen files**, plus a 684-build structural sweep, a
+**771 assertions across nineteen files**, plus a 684-build structural sweep, a
 2,304-combination render/export sweep over every gated-part combination, and a
 monotonicity sweep. Exits non-zero on any failure or crash — safe to use as a
 gate. See `tests/shim.js` for how a plain-Node DOM shim runs the app's real

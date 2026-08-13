@@ -153,6 +153,12 @@ they are comparable in size to the wings. Validated out-of-sample on the GR86.
 
 ### `k` is the invariant — MEASURED
 
+**One caveat on the evidence, found by audit.** The July sitting's axis was
+never actually read — the fixture records it as null. The 157 used for it is
+what k-invariance *implies*, not an independent reading, so it is excluded from
+any claim about invariance and the remaining four triples carry that on their
+own. Using it as evidence for the thing that produced it would be circular.
+
 ```
 speed at redline in gear G = k / (FD · G)        k = axisMax · fdFit · G_top
 ```

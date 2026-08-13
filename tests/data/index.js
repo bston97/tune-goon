@@ -46,6 +46,37 @@ const MB      = load('balance-mb-gr86-2026-08-12');
 const MB_PAIR = load('balance-mb-solved-gr86-2026-08-12');
 const DEFTUNE = load('balance-gr86-default-2026-08-12');
 
+/* Three fixtures that were loaded by NOTHING until 2026-08-12. Found by an
+   audit, and the omission mattered: AB holds a REVERSED claim (Aero Balance is
+   not front-over-total) with nothing keeping it dead, and PANEL_APPTUNE holds
+   C1 — the game's default tune beating the app on five of six columns — which
+   is the highest-stakes result the programme has produced. A finding recorded
+   in a fixture and pinned by no assertion is a finding a future edit breaks
+   silently. See ab.test.js. */
+const AB             = load('balance-ab-gr86-2026-08-12');
+const PANEL_APPTUNE  = load('panel-gr86-apptune-2026-08-12');
+const PANEL_PRESSURE = load('panel-gr86-pressure-2026-08-12');
+
+/* Aero Balance: downforce in POUNDS plus a per-axle bodyshell term.
+       AB = (F + a) / (F + a + R + b)
+   a and b are ONE CAR and only loosely pinned — roughly 85 to 360 lb for the
+   front — so this takes them as arguments rather than baking in a point
+   estimate. abOf(row) with no model is deliberately not offered. */
+const abOf = ({ aeF, aeR }, { a, b }) => (aeF + a) / (aeF + a + aeR + b);
+const AB_ROWS = AB.rows.filter(r => r.ab != null)
+  .map(r => ({ aeF: r.aeF, aeR: r.aeR, ab: r.ab, who: 'row ' + r.n }));
+
+/* Every (a,b) reproducing all measured AB rows at the printed digit. The
+   answer is a REGION, not a pair — that is the whole lesson of this fixture. */
+function abRegion(rows = AB_ROWS, step = 5) {
+  const out = [];
+  for (let a = 0; a <= 600; a += step)
+    for (let b = 0; b <= 600; b += step)
+      if (rows.every(r => Math.round(abOf(r, { a, b }) * 100) / 100 === r.ab))
+        out.push({ a, b });
+  return out;
+}
+
 /* ---------------------------------------------------------------------------
    Gearing: measured (axis, fit, topRatio) triples.
 
@@ -56,10 +87,23 @@ const DEFTUNE = load('balance-gr86-default-2026-08-12');
    out 3.8% low.
    ------------------------------------------------------------------------ */
 const TRIPLES = [
-  { who: 'july build, axis 157',
-    axis: 157, fit: JULY.readings.fit, topRatio: JULY.held.ratios[JULY.held.ratios.length - 1],
-    note: "July's other build. The axis was recorded twice for this sitting, 157 and 159; " +
-          'both are real and the fit is what pairs with them.' },
+  /* THIS AXIS IS INFERRED, NOT READ, and saying so is the point. The July
+     fixture records axisMax as null with an UNRESOLVED note: the number was
+     written down twice, 157 and 159, and nobody knows which sitting was which.
+     A literal 157 was quietly supplied here for weeks, which made k-invariance
+     rest on an input the fixture declares unknown — an audit caught it.
+
+     What justifies 157 is k itself. With this sitting's fit and top ratio,
+     157 gives 589.0 and 159 gives 596.5, against 589.1 pooled from the four
+     triples that ARE fully read. So 157 is the value implied by invariance
+     rather than an independent confirmation of it, and gearing.test.js asserts
+     the alternative would break it — which turns the literal into a result. */
+  { who: 'july build, axis INFERRED as 157',
+    axis: 157, inferred: true,
+    fit: JULY.readings.fit, topRatio: JULY.held.ratios[JULY.held.ratios.length - 1],
+    note: 'Axis not read for this sitting — 157 is what k-invariance implies; ' +
+          '159 with the same fit lands 1.3% out. Circular if used as evidence ' +
+          'FOR invariance, so assertions about invariance exclude it.' },
   { who: "2026-08-12, app's old tune",
     axis: 157, fit: AUG.readings.fit, topRatio: AUG.held.ratios[AUG.held.ratios.length - 1],
     note: 'A completely different build — AWD swap, 472 lb lighter, 60 hp down.' },
@@ -254,6 +298,7 @@ module.exports = {
   DEFAULT_RATIOS, DEFAULT_FD,
   MB_MODEL, mbOf, MB_ROWS,
   CIVIC, CIVIC_ROWS, CIVIC_ALL, lumpedMb, civicRegion, tRwindow, wsWindow,
+  AB, PANEL_APPTUNE, PANEL_PRESSURE, abOf, AB_ROWS, abRegion,
   /* Back-compat shim: GR86 was the only export two test files used. */
   GR86: JULY
 };

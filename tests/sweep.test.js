@@ -35,13 +35,15 @@ const ok = (l, c, e) => console.log((c ? 'PASS  ' : 'FAIL  ') + l + (e !== undef
 const FX = require('./data');
 const SWEEP = FX.GR86.rows;
 const FIT = FX.GR86.readings.fit;
-/* 157 rather than 159 is not a claim about which reading was right — resolved
-   2026-08-12, both were. It is the axis that pairs with THIS fixture's fit, and
-   the pair is what means anything. See tests/data/index.js. */
-const AXIS = 157;
+/* No axis literal here. The July sitting's axis was never resolved — the
+   fixture records it null — and 157 is what k-invariance IMPLIES rather than
+   what anyone read. Carrying that inference as a bare number in a second file
+   is the E2 defect exactly, so this file takes the triple from the loader,
+   where the inference is labelled. */
+const JULY_AXIS = FX.TRIPLES[0].axis;
 const CAR = { name: 'GR86', cls: 'A', disc: 'road', wt: 2900, fw: 53, hp: 350, tq: 260,
   dt: 'RWD', gr: 7, tire: 'sport', aero: 'both', twf: 0, twr: 0, susp: 'race', arb: 'both',
-  trans: 'race', diff: 'race', vmax: NaN, fdfit: FIT, vgraph: AXIS };
+  trans: 'race', diff: 'race', vmax: NaN, fdfit: FIT, vgraph: JULY_AXIS };
 
 /* Rank each measured setting 1..6 on all three figures and sum. Equal weight is
    crude, but it is honest about the fact that no single metric decides a lap. */
