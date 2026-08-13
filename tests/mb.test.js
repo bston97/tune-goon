@@ -361,3 +361,53 @@ console.log('\n--- the false rejection that a coarse grid nearly produced ---');
   ok('with the tell that should have caught it sooner',
      /resolution limit/.test(FX.CIVIC.theFalseRejectionIAlmostPublished.join(' ')));
 }
+
+console.log('\n--- P7: the widebody is an aero part, and lateral G proves it ---');
+/* Preview only, from the same upgrade-screen A/B. The point of this block is
+   the SHAPE of the change, not the magnitudes: grip that appears at 120 mph
+   and barely at 60, paid for in straight-line speed, is downforce. */
+{
+  const W = FX.CIVIC.widebodyAB, b = W.baseline, w = W.widebody;
+  ok('the kit was previewed, not bought', W.installed === false);
+  ok('front % is recorded as unread rather than guessed', w.fw === null);
+
+  const g60 = w.lateralG60 - b.lateralG60, g120 = w.lateralG120 - b.lateralG120;
+  ok('lateral G rises', g60 > 0 && g120 > 0,
+     '+' + g60.toFixed(2) + ' at 60, +' + g120.toFixed(2) + ' at 120');
+  ok('and rises MUCH harder at 120 than at 60, which is downforce not track',
+     g120 > g60 * 2, (g120 / g60).toFixed(1) + 'x');
+  ok('aero balance shifts hard rearward', b.ab - w.ab > 0.10,
+     b.ab + ' -> ' + w.ab);
+  ok('and it is paid for in a straight line',
+     w.zeroHundred > b.zeroHundred && w.topSpeed < b.topSpeed,
+     ((w.zeroHundred - b.zeroHundred) * 60).toFixed(0) + ' frames on 0-100');
+  ok('far too much loss for the weight it adds', w.wt - b.wt <= 5,
+     '+' + (w.wt - b.wt) + ' lb cannot cost 52 frames — it is drag');
+  ok('the fixture calls it a downforce kit', /downforce kit/i.test(
+     W.itIsAnAEROPART.join(' ')));
+
+  ok('and it COSTS PI rather than buying it', w.pi < b.pi,
+     b.pi + ' -> ' + w.pi + ', a 17-point drop');
+
+  /* The trap worth pinning: this looks like an M10 answer and is not. */
+  ok('it is explicitly rejected as an M10 discriminator',
+     /M10 STILL WANTS REAR TRACK WIDTH ALONE/i.test(
+       W.notADiscriminatorForM10.join(' ')));
+}
+
+console.log('\n--- S5 sharpened: lateral G answers to parts, never to the tune ---');
+{
+  const tuneRows = FX.CIVIC_ALL.map(r => r.panel).filter(Boolean);
+  ok('every tune row on this car reads the same lateral G',
+     new Set(tuneRows.map(p => p.lateralG60)).size === 1 &&
+     new Set(tuneRows.map(p => p.lateralG120)).size === 1,
+     tuneRows.length + ' rows, all ' + tuneRows[0].lateralG60 + ' / ' + tuneRows[0].lateralG120);
+  ok('spanning the spring slider end to end',
+     Math.max(...FX.CIVIC_ALL.map(r => r.spF)) /
+     Math.min(...FX.CIVIC_ALL.map(r => r.spF)) > 4.5);
+  ok('yet a body kit moves it',
+     FX.CIVIC.widebodyAB.widebody.lateralG120 !== tuneRows[0].lateralG120);
+  ok('so the readout is responsive, just not to roll stiffness',
+     /responds to PARTS and refuses to respond to the TUNE/.test(
+       FX.CIVIC.widebodyAB.lateralGRespondsToPARTSButNotToTUNE.join(' ')));
+}

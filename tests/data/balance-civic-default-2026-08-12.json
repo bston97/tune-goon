@@ -516,6 +516,92 @@
     ]
   },
 
+  "widebodyAB": {
+    "_note": [
+      "Case P7, from the same upgrade-screen A/B. PREVIEW ONLY — the kit was not",
+      "bought, so this is the game's projection for installing it, read against",
+      "the car as it currently stands (front track width upgraded, A 700).",
+      "",
+      "Front % could not be read confidently off the screenshot: the field is",
+      "flagged red but the digits are not legible. NOT GUESSED. Weight reads",
+      "3,001 lb, which is +2 lb, so front % is unlikely to have moved much."
+    ],
+    "part": "Forza Horizon 6 — Widebody Kit",
+    "cost": 20000,
+    "installed": false,
+    "baseline": { "pi": 700, "wt": 2999, "fw": 57,
+                  "sixtyZero": 71.5, "hundredZero": 158.3,
+                  "lateralG60": 1.20, "lateralG120": 1.36,
+                  "zeroSixty": 3.467, "zeroHundred": 8.500, "topSpeed": 166.5,
+                  "aeroEff": 0.822, "ab": 0.50, "mb": 0.46 },
+    "widebody": { "pi": 683, "wt": 3001, "fw": null,
+                  "sixtyZero": 72.1, "hundredZero": 160.9,
+                  "lateralG60": 1.23, "lateralG120": 1.45,
+                  "zeroSixty": 3.800, "zeroHundred": 9.367, "topSpeed": 164.8,
+                  "aeroEff": 0.818, "ab": 0.33, "mb": 0.45 },
+
+    "itIsAnAEROPART": [
+      "THE WIDEBODY IS NOT A TRACK-WIDTH UPGRADE WITH SIDE EFFECTS. It is a",
+      "downforce kit, and the numbers only make sense read that way:",
+      "",
+      "  Aero Balance   0.50 -> 0.33      an enormous shift rearward",
+      "  lateral G 120  1.36 -> 1.45      +0.09, and it grows with speed",
+      "  lateral G 60   1.20 -> 1.23      +0.03, much smaller at low speed",
+      "  0-100          8.500 -> 9.367    52 frames slower",
+      "  top speed      166.5 -> 164.8",
+      "  aero efficiency 0.822 -> 0.818",
+      "",
+      "Grip that appears mostly at 120 mph and barely at 60 is downforce, not",
+      "mechanical grip — a track-width change would help both ends equally. And",
+      "the straight-line loss is far too large for +2 lb of weight, so it is",
+      "drag. Efficiency barely moved, which means the TOTAL downforce went up a",
+      "lot rather than the kit being inefficient.",
+      "",
+      "So P7's framing was wrong before the data: it was written as 'the largest",
+      "track-width change available'. It may widen the track too, but that is",
+      "not what the readouts are reporting."
+    ],
+
+    "andItCOSTS17PI": [
+      "PI 700 -> 683 for a kit that makes the car quicker through corners. That",
+      "is not a discount, it is the PI system pricing what it measures: the",
+      "straight-line losses are large and the cornering gain is not weighted",
+      "enough to offset them.",
+      "",
+      "Which makes it interesting rather than good or bad. On a class-capped",
+      "build those 17 points buy power back. Whether the round trip — downforce",
+      "in, 17 points of engine back — beats the stock body is a real question",
+      "this data cannot answer, and it is the first genuine BUILD question the",
+      "measurement program has turned up rather than a tuning one."
+    ],
+
+    "notADiscriminatorForM10": [
+      "Tempting and wrong. MB moved only 0.46 -> 0.45 here, but a widebody",
+      "changes both tracks, the weight, the downforce and the aero balance at",
+      "once. Four variables moving means the row cannot separate roll stiffness",
+      "from load transfer, which is what M10 needs.",
+      "",
+      "M10 still wants REAR TRACK WIDTH ALONE."
+    ],
+
+    "lateralGRespondsToPARTSButNotToTUNE": [
+      "S5 asked whether lateral G responds to the tune. Across two cars it has",
+      "sat at 1.20 / 1.36 through every bar setting, every spring setting from",
+      "the slider's minimum to its maximum, tire pressure, gearing and aero",
+      "slider changes.",
+      "",
+      "The widebody moved it: 1.23 / 1.45. So the readout is not insensitive and",
+      "not broken — it responds to PARTS and refuses to respond to the TUNE.",
+      "",
+      "That STRENGTHENS S5's provisional no rather than weakening it, and it",
+      "sharpens the surprise. Anti-roll bars and springs genuinely should change",
+      "steady-state cornering grip. That this readout does not see them suggests",
+      "it is a tire-and-downforce limit rather than a whole-car cornering",
+      "measurement — which would also explain why it moves with a downforce kit",
+      "and not with roll stiffness."
+    ]
+  },
+
   "whatIsStillLumped": [
     "A and B each contain a spring term plus an axle constant, and bar-only rows",
     "cannot separate them. Two more readings would:",
