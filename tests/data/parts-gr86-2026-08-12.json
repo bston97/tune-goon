@@ -1,0 +1,115 @@
+{
+  "_README": [
+    "Upgrade-screen readings for the reference GR86. This is the SECOND car for",
+    "the parts group — the Civic's rows live in",
+    "balance-civic-default-2026-08-12.json under trackWidthAB and widebodyAB.",
+    "",
+    "THE UPGRADE SCREEN IS A CONTROLLED A/B. It shows every readout for the",
+    "installed part AND for the alternative, side by side, with no tune drift",
+    "between the two halves. Nothing has to be bought to read it. Five pages",
+    "cycle with Toggle; page 1 (the six star ratings) is the only one not worth",
+    "capturing, because those are rounded to one decimal and derived from the",
+    "real numbers, and the PI appears on page 2 anyway.",
+    "",
+    "So far this file holds the BASELINE ROW only — the car as it stands, with",
+    "the upgraded front track width installed. The stock-width halves are what",
+    "turn it into a measurement."
+  ],
+
+  "car": "2022 Toyota GR86",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "upgrade menu — part preview, pages 2 to 5",
+
+  "build": {
+    "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+    "aero": "both", "tires": "semi-slick", "twf": 3, "twr": 3,
+    "dt": "AWD", "gears": 7,
+    "_note": "Same build as the gearing and balance fixtures for this car."
+  },
+
+  "baseline": {
+    "_state": "Upgraded Front Track Width INSTALLED — the car as it currently stands",
+    "pi": 700,
+    "hp": 290, "tq": 303, "wt": 2428, "fw": 54,
+    "pwr": 0.12, "displacement": 1994,
+    "sixtyZero": 63.4, "hundredZero": 146.1,
+    "lateralG60": 1.25, "lateralG120": 1.41,
+    "zeroSixty": 3.350, "zeroHundred": 8.717, "topSpeed": 141.1,
+    "aeroEff": 0.750, "ab": 0.45, "mb": 0.50
+  },
+
+  "thePreviewSHOWSTHEDEFAULTTUNE": [
+    "AN OPEN QUESTION, CLOSED BY THIS BASELINE. When the Civic's upgrade-screen",
+    "readings came in, its Mechanical Balance matched neither the default-tune",
+    "reading nor the live one, so the fixture recorded that the preview is",
+    "'computed at some tune state of its own' and warned that only DELTAS were",
+    "usable.",
+    "",
+    "The GR86 baseline settles it three ways at once:",
+    "",
+    "    readout            preview     tuning menu, default tune",
+    "    Mech. Balance        0.50          0.50",
+    "    Aero Balance         0.45          0.45",
+    "    Aero Efficiency      0.750         0.75",
+    "",
+    "Three for three, and the car's LIVE tune at the time was nothing like its",
+    "default. So the preview shows the game's DEFAULT TUNE for the previewed",
+    "configuration, not whatever is currently dialled in.",
+    "",
+    "THE ONE LOOSE END, recorded rather than smoothed over: the Civic's preview",
+    "read 0.46 where its default-tune tuning-menu reading was 0.47. One printing",
+    "step, on one readout, on one car, against three exact matches here. Most",
+    "likely a rounding difference between two code paths, but it is not",
+    "explained and it is not being explained away.",
+    "",
+    "WHY IT MATTERS: it means every upgrade-screen A/B is directly comparable to",
+    "a default-tune reading, so the parts group and the balance group share a",
+    "reference point rather than living in separate worlds. It also means the",
+    "screen can be read WITHOUT restoring the default tune first, which is the",
+    "step whose absence caused the SPREAD disaster."
+  ],
+
+  "twoCarsSideBySide": [
+    "Both at A 700, both AWD, so the differences are the cars and the parts.",
+    "",
+    "                    GR86        Civic",
+    "    weight          2428        2999 lb",
+    "    front %           54          57",
+    "    power            290         321 hp",
+    "    60-0            63.4        71.5 ft",
+    "    100-0          146.1       158.3 ft",
+    "    lateral 60      1.25        1.20 g",
+    "    lateral 120     1.41        1.36 g",
+    "    0-60           3.350       3.467 s",
+    "    0-100          8.717       8.500 s",
+    "    top speed      141.1       166.5 mph",
+    "    aero eff       0.750       0.822",
+    "    aero balance    0.45        0.50",
+    "    mech balance    0.50        0.46",
+    "",
+    "Nothing is concluded from this — two cars differing in tires, aero and",
+    "everything else is not an experiment. It is here because it is the first",
+    "time two complete, comparable rows have existed at all, and because two of",
+    "the differences are worth a second look later: the GR86 brakes 8 ft better",
+    "and corners harder on semi-slicks, and gives up 25 mph of top speed at a",
+    "much worse aero efficiency, which is what a downforce build looks like."
+  ],
+
+  "stillNeeded": [
+    "The stock halves. Each is one Toggle press away on a screen already open:",
+    "",
+    "  1. Stock FRONT track width, page 5 (Chassis). Second car for M10 — does",
+    "     widening the front raise MB here too?",
+    "  2. Stock REAR track width, page 5. The other half of M10.",
+    "  3. Widebody preview, pages 2-5. Second car for P7 — is it a downforce",
+    "     kit on every car, or was that the Civic's kit specifically?",
+    "",
+    "Pages 2, 3 and 4 on the width rows are wanted but not required: the",
+    "direction on page 5 is what settles M10, and P4's performance numbers are",
+    "a bonus on top."
+  ],
+
+  "notes": ""
+}

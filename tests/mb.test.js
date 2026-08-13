@@ -467,3 +467,28 @@ console.log('\n--- and the tidy 8.42-vs-8.36 agreement is refused ---');
      /not rounding-dependent/.test(
        FX.CIVIC.m10Answered.theQuantitativeCheckAndItsLIMIT.join(' ')));
 }
+
+console.log('\n--- the upgrade preview shows the DEFAULT tune, not the live one ---');
+/* Left open when the Civic's numbers matched neither its default nor its live
+   tune. The GR86 baseline closes it three ways at once, which makes every
+   upgrade-screen A/B comparable to a default-tune reading. */
+{
+  const P = require('./data/parts-gr86-2026-08-12.json');
+  const D = FX.DEFTUNE.readouts;
+  ok('preview Mech. Balance matches the default tune', P.baseline.mb === D.mechBalance,
+     P.baseline.mb + ' vs ' + D.mechBalance);
+  ok('preview Aero Balance matches', P.baseline.ab === D.aeroBalance);
+  ok('preview Aero Efficiency matches', P.baseline.aeroEff === D.aeroEfficiency);
+  /* And the live tune at the time was nothing like the default, so this is not
+     a coincidence of the two happening to agree. */
+  const live = FX.CIVIC_ALL.find(r => r.spF > 1500);
+  ok('while the live tune was far from default', live && live.mb !== D.mechBalance,
+     'the sweep was sitting at MB ' + live.mb);
+  ok('the one-step Civic discrepancy is recorded, not explained away',
+     /not explained and it is not being explained away/.test(
+       P.thePreviewSHOWSTHEDEFAULTTUNE.join(' ')));
+  /* The GR86 baseline is a row, not yet a measurement — the stock halves are
+     what make it one. Pinned so a later session does not read it as complete. */
+  ok('and the file says what is still owed', /Second car for M10/.test(
+     P.stillNeeded.join(' ')));
+}
