@@ -1,0 +1,205 @@
+{
+  "_README": [
+    "SECOND CAR. The game's own default tune for a 2023 Civic Type R at A 700,",
+    "AWD-swapped, race everything — read off eight screenshots on 2026-08-12,",
+    "straight out of the upgrade shop with nothing tuned.",
+    "",
+    "Collected as the baseline for the Mechanical Balance structure test (M7):",
+    "does the solved GR86 form hold on a different car, with only the three",
+    "coefficients moving? The three bar rows for that are below and NOT YET",
+    "TAKEN. Everything in defaultTune is the hold-point for them.",
+    "",
+    "It answered four other questions on the way, none of which it was sent to",
+    "answer. See crossCarConstants, gearboxIsTheTier, casterIsFive and",
+    "dampingRatioConfirmed."
+  ],
+
+  "car": "2023 Honda Civic Type R",
+  "class": "A",
+  "pi": 700,
+  "date": "2026-08-12",
+  "screen": "tuning menu — all tabs",
+  "tune": "game default, untouched",
+  "readout": "mb",
+
+  "build": {
+    "susp": "race", "arb": "both", "diff": "race", "trans": "race",
+    "aero": "both", "tires": "UNKNOWN — compound not yet reported",
+    "twf": null, "twr": null,
+    "wt": 2999, "fw": 57, "hp": 321, "tq": 316, "dt": "AWD", "gears": 7,
+    "_gap": "Tire compound and width steps are the only missing baseline fields. The Tires tab shows pressure only; compound and width live on the upgrade screen. They matter because P4 asks whether track width lives inside the MB axle constants, and the GR86 was measured at +3/+3."
+  },
+
+  "defaultTune": {
+    "_note": "Every value the game shipped for this build. Units as the screen prints them.",
+    "pF": 32.0, "pR": 29.0, "pUnit": "psi",
+    "camF": -2.0, "camR": -1.5, "toeF": 0.0, "toeR": 0.0, "cast": 5.0,
+    "arF": 30.90, "arR": 21.50,
+    "spF": 703.0, "spR": 596.6, "spUnit": "lb/in",
+    "rhF": 6.0, "rhR": 6.1, "rhUnit": "in",
+    "reF": 12.7, "reR": 9.2, "buF": 7.9, "buR": 5.7,
+    "aeF": 361, "aeR": 336, "aeUnit": "lb of downforce",
+    "brakeBal": 50, "brakePres": 100, "brakeUnit": "%",
+    "dfa": 30, "dfd": 10, "dra": 55, "drd": 13, "dc": 60, "diffUnit": "%",
+    "fd": 3.63,
+    "ratios": [4.17, 2.89, 2.17, 1.66, 1.32, 1.07, 0.85]
+  },
+
+  "readouts": {
+    "mechBalance": 0.47,
+    "aeroBalance": 0.50,
+    "aeroEfficiency": 0.822
+  },
+
+  "panel": {
+    "_note": "Default tune, no driving. The C1 control row for this car.",
+    "zeroSixty": 3.467, "zeroHundred": 8.500, "topSpeed": 166.5,
+    "sixtyZero": 72.6, "hundredZero": 159.3,
+    "lateralG60": 1.20, "lateralG120": 1.36,
+    "quantisation": "3.467 s is exactly 208 frames at 1/60 s and 8.500 is exactly 510. Independent corroboration of the acceleration quantisation found on the GR86."
+  },
+
+  "gearingGraph": {
+    "axisMax": 185,
+    "axisUnit": "mph",
+    "redline": 7000,
+    "_note": "Read off the digits at the ends of the graph's bottom axis. NO fit has been swept yet, so there is no k for this car — the axis alone is chart furniture, and it is the (axis, fit, topRatio) triple that means something. G5 wants that sweep."
+  },
+
+  "gearboxIsTheTier": [
+    "THE RACE 7-SPEED'S DEFAULT RATIOS ARE NOT A PROPERTY OF THE CAR.",
+    "",
+    "  GR86  4.17/2.89/2.17/1.66/1.32/1.07/0.85 at final drive 3.63",
+    "  Civic 4.17/2.89/2.17/1.66/1.32/1.07/0.85 at final drive 3.63",
+    "",
+    "Identical at every gear AND at the final drive, on two cars sharing",
+    "nothing else: 2022 RWD coupe vs 2023 FWD hatch, 571 lb apart, 3 points of",
+    "front distribution apart. This is case G7, the gate on G4, and it opens the",
+    "gate: measuring SPREAD for 4/5/6/8/9/10 gears is worth doing, because one",
+    "car's reading will generalise.",
+    "",
+    "It also means SPREAD[7] can simply be replaced with the measured set rather",
+    "than left as a fallback nobody trusts.",
+    "",
+    "THE CONFOUND, STATED BEFORE ANYONE ELSE FINDS IT: both cars are",
+    "AWD-SWAPPED. 'The race 7-speed has fixed ratios' and 'the AWD swap installs",
+    "a standard gearbox' both explain this equally well. Nothing here separates",
+    "them. A third race 7-speed on a car that was NOT drivetrain-swapped costs",
+    "one screenshot and settles it — take that before acting on this."
+  ],
+
+  "crossCarConstants": [
+    "MOST OF THE GAME'S DEFAULT TUNE IS A TEMPLATE, NOT A CALCULATION.",
+    "",
+    "Identical on both cars, to every digit:",
+    "  camber      -2.0 / -1.5",
+    "  toe          0.0 /  0.0",
+    "  caster       5.0",
+    "  brakes       50% balance, 100% pressure",
+    "  diff         30/10 front, 55/13 rear, 60 centre",
+    "  gearing      all seven ratios and the final drive",
+    "",
+    "Different on the two cars — and every one of them is load-bearing:",
+    "  anti-roll    48.1/22.8   vs 30.90/21.50",
+    "  springs     607.6/596.9  vs 703.0/596.6",
+    "  ride height   4.4/4.8    vs 6.0/6.1",
+    "  damping      12.1/11.3/7.6/7.1 vs 12.7/9.2/7.9/5.7",
+    "  pressure       31/31     vs 32.0/29.0",
+    "  aero          190/232    vs 361/336",
+    "",
+    "The split is clean: anything that depends on the car's mass, its",
+    "distribution or its bodywork varies, and everything else is a constant the",
+    "game stamps on. Two cars is not a law, but it is a sharp enough pattern",
+    "that a third car disagreeing would be the interesting result."
+  ],
+
+  "casterIsFive": [
+    "Case S7, second confirmation. The game's default caster is 5.0 on both",
+    "cars. The app prints 6.5 for the road family (moved there 2026-08-01 from",
+    "6.7 on ForzaTune's 5.5-6.5 band); the forums say 7.0.",
+    "",
+    "This does NOT make 5.0 correct — a default is where the game starts you,",
+    "not where it is fastest, and every other default here is beatable. What it",
+    "does is remove the possibility that 5.0 was a one-car quirk. S7 still needs",
+    "the sweep against a panel figure to say which value is actually better."
+  ],
+
+  "dampingRatioConfirmed": [
+    "The app builds bump as 0.63 x rebound, carried over from FH4/FH5 community",
+    "practice and sitting at tier 3 in CLAUDE.md as never FH6-confirmed.",
+    "",
+    "  GR86  7.6/12.1 = 0.628    7.1/11.3 = 0.628",
+    "  Civic 7.9/12.7 = 0.622    5.7/9.2  = 0.620",
+    "",
+    "The game's own default tune uses 0.62-0.63 at both ends of both cars. That",
+    "is four independent instances agreeing with the convention to within a",
+    "hundredth. Corroboration of the RATIO only — it says nothing about whether",
+    "the app's absolute damping numbers are right, which is still D-class work."
+  ],
+
+  "mbModelDoesNotTransfer": [
+    "As predicted, and worth recording as a prediction that held rather than a",
+    "surprise. The GR86's coefficients applied to the Civic's default tune:",
+    "",
+    "  F = 30.90 + 0.150 x 703.0 + 50.5 = 186.85",
+    "  R = 21.50 + 0.150 x 596.6 + 72.3 = 183.29",
+    "  MB = R/(F+R) = 0.4952  ->  prints 0.50",
+    "",
+    "  measured: 0.47",
+    "",
+    "Out by 0.025, which is well outside the +/-0.005 rounding window, so this",
+    "is a real miss and not a two-decimal artefact. CLAUDE.md said the three",
+    "coefficients are that car's tires, geometry and unsprung mass and do not",
+    "transfer; they do not.",
+    "",
+    "The DIRECTION does transfer, which is the part that matters. The Civic runs",
+    "a stiffer front at both bar and spring (30.90 vs 21.50, 703.0 vs 596.6) and",
+    "reads BELOW 0.5 — exactly what a rear-share model requires. One point, so",
+    "it is consistent with the form rather than evidence for it. The three rows",
+    "below are the evidence."
+  ],
+
+  "aeroBodyTermAgain": [
+    "Weak but same-signed. The Civic makes MORE front downforce than rear (361",
+    "vs 336) and still reads 0.50 rather than above it, so the rear body term is",
+    "the larger one here too:",
+    "",
+    "  (361 + a) / (361 + a + 336 + b) = 0.50   ->   b - a = 25",
+    "",
+    "against the GR86's b - a = 40. Both rear-biased, same order of magnitude.",
+    "But a single 2-dp readout constrains only the DIFFERENCE, not a or b, and",
+    "0.50 covers everything in [0.495, 0.505] — so b-a is really 'about 25, give",
+    "or take 7'. Do not treat this as a measurement of anything. A3's floor and",
+    "ceiling rows are what pin a and b."
+  ],
+
+  "varied": "arF/arR",
+
+  "rows": [
+    { "n": 1, "purpose": "DIRECTION AND OFFSET — equal bars. The GR86 read 0.51 here, not 0.50, and the axle constants are why. If this car also reads off 0.5 with equal bars, the constants are real here too",
+      "arF": 30, "arR": 30, "spF": 703.0, "spR": 596.6, "rhF": 6.0, "rhR": 6.1, "pF": 32.0, "pR": 29.0, "mb": null },
+
+    { "n": 2, "purpose": "SAME-RATIO PAIR (a) — with row 3, separates a pure ratio from anything carrying an additive term",
+      "arF": 20, "arR": 40, "spF": 703.0, "spR": 596.6, "rhF": 6.0, "rhR": 6.1, "pF": 32.0, "pR": 29.0, "mb": null },
+
+    { "n": 3, "purpose": "SAME-RATIO PAIR (b) — identical 1:2 at near-double magnitude. Equal readouts = pure ratio; different = additive terms are real. The GR86 split 0.54 vs 0.56. 40/80 was the original plan and is unreachable: the bar slider maxes at 65",
+      "arF": 32.5, "arR": 65, "spF": 703.0, "spR": 596.6, "rhF": 6.0, "rhR": 6.1, "pF": 32.0, "pR": 29.0, "mb": null },
+
+    { "n": 0, "purpose": "FREE ROW, already taken — the default bars. Not one of the three settings and not fitted to anything, which makes it the out-of-sample check once the other three solve the coefficients",
+      "arF": 30.90, "arR": 21.50, "spF": 703.0, "spR": 596.6, "rhF": 6.0, "rhR": 6.1, "pF": 32.0, "pR": 29.0, "mb": 0.47 }
+  ],
+
+  "method": [
+    "One variable per row: bars only. Springs, ride heights and pressures are",
+    "copied into every row above from defaultTune and must not move — they are",
+    "in the model, and a drift in any of them gets blamed on the bars.",
+    "",
+    "Nothing recorded while the panel reads SIMULATING. That cost two rows the",
+    "day the rule was written, one of them half a same-ratio pair.",
+    "",
+    "Record MB to every digit printed. Two decimals cannot confirm a model to",
+    "four: anything in [0.465, 0.475] prints as 0.47."
+  ],
+
+  "notes": ""
+}
