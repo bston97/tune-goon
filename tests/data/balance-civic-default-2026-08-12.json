@@ -616,6 +616,14 @@
                   "aeroEff": 0.818, "ab": 0.33, "mb": 0.45 },
 
     "itIsAnAEROPART": [
+      "*** WITHDRAWN AS A GENERAL CLAIM, SAME DAY, BY THE SECOND CAR. ***",
+      "*** See parts-gr86-2026-08-12.json -> widebodyIsPerKit.               ***",
+      "*** The GR86's Rocket Bunny kit moves lateral G DOWN (1.25 -> 1.18 and ***",
+      "*** 1.41 -> 1.31) and barely touches aero balance (0.45 -> 0.44). This ***",
+      "*** section is true of THIS KIT and is not a rule about widebodies.    ***",
+      "*** Kept unedited below, because generalising a part's behaviour from  ***",
+      "*** one car is the error, and the reasoning was otherwise sound.       ***",
+      "",
       "THE WIDEBODY IS NOT A TRACK-WIDTH UPGRADE WITH SIDE EFFECTS. It is a",
       "downforce kit, and the numbers only make sense read that way:",
       "",

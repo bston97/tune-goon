@@ -492,3 +492,57 @@ console.log('\n--- the upgrade preview shows the DEFAULT tune, not the live one 
   ok('and the file says what is still owed', /Second car for M10/.test(
      P.stillNeeded.join(' ')));
 }
+
+console.log('\n--- M10 CONFIRMED on the second car, both directions ---');
+{
+  const P = require('./data/parts-gr86-2026-08-12.json');
+  const T = P.trackWidthAB, C = FX.CIVIC.m10Answered.states;
+  ok('GR86: widening the FRONT raises MB', T.installed.mb > T.stockFront.mb,
+     T.stockFront.mb + ' -> ' + T.installed.mb);
+  ok('GR86: widening the REAR lowers it', T.installed.mb < T.stockRear.mb,
+     T.stockRear.mb + ' -> ' + T.installed.mb);
+  ok('the same two signs as the Civic',
+     (C.bothUpgraded > C.stockFront) === (T.installed.mb > T.stockFront.mb) &&
+     (C.bothUpgraded < C.stockRear) === (T.installed.mb < T.stockRear.mb));
+  ok('and the same magnitudes, +0.02 front and -0.02 rear on both cars',
+     Math.abs((T.installed.mb - T.stockFront.mb) - (C.bothUpgraded - C.stockFront)) < 1e-9 &&
+     Math.abs((T.installed.mb - T.stockRear.mb) - (C.bothUpgraded - C.stockRear)) < 1e-9);
+  /* The control that makes it a width result rather than an aero one. */
+  ok('aero balance and efficiency do not move on any width row',
+     T.stockFront.ab === T.installed.ab && T.stockRear.ab === T.installed.ab &&
+     T.stockFront.aeroEff === T.installed.aeroEff);
+  ok('so MB is load transfer on two cars, not one',
+     /rear axle's share of lateral LOAD TRANSFER/.test(P.m10CONFIRMED.join(' ')));
+  ok('and the 8.4% point estimate is refused again',
+     /NOT QUOTABLE/.test(P.m10CONFIRMED.join(' ')));
+}
+
+console.log('\n--- P7 withdrawn: the widebody is per-kit, not a kind of part ---');
+/* Published one commit earlier off the Civic alone. The GR86 reverses every
+   sign that mattered. */
+{
+  const P = require('./data/parts-gr86-2026-08-12.json');
+  const g = P.widebody, gb = P.baseline;
+  const c = FX.CIVIC.widebodyAB;
+
+  ok('the Civic kit RAISES lateral G',
+     c.widebody.lateralG120 > c.baseline.lateralG120);
+  ok('the GR86 kit LOWERS it', g.lateralG120 < gb.lateralG120,
+     gb.lateralG120 + ' -> ' + g.lateralG120);
+  ok('the Civic kit swings aero balance hard',
+     Math.abs(c.widebody.ab - c.baseline.ab) > 0.10);
+  /* One printing step. The 1e-9 slack is float noise, not measurement slack —
+     0.45 - 0.44 evaluates to 0.010000000000000009. */
+  ok('the GR86 kit barely moves it', Math.abs(g.ab - gb.ab) <= 0.01 + 1e-9,
+     gb.ab + ' -> ' + g.ab + ', one printing step against the Civic\'s seventeen');
+  ok('so no general statement about widebodies survives',
+     /no general statement about 'widebodies' to be made/.test(
+       P.widebodyIsPerKit.join(' ')));
+  ok('the earlier claim is withdrawn IN PLACE rather than deleted',
+     /WITHDRAWN AS A GENERAL CLAIM/.test(c.itIsAnAEROPART.join(' ')) &&
+     /downforce kit/.test(c.itIsAnAEROPART.join(' ')));
+  /* The number that would explain it was not legible and was not invented. */
+  ok('the GR86 weight is recorded unread, not guessed', g.wt === null && g.fw === null);
+  ok('and the mechanism it would settle is stated as unconfirmed',
+     /UNCONFIRMED/.test(P.widebodyIsPerKit.join(' ')));
+}
