@@ -1139,7 +1139,8 @@ Two rules that fall straight out of this, and they invert F's:
 Two mechanisms exist and neither picks a best:
 
 **Find groups families for free.** The match is a substring test on the name —
-`String(b.name||'').toLowerCase().includes(q)` (`index.html:2420`) — so typing
+`String(b.name||'').toLowerCase().includes(q)` (the `match` closure in the Find
+handler) — so typing
 `lancer` already returns every Lancer, `corvette` every Corvette. There is no
 family feature to build; there is a naming convention to settle (G3). The
 autocomplete is fed the same way and sorts alphabetically (`refreshCarList`,
@@ -1207,8 +1208,12 @@ touched: **the app lists, it does not order.**
 
 ## G5 — Open, needs Boston
 
-1. Which string is the family for the Nissans (G3), and whether "the Subarus"
-   means WRX/STI as one family or several.
+1. **Answered 2026-08-12 for the Nissans — see G7:** the family substring is
+   `gt-r`, hyphenated, and it catches every generation including the R35.
+   Still open: whether "the Subarus" means WRX/STI as one family or several.
+   The GT-R answer suggests the method rather than the answer — pick the
+   substring every member shares and check it against the match at
+   the `match` closure in the Find handler before committing to it.
 2. Whether the multiple builds per family differ by **class** (an A-class Evo
    and an S1 Evo) or by **discipline**, or vary per family. F2 settled this at
    the whole-library level as "discipline or class, decided per car" — a family
@@ -1337,3 +1342,105 @@ Cross-country is unallocated: it wants off-road tires and max width on a car
 that will otherwise be built for tarmac, and thirteen builds is already the
 work. Worth adding as a fourteenth on whichever copy is least interesting after
 the first pass.
+
+## G7 — Second family: the GT-Rs. Roster opened 2026-08-12
+
+**Name clash, per the rule in `TESTS.md`'s "The letters" section:** this is
+**BACKLOG G7**, the GT-R garage. A bare `G7` means the *gearing* case in
+`TESTS.md` — "do default ratios belong to the tier or the car?" — which is
+unrelated. Always write this one with the `BACKLOG` prefix when citing it.
+
+"Multiple of every version, and there are a lot of versions." Counts still to
+be filled in off the garage screen — but the naming question this family raises
+is settled below, and it was the blocking one in G5.
+
+### The naming question is answered: the family substring is `gt-r`
+
+G3 flagged this family as the case that breaks the convention, on the grounds
+that the R32/R33/R34 are *Skyline* GT-Rs while the R35 is just GT-R. Checked
+against the actual match — `String(b.name||'').toLowerCase().includes(q)` at
+the `match` closure in the Find handler — and the worry was misplaced:
+
+| search | catches |
+|---|---|
+| **`gt-r`** | **every generation, R32 / R33 / R34 / R35 / NISMO, and the classic Skyline 2000GT-R** |
+| `skyline` | the older cars only — misses the R35 |
+| `gtr` | **nothing at all** |
+| `nissan` | nothing, unless the manufacturer is typed into the name |
+
+"Skyline GT-R R34" contains the substring "gt-r", so the older naming is already
+compatible. One family substring covers the whole lineup and no schema change is
+needed.
+
+**The hyphen is load-bearing.** `gtr` matches nothing. Every GT-R name must be
+written `GT-R`, hyphenated, or it drops out of the family. That is the single
+rule to hold to across every entry.
+
+**The 350Z correctly does not match**, which is the right outcome and the
+concrete illustration of G5's distinction: "the Nissans" is a garage grouping,
+"GT-R" is a nameplate family, and the app only models the second. Do not try to
+force the 350Z in.
+
+### Suggested strings
+
+Keep `GT-R` intact, put the chassis code at the end, let the year field carry
+the year (`carTitle` is `year + name`, so entries sort chronologically on their
+own):
+
+`Skyline GT-R V-Spec R32` · `Skyline GT-R V-Spec R33` ·
+`Skyline GT-R V-Spec II R34` · `GT-R R35` · `GT-R NISMO` ·
+`Skyline 2000GT-R` for the Hakosuka
+
+### The roster — fill from the garage
+
+Do not trust this list; it is scaffolding from prior Forza titles, not an FH6
+reading. Add, delete and correct against the actual garage, then fill the
+counts.
+
+| version | year | copies | builds needed |
+|---|---|---|---|
+| Skyline 2000GT-R (Hakosuka) | | | |
+| Skyline GT-R V-Spec R32 | | | |
+| Skyline GT-R V-Spec R33 | | | |
+| Skyline GT-R V-Spec II R34 | | | |
+| GT-R R35 | | | |
+| GT-R NISMO | | | |
+| *(add rows — Forza Editions, Black/Track editions, other model years)* | | | |
+
+### The R35 sub-variant question, which is the one that could go wrong
+
+The R35 has shipped in Forza titles as several separate cars — model years plus
+NISMO, Black Edition, Track Edition and Forza Editions. **Each of those is a
+distinct car if the game lists it separately**, exactly as the Evo VIII MR
+Forza Edition turned out to be in G6. Check the garage before merging any two
+of them: merging distinct cars loses builds, and splitting one car into two
+names breaks the family search. When in doubt keep them separate — a spare row
+costs nothing, a lost build costs a rebuild.
+
+### The key constraint still applies, and this family is where it bites
+
+`libKey` is `name|year|class|disc`, so **every copy of a given version needs a
+distinct (class, discipline) pair**. That was comfortable for the Evos. It is
+tighter here for two reasons: a heavy AWD GT-R is realistically an S1/S2/X car
+rather than a D-through-X one, and the four tarmac disciplines are the ones
+that suit it. If a version has four or more copies, the sensible pairs start
+running out and the choice is a wider class spread or accepting that two copies
+share a setup.
+
+### Arithmetic worth doing before buying anything
+
+G6 is thirteen builds. If G7 is, say, six versions at two to three copies each,
+that is another twelve to eighteen — thirty-odd builds across the two families,
+each needing parts bought and PI managed. That is a lot of shopping. Worth
+deciding up front whether the whole roster gets built or whether it is a
+standing list to work through over time.
+
+### One distinction to keep clear
+
+**This roster is the app's users, not its instruments.** The core three cars in
+`TESTS.md` exist to measure the game's formulas; the G6/G7 rosters exist because
+Boston wants tunes for his own cars. A GT-R may well end up serving as CORE-3
+(heavy AWD, and the R35 is a strong candidate for the long-gearbox slot), but
+that is a coincidence of fit, not the reason the roster exists. Do not let
+roster-building consume the measurement session, or the measurement work will
+keep slipping behind a shopping list.
