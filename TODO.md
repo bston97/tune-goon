@@ -17,9 +17,20 @@ the working sheets, `BACKLOG.md` for the long-form plans.
 waiting on, and where to read about it. The argument always lives in the other
 file.
 
+> [!note] Every card is also a GitHub issue
+> Filed 2026-08-22 — one per card, labelled `topic:`, `place:`, `owner:` and
+> `lane:`, generated from the same `CARDS` array the board is, so the two cannot
+> drift. **This file stays the source of truth**; the issues are the tracker, a
+> place to filter and sort. Answers get written here or in the document the item
+> points at, never in an issue thread.
+>
+> Regenerate the board with `npm run todo` after editing any item. Counts are
+> derived by scanning `- [ ]` bullets, never typed — a hand-maintained count
+> silently goes wrong and then the board lies.
+
 ## Board
 
-**Every open item, as cards.** 67 items across 16 areas, so the board is one row per area with the detail underneath — tap a card to jump to its items.
+**Every open item, as cards.** 68 items across 16 areas, so the board is one row per area with the detail underneath — tap a card to jump to its items.
 
 **Cards have stable IDs.** Say "do PARTS-1" and I will pick it up without you describing it again. IDs do not change when the board is reordered.
 
@@ -51,7 +62,7 @@ No input needed. Say the ID and it gets built. **12 items, 2 cards.**
 
 #### Blocked — needs you at a screen I cannot see
 
-A readout, a tuning menu, a garage screen, or a settings page only you can open. **41 items, 10 cards.**
+A readout, a tuning menu, a garage screen, or a settings page only you can open. **42 items, 10 cards.**
 
 | ID | Card | Items | Owner | Where | Note |
 | :--- | :--- | ---: | :--- | :--- | :--- |
@@ -64,7 +75,7 @@ A readout, a tuning menu, a garage screen, or a settings page only you can open.
 | `DISC-1` | [Discipline naming and circuit vs sprint](#discipline-naming-and-circuit-vs-sprint) | 4 | **Boston** | In the game | Step one is a screen check, not an edit. Rename labels freely; renaming keys costs a three-store migration |
 | `LIB-1` | [Library cull, then two tunes per keeper](#library-cull-then-two-tunes-per-keeper) | 4 | **Boston** | In the game | Deletes are unrecoverable — localStorage, one device, no undo. Do `FAM-1`'s naming rule first |
 | `ROSTER-1` | [The garage rosters](#the-garage-rosters) | 4 | **Boston** | In the game | Mitsubishis are 13 builds across 7 cars. GT-R counts still to be filled from the garage |
-| `RENAME-1` | [Finish the repo rename](#finish-the-repo-rename) | 4 | **Boston** | At the repo | Code and docs all say forza-tune-goon; the remote is still tune-goon. Two minutes, and it is the only thing left from that job |
+| `RENAME-1` | [Finish the repo rename](#finish-the-repo-rename) | 5 | **Boston** | At the repo | Code and docs all say forza-tune-goon; the remote is still tune-goon. Two minutes, and it is the only thing left from that job |
 
 #### Waiting on a decision or a fact only you have
 
@@ -115,13 +126,13 @@ FH6 has to be open — a tuning menu, the Performance panel, the garage or the u
 
 #### At the repo
 
-The editor, GitHub, or a decision. No game needed. **13 items, 3 cards.**
+The editor, GitHub, or a decision. No game needed. **14 items, 3 cards.**
 
 | ID | Card | Items | Owner | Lane | Note |
 | :--- | :--- | ---: | :--- | :--- | :--- |
 | `GH-1` | [GitHub repo files](#github-repo-files) | 7 | Either | Ready — I can start these now | `.gitattributes` done. CI is the highest-value one left — the run-the-tests discipline currently depends on remembering |
 | `FAM-1` | [Nameplate families — many builds, never a best](#nameplate-families--many-builds-never-a-best) | 2 | **Boston** | Waiting on a decision or a fact only you have | The app already refuses to rank. Mostly a naming convention plus a guard against regressing it |
-| `RENAME-1` | [Finish the repo rename](#finish-the-repo-rename) | 4 | **Boston** | Blocked — needs you at a screen I cannot see | Code and docs all say forza-tune-goon; the remote is still tune-goon. Two minutes, and it is the only thing left from that job |
+| `RENAME-1` | [Finish the repo rename](#finish-the-repo-rename) | 5 | **Boston** | Blocked — needs you at a screen I cannot see | Code and docs all say forza-tune-goon; the remote is still tune-goon. Two minutes, and it is the only thing left from that job |
 
 #### Neither — mine or automatic
 
@@ -179,12 +190,12 @@ I do these, or a script does. Listed so the board stays complete. **9 items, 2 c
 
 #### Repo hygiene
 
-**11 items, 2 cards.**
+**12 items, 2 cards.**
 
 | ID | Card | Items | Owner | Lane | Note |
 | :--- | :--- | ---: | :--- | :--- | :--- |
 | `GH-1` | [GitHub repo files](#github-repo-files) | 7 | Either | Ready — I can start these now | `.gitattributes` done. CI is the highest-value one left — the run-the-tests discipline currently depends on remembering |
-| `RENAME-1` | [Finish the repo rename](#finish-the-repo-rename) | 4 | **Boston** | Blocked — needs you at a screen I cannot see | Code and docs all say forza-tune-goon; the remote is still tune-goon. Two minutes, and it is the only thing left from that job |
+| `RENAME-1` | [Finish the repo rename](#finish-the-repo-rename) | 5 | **Boston** | Blocked — needs you at a screen I cannot see | Code and docs all say forza-tune-goon; the remote is still tune-goon. Two minutes, and it is the only thing left from that job |
 
 #### Testing
 
@@ -347,4 +358,5 @@ regressing that.
 - [ ] Rename the repo on GitHub: `tune-goon` → `forza-tune-goon`. Code, docs, manifest and `package.json` all already say the new name; only the remote does not
 - [ ] `git remote set-url origin https://github.com/bston97/forza-tune-goon.git` on both machines
 - [ ] Confirm Pages republished at the new URL
+- [ ] **Regenerate the issue bodies.** Every link in the 16 issues points at `tune-goon`, so they resolve today; GitHub redirects after a rename, but CLAUDE.md says nothing should rely on that redirect, so re-point them once the rename lands
 - [ ] Re-add the PWA on the phone — the site moves origin path, so the old install is a different scope and keeps serving the old shell. Saved builds are keyed to the old origin and **will not follow**
