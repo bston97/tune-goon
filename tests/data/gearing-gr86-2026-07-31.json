@@ -81,7 +81,7 @@
     "fit": 4.575,
     "fitNote": "final drive at which the top gear's line just reaches the right-hand edge of the gearing graph",
     "axisMax": null,
-    "axisMaxNote": "UNRESOLVED — see BACKLOG.md E2. Recorded twice off the same car and screen, 1.3% apart, and the whole gear-speed model hangs off it via k = axisMax * fit * topRatio. Read it once, cold, and write the number into this field.",
+    "axisMaxNote": "UNRESOLVED, AND DELIBERATELY LEFT THAT WAY — do not fill this in. The number was written down twice for this sitting, 157 and 159, and nobody knows which reading belonged to which build state. BACKLOG E2 is RESOLVED (2026-08-12) but not by recovering it: the finding was that the axis alone is chart furniture and k = axisMax * fit * topRatio is the invariant, conserved at ~589 across two builds and three tunes. So this field stays null because the reading is genuinely lost, not because it is still owed. tests/data/index.js infers 157 for this sitting FROM k rather than reading it, says so at the TRIPLES comment, and gearing.test.js asserts 159 would break invariance. Reading a fresh axis off the car today would not recover this row — the build has changed since.",
     "axisMaxCandidates": [
       {
         "value": 157,
