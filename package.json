@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node tests/run.js",
     "status": "node tests/status.js",
-    "fit": "node tests/fit-balance.js"
+    "fit": "node tests/fit-balance.js",
+    "todo": "node scripts/build-todo.mjs"
   },
   "repository": "github:bston97/forza-tune-goon",
   "license": "UNLICENSED"
