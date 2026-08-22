@@ -65,6 +65,15 @@ found — all fixed.
 tier list further down), and the green suite still proves *structure*, not
 calibration — it would pass just as happily with every ARB off by 10×.
 
+**`TODO.md` is the index to all of it** — every open item as a card with a
+stable ID, in three views (what is blocking it, where you have to be, which
+topic is piling up), and one GitHub issue per card. Say an ID like `PARTS-1`
+and it is picked up without re-describing the work. Regenerate the board with
+`npm run todo` after editing an item; counts are derived by scanning `- [ ]`
+bullets, never typed. **`TODO.md` is the index, not the argument** — each item
+points at the document below that holds the reasoning, and answers get written
+there or in `TODO.md`, never in a GitHub issue thread.
+
 Four documents and three tools:
 
 | file | what it is |
